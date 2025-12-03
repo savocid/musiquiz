@@ -1,0 +1,32 @@
+{
+  "collections": [
+    {
+      "id": "example-collection",
+      "title": "Example Music Quiz",
+      "description": "A sample collection to demonstrate the structure",
+      "difficulty": "medium",
+      "clipDuration": 15,
+      "guessTime": 10,
+      "songs": [
+        {
+          "id": 1,
+          "artist": "Linkin Park",
+          "title": "Numb",
+          "audioFile": "audio/example-collection/Numb.mp3"
+        },
+        {
+          "id": 2,
+          "artist": "Flyleaf",
+          "title": "Great Love",
+          "audioFile": "audio/example-collection/Great Love.mp3"
+        },
+        {
+          "id": 3,
+          "artist": "Daft Punk",
+          "title": "Technologic",
+          "audioFile": "audio/example-collection/Technologic.mp3"
+        }
+      ]
+    }
+  ]
+}

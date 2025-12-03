@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play - MusiQuiz</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="game-container">
+            <div class="game-info">
+                <div>Score: <span id="score">0</span></div>
+                <div>Lives: <span id="lives">3</span></div>
+                <div>Round: <span id="round">1</span> / <span id="total">10</span></div>
+            </div>
+
+            <div class="timer" id="timer">15</div>
+
+            <div id="playingState">
+                <h2>🎵 Listen carefully...</h2>
+                <p>A song is playing!</p>
+            </div>
+
+            <div id="guessState" style="display: none;">
+                <h2>What song is this?</h2>
+                <div class="guess-input">
+                    <input type="text" id="guessInput" placeholder="Type your guess..." autocomplete="off">
+                </div>
+                <button class="btn btn-primary" id="submitGuess">Submit Guess</button>
+                <button class="btn btn-secondary" id="skipBtn">Skip</button>
+            </div>
+
+            <div id="resultState" style="display: none;">
+                <div class="result" id="resultMessage"></div>
+                <p id="correctAnswer" style="margin-top: 1rem; font-size: 1.2rem;"></p>
+                <button class="btn btn-primary" id="nextBtn">Next Song</button>
+            </div>
+
+            <div id="gameOverState" style="display: none;">
+                <h2>Game Over!</h2>
+                <p style="font-size: 1.5rem; margin: 1rem 0;">Final Score: <span id="finalScore">0</span></p>
+                <button class="btn btn-primary" onclick="location.href='play.html'">Play Again</button>
+                <button class="btn btn-secondary" onclick="location.href='index.html'">Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
