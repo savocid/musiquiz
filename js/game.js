@@ -250,10 +250,11 @@ function playSong(restartCountdown = false) {
     }
     
     // Create and configure audio
-    gameState.audio = new Audio("https://github.com/savocid/musiquiz/tree/main/"+song.audioFile);
+    gameState.audio = new Audio("https://github.com/savocid/musiquiz/blob/main/"+song.audioFile);
     gameState.audio.volume = getCurrentVolume();
     gameState.audio.currentTime = startTime;
-    
+	console.error("https://github.com/savocid/musiquiz/blob/main/"+song.audioFile);    
+
     // Start countdown only if requested (new round)
     if (restartCountdown && gameState.hasTimeout && gameState.canGuess) {
         startCountdown();
