@@ -250,7 +250,7 @@ function playSong(restartCountdown = false) {
     }
     
     // Create and configure audio
-    gameState.audio = new Audio(song.audioFile);
+    gameState.audio = new Audio("https://github.com/savocid/musiquiz/tree/main/"+song.audioFile);
     gameState.audio.volume = getCurrentVolume();
     gameState.audio.currentTime = startTime;
     
