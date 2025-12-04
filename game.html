@@ -6,27 +6,41 @@
     <title>Play - MusiQuiz</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <!-- Volume Control (persistent across site) -->
-    <div class="volume-control">
-        <label for="volumeSlider">🔊</label>
-        <input type="range" id="volumeSlider" min="0" max="100" value="50">
-        <span id="volumePercent">50%</span>
-    </div>
-
+<body class="preload">
     <div class="container">
+        <div class="controls-wrapper">
+            <!-- Mode Display (left) -->
+            <div class="mode-control">
+                <button id="modeDisplay" class="mode-btn-compact active" style="cursor: default; pointer-events: none;">
+                    <strong id="modeName">Loading...</strong>
+                    <span id="modeDetails"></span>
+                </button>
+            </div>
+
+            <!-- Header -->
+            <header>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none;">MusiQuiz</a></h1>
+            </header>
+
+            <!-- Volume Control (right) -->
+            <div class="volume-control">
+                <label for="volumeSlider">🔊</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <span id="volumePercent">50%</span>
+            </div>
+        </div>
         <header>
             <h1><a href="index.html" style="color: inherit; text-decoration: none;">MusiQuiz</a></h1>
         </header>
         
         <!-- Start Screen -->
         <div id="startScreen" class="game-container" style="text-align: center;">
-            <h2 id="collectionTitle" style="color: #667eea; margin-bottom: 1rem;">Loading...</h2>
-            <p id="collectionDescription" style="color: #666; font-size: 1.1rem; margin-bottom: 1rem;"></p>
-            <div style="margin: 2rem auto; display: inline-block; text-align: left;">
+            <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem;">Loading...</h2>
+            <p id="collectionDescription" style="color: #666; font-size: 1.1rem; margin-bottom: 1.5rem;"></p>
+            
+            <div style="margin: 1rem auto; display: inline-block; text-align: left;">
                 <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #888;">
                     <strong>Difficulty:</strong><span id="collectionDifficulty"></span>
-                    <strong>Mode:</strong><span id="gameMode"></span>
                     <strong>Rounds:</strong><span id="gameRounds"></span>
                 </div>
             </div>
@@ -37,7 +51,10 @@
         <div id="gameContent" class="game-container" style="display: none;">
             <!-- Game Info Header -->
             <div class="game-info">
-                <div>Score: <span id="score">0</span></div>
+                <div>
+                    <div>Artist: <span id="artistScore">0/0</span></div>
+                    <div>Song: <span id="songScore">0/0</span></div>
+                </div>
                 <div>Lives: <span id="lives">3</span></div>
                 <div>Round: <span id="round">1</span> / <span id="total">3</span></div>
             </div>
@@ -79,17 +96,72 @@
                 <button class="btn btn-primary" id="nextBtn">Next Song</button>
             </div>
 
-            <!-- Game Over State -->
-            <div id="gameOverState" style="display: none;">
-                <h2>Game Over!</h2>
-                <p style="font-size: 1.5rem; margin: 1rem 0;">Final Score: <span id="finalScore">0</span></p>
-                <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
-                <button class="btn btn-secondary" onclick="location.href='index.html'">Home</button>
+            <!-- Result Screen -->
+            <div id="resultScreen" style="display: none; text-align: center;">
+                <p id="resultCollection" style="color: var(--primary-color); font-size: 1.2rem; margin: 0.5rem 0;"></p>
+                
+                <div style="margin: 2rem auto; max-width: 400px; background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                    <h3 style="margin-bottom: 1rem; color: #333;">Your Score</h3>
+                    <div style="font-size: 1.3rem; line-height: 2.5; color: #555;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Rounds:</strong></span>
+                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">0</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Artists:</strong></span>
+                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;"><span id="artistsGuessed">0</span>/<span id="totalArtists">0</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Songs:</strong></span>
+                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">0</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Mode:</strong></span>
+                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
+                        </div>
+                    </div>
+                    <div id="resultStatus" style="font-size: 1.8rem; font-weight: bold; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd;">Success!</div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
+                    <button class="btn btn-secondary" onclick="location.href='index.html'">Home</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="js/volume.js"></script>
+    <script>
+        // Apply mode theme on page load
+        (function() {
+            const savedMode = localStorage.getItem('selectedMode') || 'default';
+            document.body.classList.add(`mode-${savedMode}`);
+            
+            // Update CSS variables immediately
+            const root = document.documentElement;
+            if (savedMode === 'trivial') {
+                root.style.setProperty('--primary-color', '#48bb78');
+                root.style.setProperty('--primary-dark', '#2f855a');
+                root.style.setProperty('--text-light', 'white');
+                root.style.setProperty('--shadow-color', 'rgba(72, 187, 120, 0.4)');
+            } else if (savedMode === 'sudden-death') {
+                root.style.setProperty('--primary-color', '#e53e3e');
+                root.style.setProperty('--primary-dark', '#9b2c2c');
+                root.style.setProperty('--text-light', '#fff5f5');
+                root.style.setProperty('--shadow-color', 'rgba(229, 62, 62, 0.4)');
+            } else {
+                root.style.setProperty('--primary-color', '#667eea');
+                root.style.setProperty('--primary-dark', '#764ba2');
+                root.style.setProperty('--text-light', 'white');
+                root.style.setProperty('--shadow-color', 'rgba(102, 126, 234, 0.4)');
+            }
+            
+            setTimeout(() => {
+                document.body.classList.remove('preload');
+            }, 100);
+        })();
+    </script>
     <script src="js/game.js"></script>
 </body>
 </html>

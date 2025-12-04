@@ -6,21 +6,26 @@
     <title>Create Quiz - MusiQuiz</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <!-- Volume Control (persistent across site) -->
-    <div class="volume-control">
-        <label for="volumeSlider">🔊</label>
-        <input type="range" id="volumeSlider" min="0" max="100" value="50">
-        <span id="volumePercent">50%</span>
-    </div>
-
+<body class="preload">
     <div class="container">
-        <a href="index.html" class="btn btn-secondary btn-back">← Back to Home</a>
+        <div class="controls-wrapper">
+            <div></div>
+            
+            <!-- Header -->
+            <header>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none;">Create Quiz Collection</a></h1>
+                <p class="tagline">Suggest a new music quiz collection</p>
+            </header>
+            
+            <!-- Volume Control (right) -->
+            <div class="volume-control">
+                <label for="volumeSlider">🔊</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <span id="volumePercent">50%</span>
+            </div>
+        </div>
         
-        <header>
-            <h1><a href="index.html" style="color: inherit; text-decoration: none;">Create Quiz Collection</a></h1>
-            <p class="tagline">Suggest a new music quiz collection</p>
-        </header>
+        <a href="index.html" class="btn btn-secondary btn-back">← Back to Home</a>
         
         <div class="form-container">
             <form id="createForm">
@@ -90,6 +95,36 @@
     </div>
 
     <script src="js/volume.js"></script>
+    <script>
+        // Apply mode theme on page load
+        (function() {
+            const savedMode = localStorage.getItem('selectedMode') || 'default';
+            document.body.classList.add(`mode-${savedMode}`);
+            
+            // Update CSS variables immediately
+            const root = document.documentElement;
+            if (savedMode === 'trivial') {
+                root.style.setProperty('--primary-color', '#48bb78');
+                root.style.setProperty('--primary-dark', '#2f855a');
+                root.style.setProperty('--text-light', 'white');
+                root.style.setProperty('--shadow-color', 'rgba(72, 187, 120, 0.4)');
+            } else if (savedMode === 'sudden-death') {
+                root.style.setProperty('--primary-color', '#e53e3e');
+                root.style.setProperty('--primary-dark', '#9b2c2c');
+                root.style.setProperty('--text-light', '#fff5f5');
+                root.style.setProperty('--shadow-color', 'rgba(229, 62, 62, 0.4)');
+            } else {
+                root.style.setProperty('--primary-color', '#667eea');
+                root.style.setProperty('--primary-dark', '#764ba2');
+                root.style.setProperty('--text-light', 'white');
+                root.style.setProperty('--shadow-color', 'rgba(102, 126, 234, 0.4)');
+            }
+            
+            setTimeout(() => {
+                document.body.classList.remove('preload');
+            }, 100);
+        })();
+    </script>
     <script src="js/create.js"></script>
 </body>
 </html>

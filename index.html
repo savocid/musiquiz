@@ -6,34 +6,37 @@
     <title>MusiQuiz</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <!-- Volume Control (persistent across site) -->
-    <div class="volume-control">
-        <label for="volumeSlider">🔊</label>
-        <input type="range" id="volumeSlider" min="0" max="100" value="50">
-        <span id="volumePercent">50%</span>
-    </div>
-
-    <!-- Mode Selection (top left) -->
-    <div class="mode-control">
-        <button class="mode-btn-compact" data-mode="trivial">
-            <strong>Trivial</strong>
-            <span>∞ Lives • 15s Listen • No Timeout</span>
-        </button>
-        <button class="mode-btn-compact" data-mode="default">
-            <strong>Default</strong>
-            <span>3 Lives • 10s Listen • No Timeout</span>
-        </button>
-        <button class="mode-btn-compact" data-mode="sudden-death">
-            <strong>Sudden Death</strong>
-            <span>1 Life • 5s Listen • 5s Timeout</span>
-        </button>
-    </div>
-
+<body class="preload">
     <div class="container home-container">
-        <header>
-            <h1><a href="index.html" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
-        </header>
+        <div class="controls-wrapper">
+            <!-- Mode Selection -->
+            <div class="mode-control">
+                <button class="mode-btn-compact" data-mode="trivial">
+                    <strong>Trivial</strong>
+                    <span>∞ Lives • 15s Listen • No Timeout</span>
+                </button>
+                <button class="mode-btn-compact" data-mode="default">
+                    <strong>Default</strong>
+                    <span>3 Lives • 10s Listen • No Timeout</span>
+                </button>
+                <button class="mode-btn-compact" data-mode="sudden-death">
+                    <strong>Sudden Death</strong>
+                    <span>1 Life • 5s Listen • 5s Timeout</span>
+                </button>
+            </div>
+
+            <!-- Header -->
+            <header>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
+            </header>
+
+            <!-- Volume Control -->
+            <div class="volume-control">
+                <label for="volumeSlider">🔊</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <span id="volumePercent">50%</span>
+            </div>
+        </div>
 
         <!-- Collection Selection -->
         <div id="collectionSelection" class="collections-list">

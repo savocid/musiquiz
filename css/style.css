@@ -5,18 +5,93 @@
     box-sizing: border-box;
 }
 
+/* Disable transitions on page load */
+body.preload * {
+    transition: none !important;
+}
+
+/* CSS Variables for mode themes */
+:root {
+    --primary-color: #667eea;
+    --primary-dark: #764ba2;
+    --text-light: white;
+    --shadow-color: rgba(102, 126, 234, 0.4);
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     min-height: 100vh;
     color: #333;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Don't transition background during animation */
+body:not(.mode-animating) {
+    transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mode-specific themes */
+body.mode-trivial {
+    background: linear-gradient(135deg, #48bb78 0%, #2f855a 100%);
+}
+
+body.mode-default {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+body.mode-sudden-death {
+    background: linear-gradient(135deg, #2d1a1a 0%, #000000 100%);
+}
+
+/* Animated background overlay for ripple effect */
+@keyframes ripple-spread {
+    0% {
+        clip-path: circle(0% at 10% 10%);
+    }
+    100% {
+        clip-path: circle(150% at 10% 10%);
+    }
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    clip-path: circle(0% at 10% 10%);
+}
+
+/* Show the NEW color expanding over the old background */
+body.mode-animating::before {
+    opacity: 1;
+    animation: ripple-spread 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* New mode backgrounds (what we're transitioning TO) */
+body.mode-animating[data-new-mode="trivial"]::before {
+    background: linear-gradient(135deg, #48bb78 0%, #2f855a 100%);
+}
+
+body.mode-animating[data-new-mode="default"]::before {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+body.mode-animating[data-new-mode="sudden-death"]::before {
+    background: linear-gradient(135deg, #2d1a1a 0%, #000000 100%);
 }
 
 /* Volume Control */
 .volume-control {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
+    position: relative;
     background: rgba(255, 255, 255, 0.95);
     padding: 0.75rem 1rem;
     border-radius: 25px;
@@ -24,7 +99,8 @@ body {
     align-items: center;
     gap: 0.5rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 1000;
+    margin-left: auto;
+    width: fit-content;
 }
 
 .volume-control label {
@@ -46,9 +122,7 @@ body {
 
 /* Mode Control (mirrored from volume control) */
 .mode-control {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
+    position: relative;
     background: rgba(255, 255, 255, 0.95);
     padding: 0.75rem;
     border-radius: 15px;
@@ -56,13 +130,13 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 1000;
+    width: fit-content;
 }
 
 .mode-btn-compact {
     background: white;
-    border: 2px solid #667eea;
-    color: #667eea;
+    border: 2px solid #ddd;
+    color: #666;
     padding: 0.75rem 1rem;
     border-radius: 10px;
     cursor: pointer;
@@ -83,34 +157,95 @@ body {
 .mode-btn-compact span {
     font-size: 0.75rem;
     font-weight: normal;
-    color: #666;
+    color: #999;
 }
 
 .mode-btn-compact:hover {
-    background: #f0f0ff;
+    background: #f0f0f0;
     transform: translateX(3px);
-}
-
-.mode-btn-compact.active {
-    background: #667eea;
-    color: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 
 .mode-btn-compact.active span {
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* Mode-specific button colors (always use their own colors) */
+.mode-btn-compact[data-mode="trivial"] {
+    border-color: #48bb78;
+    color: #48bb78;
+}
+
+.mode-btn-compact[data-mode="trivial"]:hover {
+    background: #f0fff4;
+}
+
+.mode-btn-compact[data-mode="trivial"].active {
+    background: #48bb78;
+    border-color: #48bb78;
+    color: white;
+    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
+}
+
+.mode-btn-compact[data-mode="default"] {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.mode-btn-compact[data-mode="default"]:hover {
+    background: #f0f0ff;
+}
+
+.mode-btn-compact[data-mode="default"].active {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.mode-btn-compact[data-mode="sudden-death"] {
+    border-color: #e53e3e;
+    color: #e53e3e;
+}
+
+.mode-btn-compact[data-mode="sudden-death"]:hover {
+    background: #fff5f5;
+}
+
+.mode-btn-compact[data-mode="sudden-death"].active {
+    background: #e53e3e;
+    border-color: #e53e3e;
+    color: white;
+    box-shadow: 0 2px 8px rgba(229, 62, 62, 0.6);
+}
+
 .container {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 2rem;
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    width: 100%;
 }
 
 /* Header */
+.controls-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.controls-wrapper header {
+    flex: 1;
+    text-align: center;
+    margin-bottom: 0;
+}
+
 header {
     text-align: center;
-    color: white;
+    color: var(--text-light);
     margin-bottom: 3rem;
 }
 
@@ -118,14 +253,22 @@ header h1 {
     font-size: 3.5rem;
     margin-bottom: 0.5rem;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    letter-spacing: 2px;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* Footer */
 .site-footer {
-    position: fixed;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    margin-top: auto;
+    margin-bottom: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
     background: rgba(255, 255, 255, 0.9);
     padding: 0.5rem 1.5rem;
     border-radius: 20px;
@@ -134,14 +277,14 @@ header h1 {
 }
 
 .site-footer a {
-    color: #667eea;
+    color: var(--primary-color);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s;
 }
 
 .site-footer a:hover {
-    color: #5568d3;
+    color: var(--primary-dark);
     text-decoration: underline;
 }
 
@@ -214,7 +357,7 @@ header h1 {
 .menu-button h2 {
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
-    color: #667eea;
+    color: var(--primary-color);
 }
 
 .menu-button p {
@@ -288,14 +431,14 @@ header h1 {
 }
 
 .btn-primary {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .btn-secondary {
@@ -323,11 +466,14 @@ header h1 {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .game-info {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 2rem;
     padding: 1rem;
     background: #f8f9fa;
@@ -355,7 +501,7 @@ header h1 {
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     transition: width 0.05s linear;
     width: 0%;
 }
@@ -367,7 +513,7 @@ header h1 {
 	width:100%;
     background: none;
 	border: none;
-    color: #667eea;
+    color: var(--primary-color);
     padding: 0.5rem 1rem;
     cursor: pointer;
     font-weight: 600;
@@ -382,7 +528,7 @@ header h1 {
 /* Timer Display */
 .timer {
     font-size: 5rem;
-    color: #667eea;
+    color: var(--primary-color);
     margin: 1rem 0;
     font-weight: bold;
 }
@@ -428,7 +574,7 @@ header h1 {
     max-width: 600px;
     padding: 1rem;
     font-size: 1.2rem;
-    border: 3px solid #667eea;
+    border: 3px solid var(--primary-color);
     border-radius: 8px;
     text-align: center;
 }
@@ -464,11 +610,13 @@ header h1 {
     padding: 2rem;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .collections-list h2 {
     text-align: center;
-    color: #667eea;
+    color: var(--primary-color);
     margin-bottom: 1.5rem;
 }
 
@@ -477,7 +625,7 @@ header h1 {
     margin-bottom: 1rem;
     background: #f8f9fa;
     border-radius: 8px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--primary-color);
     transition: all 0.3s;
     display: flex;
     justify-content: space-between;
@@ -494,7 +642,7 @@ header h1 {
 }
 
 .collection-item h3 {
-    color: #667eea;
+    color: var(--primary-color);
     margin-bottom: 0.5rem;
 }
 
@@ -548,6 +696,28 @@ header h1 {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .controls-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .controls-wrapper header {
+        order: -1;
+        text-align: center;
+    }
+    
+    .mode-control {
+        order: 1;
+        width: 100%;
+    }
+    
+    .volume-control {
+        order: 2;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
     header h1 {
         font-size: 2.5rem;
     }
@@ -580,26 +750,10 @@ header h1 {
         align-items: flex-start;
     }
     
-    .volume-control {
-        top: 0.5rem;
-        right: 0.5rem;
-        padding: 0.5rem;
-    }
-    
-    .volume-control input[type="range"] {
-        width: 80px;
-    }
-    
-    .mode-control {
-        top: 0.5rem;
-        left: 0.5rem;
-        padding: 0.5rem;
-    }
-    
     .mode-btn-compact {
         font-size: 0.85rem;
         padding: 0.6rem 0.8rem;
-        min-width: 160px;
+        min-width: 100%;
     }
     
     .mode-btn-compact strong {
