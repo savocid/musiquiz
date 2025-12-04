@@ -129,6 +129,9 @@ async function loadGameData() {
             gameState.lifelines.year = { remaining: 1, total: 1 };
             gameState.lifelines.skip = { remaining: 1, total: 1 };
         }
+    } catch (error) {
+        console.error('Failed to load collection:', error);
+        return; // Will redirect to home
     }
 }
 

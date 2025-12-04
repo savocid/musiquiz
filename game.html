@@ -207,7 +207,8 @@
     <script>
         // Apply mode theme on page load
         (function() {
-            const savedMode = localStorage.getItem('selectedMode') || 'default';
+            const params = new URLSearchParams(window.location.search);
+            const savedMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
             document.body.classList.add(`mode-${savedMode}`);
             
             // Update CSS variables immediately
@@ -247,10 +248,17 @@
             document.querySelectorAll('.mode-btn-compact').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const newMode = this.dataset.mode;
+                    
                     if (newMode !== savedMode) {
                         if (confirm('Changing the game mode will reload the page. Continue?')) {
                             localStorage.setItem('selectedMode', newMode);
-                            location.reload();
+                            const collectionId = params.get('collection');
+                            if (collectionId) {
+                                params.set('mode', newMode);
+                                window.location.href = `game?${params.toString()}`;
+                            } else {
+                                location.reload();
+                            }
                         }
                     }
                 });
