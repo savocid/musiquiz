@@ -12,7 +12,7 @@
           "artists": ["Linkin Park"],
           "title": "Numb",
           "audioFile": "audio/example-collection/Numb.mp3",
-          "startTime": 0,
+          "startTime": 15,
           "year": 2003
         },
         {
@@ -20,7 +20,7 @@
           "artists": ["Flyleaf"],
           "title": "Great Love",
           "audioFile": "audio/example-collection/Great Love.mp3",
-          "startTime": 0,
+          "startTime": "0:45",
           "year": 2014
         },
         {
@@ -28,7 +28,7 @@
           "artists": ["Daft Punk"],
           "title": "Technologic",
           "audioFile": "audio/example-collection/Technologic.mp3",
-          "startTime": 0,
+          "startTime": "1:05",
           "year": 2005
         }
       ]
