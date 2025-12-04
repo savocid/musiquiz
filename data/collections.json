@@ -227,18 +227,18 @@
         },
         {
           "artists": [
-            "EminemMusic"
+            "Eminem"
           ],
-          "title": "Eminem - Like Toy Soldiers (Official Music Video)",
+          "title": "Eminem",
           "audioFile": "audio/best-of-2000s-rap/Eminem - Like Toy Soldiers (Official Music Video).mp3",
           "startTime": 0,
           "year": 2009
         },
         {
           "artists": [
-            "EminemMusic"
+            "Eminem"
           ],
-          "title": "Eminem - Mockingbird [Official Music Video]",
+          "title": "Mockingbird",
           "audioFile": "audio/best-of-2000s-rap/Eminem - Mockingbird [Official Music Video].mp3",
           "startTime": 0,
           "year": 2009
@@ -250,7 +250,7 @@
             "Lil Wayne",
             "Eminem"
           ],
-          "title": "Forever (Explicit)",
+          "title": "Forever",
           "audioFile": "audio/best-of-2000s-rap/Forever (Explicit).mp3",
           "startTime": 0,
           "year": 2018
