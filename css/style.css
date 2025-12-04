@@ -746,6 +746,7 @@ header h1 {
     background: transparent;
     border-radius: 0;
     backdrop-filter: none;
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .answer-display .hidden {
@@ -772,9 +773,6 @@ header h1 {
     text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
 }
 
-.answer-display .separator {
-    color: rgba(255, 255, 255, 0.7);
-}
 
 .guess-input {
     margin: 0;

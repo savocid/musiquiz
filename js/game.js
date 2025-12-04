@@ -172,6 +172,9 @@ function startRound() {
     }
     
     // Reset round state
+    // Always clear and null guess timer for new round
+    clearInterval(gameState.guessTimer);
+    gameState.guessTimer = null;
     gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
     gameState.artistsRevealed = [];
     gameState.songRevealed = false;
@@ -222,11 +225,11 @@ function startRound() {
     // Update lifeline buttons
     updateLifelineButtons();
     
-    // Play audio
-    playSong();
+    // Play audio (start countdown)
+    playSong(true);
 }
 
-function playSong() {
+function playSong(restartCountdown = false) {
     const song = gameState.currentSong;
     
     // Mark this round as active
@@ -251,8 +254,8 @@ function playSong() {
     gameState.audio.volume = getCurrentVolume();
     gameState.audio.currentTime = startTime;
     
-    // Start countdown immediately if timeout mode AND player can still guess AND not already running
-    if (gameState.hasTimeout && gameState.canGuess && !gameState.guessTimer) {
+    // Start countdown only if requested (new round)
+    if (restartCountdown && gameState.hasTimeout && gameState.canGuess) {
         startCountdown();
     }
     
@@ -393,11 +396,9 @@ function setupProgressBarInteraction() {
                 const additionalPercent = (elapsed / remainingDuration) * (100 - (percentClicked * 100));
                 const totalPercent = Math.min((percentClicked * 100) + additionalPercent, 100);
                 progressBarEl.style.width = totalPercent + '%';
-                
-                // Update countdown timer
+                // Only update the progress timer (clip), not the guess timer
                 const remaining = Math.max(0, Math.ceil((remainingDuration - elapsed) / 1000));
                 progressTimerEl.textContent = remaining + 's';
-                
                 if (totalPercent >= 100) {
                     clearInterval(gameState.progressInterval);
                     progressTimerEl.textContent = '0s';
@@ -432,20 +433,18 @@ function setupProgressBarInteraction() {
 }
 
 function startCountdown() {
+    // Always clear any existing guess timer before starting a new one
+    clearInterval(gameState.guessTimer);
     let timeLeft = gameState.timeout;
     const timerElement = document.getElementById('timer');
     timerElement.textContent = timeLeft;
-    
     // Update color based on time remaining
     updateTimerColor(timeLeft, gameState.timeout);
-    
     gameState.guessTimer = setInterval(() => {
         timeLeft--;
         timerElement.textContent = timeLeft;
-        
         // Update color as time decreases
         updateTimerColor(timeLeft, gameState.timeout);
-        
         if (timeLeft <= 0) {
             clearInterval(gameState.guessTimer);
             // Time's up - mark as incorrect
@@ -674,6 +673,7 @@ function updateAnswerDisplay() {
     const guessSongOnly = gameState.collection && gameState.collection.guessSongOnly;
     if (guessSongOnly) {
         artistPart.innerHTML = '';
+        // Hide the separator if no artist part, but keep SONG placeholder visible
         if (separator) separator.style.display = 'none';
     } else {
         const artistDisplay = song.artists.map((artist, index) => {
@@ -699,14 +699,13 @@ function updateAnswerDisplay() {
     if (gameState.songRevealed) {
         songDisplay = `<span class="revealed">${song.title}</span>`;
     } else {
-        const guessSongOnly = gameState.collection && gameState.collection.guessSongOnly;
         // Check if hints are active for song
         const hintLetters = gameState.hintLettersRevealed.song;
         if (hintLetters && hintLetters.length > 0) {
             const hintText = buildHintDisplay(song.title, hintLetters);
             songDisplay = `<span class="hint">${hintText}</span>`;
         } else {
-            songDisplay = guessSongOnly ? '' : `<span class="hidden">SONG</span>`;
+            songDisplay = `<span class="hidden">SONG</span>`;
         }
     }
     
@@ -802,8 +801,8 @@ function repeatSong() {
     // Reset progress bar
     document.getElementById('progressBar').style.width = '0%';
     
-    // Replay song
-    playSong();
+    // Replay song (do not restart countdown)
+    playSong(false);
 }
 
 function nextRound() {
