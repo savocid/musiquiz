@@ -1,7 +1,7 @@
 {
   "collections": [
     {
-      "id": "Celeste",
+      "id": "celeste",
       "title": "Celeste Collection",
       "description": "Music from the Celeste Original Soundtrack.",
       "difficulty": "Hard",
@@ -205,6 +205,92 @@
           "audioFile": "audio/Celeste/Starjump.mp3",
           "startTime": 0,
           "year": 2023
+        }
+      ]
+    },
+    {
+      "id": "2000s-rap",
+      "title": "2000s Rap Collection",
+      "description": "Most Popular Rap from the 2000s",
+      "difficulty": "Easy",
+      "rounds": 3,
+      "guessSongOnly": false,
+      "songs": [
+        {
+          "artists": [
+            "Eminem"
+          ],
+          "title": "Beautiful",
+          "audioFile": "audio/best-of-2000s-rap/Beautiful.mp3",
+          "startTime": 0,
+          "year": 2018
+        },
+        {
+          "artists": [
+            "EminemMusic"
+          ],
+          "title": "Eminem - Like Toy Soldiers (Official Music Video)",
+          "audioFile": "audio/best-of-2000s-rap/Eminem - Like Toy Soldiers (Official Music Video).mp3",
+          "startTime": 0,
+          "year": 2009
+        },
+        {
+          "artists": [
+            "EminemMusic"
+          ],
+          "title": "Eminem - Mockingbird [Official Music Video]",
+          "audioFile": "audio/best-of-2000s-rap/Eminem - Mockingbird [Official Music Video].mp3",
+          "startTime": 0,
+          "year": 2009
+        },
+        {
+          "artists": [
+            "Drake",
+            "Kanye West",
+            "Lil Wayne",
+            "Eminem"
+          ],
+          "title": "Forever (Explicit)",
+          "audioFile": "audio/best-of-2000s-rap/Forever (Explicit).mp3",
+          "startTime": 0,
+          "year": 2018
+        },
+        {
+          "artists": [
+            "Eminem"
+          ],
+          "title": "Lose Yourself",
+          "audioFile": "audio/best-of-2000s-rap/Lose Yourself.mp3",
+          "startTime": 0,
+          "year": 2018
+        },
+        {
+          "artists": [
+            "Eminem"
+          ],
+          "title": "Space Bound",
+          "audioFile": "audio/best-of-2000s-rap/Space Bound.mp3",
+          "startTime": 0,
+          "year": 2018
+        },
+        {
+          "artists": [
+            "Eminem",
+            "Nate Dogg"
+          ],
+          "title": "Till I Collapse",
+          "audioFile": "audio/best-of-2000s-rap/Till I Collapse.mp3",
+          "startTime": 0,
+          "year": 2018
+        },
+        {
+          "artists": [
+            "Eminem"
+          ],
+          "title": "Without Me",
+          "audioFile": "audio/best-of-2000s-rap/Without Me.mp3",
+          "startTime": 0,
+          "year": 2018
         }
       ]
     }

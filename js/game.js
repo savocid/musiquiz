@@ -654,6 +654,7 @@ function updateAnswerDisplay() {
     const song = gameState.currentSong;
     const artistPart = document.getElementById('artistPart');
     const songPart = document.getElementById('songPart');
+    const separator = document.querySelector('.answer-display-wrapper .separator');
     
     // Helper function to build hint display
     const buildHintDisplay = (text, revealedIndices) => {
@@ -669,36 +670,43 @@ function updateAnswerDisplay() {
         }).join('');
     };
     
-    // Build artist display
-    const artistDisplay = song.artists.map((artist, index) => {
-        if (gameState.artistsRevealed.includes(index)) {
-            return `<span class="revealed">${artist}</span>`;
-        } else {
-            // Check if hints are active for this artist
-            const hintLetters = gameState.hintLettersRevealed.artists[index];
-            if (hintLetters && hintLetters.length > 0) {
-                const hintText = buildHintDisplay(artist, hintLetters);
-                return `<span class="hint">${hintText}</span>`;
+    // Hide artist display if guessSongOnly is enabled
+    const guessSongOnly = gameState.collection && gameState.collection.guessSongOnly;
+    if (guessSongOnly) {
+        artistPart.innerHTML = '';
+        if (separator) separator.style.display = 'none';
+    } else {
+        const artistDisplay = song.artists.map((artist, index) => {
+            if (gameState.artistsRevealed.includes(index)) {
+                return `<span class="revealed">${artist}</span>`;
             } else {
-                return `<span class="hidden">ARTIST ${index + 1}</span>`;
+                // Check if hints are active for this artist
+                const hintLetters = gameState.hintLettersRevealed.artists[index];
+                if (hintLetters && hintLetters.length > 0) {
+                    const hintText = buildHintDisplay(artist, hintLetters);
+                    return `<span class="hint">${hintText}</span>`;
+                } else {
+                    return `<span class="hidden">ARTIST ${index + 1}</span>`;
+                }
             }
-        }
-    }).join(', ');
-    
-    artistPart.innerHTML = artistDisplay;
+        }).join(', ');
+        artistPart.innerHTML = artistDisplay;
+        if (separator) separator.style.display = '';
+    }
     
     // Build song display with optional year
     let songDisplay = '';
     if (gameState.songRevealed) {
         songDisplay = `<span class="revealed">${song.title}</span>`;
     } else {
+        const guessSongOnly = gameState.collection && gameState.collection.guessSongOnly;
         // Check if hints are active for song
         const hintLetters = gameState.hintLettersRevealed.song;
         if (hintLetters && hintLetters.length > 0) {
             const hintText = buildHintDisplay(song.title, hintLetters);
             songDisplay = `<span class="hint">${hintText}</span>`;
         } else {
-            songDisplay = `<span class="hidden">SONG</span>`;
+            songDisplay = guessSongOnly ? '' : `<span class="hidden">SONG</span>`;
         }
     }
     
