@@ -253,7 +253,6 @@ function playSong(restartCountdown = false) {
     gameState.audio = new Audio("https://raw.githubusercontent.com/savocid/musiquiz/main/"+song.audioFile);
     gameState.audio.volume = getCurrentVolume();
     gameState.audio.currentTime = startTime;
-	console.error("https://raw.githubusercontent.com/savocid/musiquiz/main/"+song.audioFile);    
 
     // Start countdown only if requested (new round)
     if (restartCountdown && gameState.hasTimeout && gameState.canGuess) {
