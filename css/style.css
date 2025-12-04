@@ -43,8 +43,12 @@ body.mode-default {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
+body.mode-hard {
+    background: linear-gradient(90deg, #f57c00 0%, #ff9800 100%);
+}
+
 body.mode-sudden-death {
-    background: linear-gradient(90deg, #000000 0%, #2d1a1a 100%);
+    background: linear-gradient(90deg, #4a1a1a 0%, #6b2020 100%);
 }
 
 /* Animated background overlay for ripple effect */
@@ -85,8 +89,12 @@ body.mode-animating[data-new-mode="default"]::before {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
+body.mode-animating[data-new-mode="hard"]::before {
+    background: linear-gradient(90deg, #f57c00 0%, #ff9800 100%);
+}
+
 body.mode-animating[data-new-mode="sudden-death"]::before {
-    background: linear-gradient(90deg, #000000 0%, #2d1a1a 100%);
+    background: linear-gradient(90deg, #4a1a1a 0%, #6b2020 100%);
 }
 
 /* Panel Toggle Buttons */
@@ -287,6 +295,22 @@ body.mode-animating[data-new-mode="sudden-death"]::before {
     border-color: #667eea;
     color: white;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.mode-btn-compact[data-mode="hard"] {
+    border-color: #ff9800;
+    color: #ff9800;
+}
+
+.mode-btn-compact[data-mode="hard"]:hover {
+    background: #fff3e0;
+}
+
+.mode-btn-compact[data-mode="hard"].active {
+    background: #ff9800;
+    border-color: #ff9800;
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
 }
 
 .mode-btn-compact[data-mode="sudden-death"] {
@@ -677,8 +701,8 @@ header h1 {
     font-weight: bold;
     text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
     padding: 3rem 1.5rem;
-    background: rgba(50, 50, 80, 0.85);
-    backdrop-filter: blur(10px);
+    background: transparent;
+    backdrop-filter: none;
 }
 
 .timer.warning {
@@ -711,6 +735,19 @@ header h1 {
 .answer-display .hidden {
     color: rgba(255, 255, 255, 0.5);
     font-style: italic;
+}
+
+.answer-display .hint {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    letter-spacing: 0.08em;
+}
+
+.answer-display .hint .revealed {
+    color: #4ade80;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+    font-style: normal;
 }
 
 .answer-display .revealed {

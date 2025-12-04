@@ -27,46 +27,27 @@ let gameState = {
     lifelines: {
         time: { remaining: 0, total: 0 },
         hint: { remaining: 0, total: 0 },
-        year: { remaining: 0, total: 0 }
+        year: { remaining: 0, total: 0 },
+        skip: { remaining: 0, total: 0 }
     },
-    lifelineUsedThisRound: { time: false, hint: false, year: false },  // Track per-round usage
+    lifelineUsedThisRound: { time: false, hint: false, year: false, skip: false },  // Track per-round usage
     hintLettersRevealed: { artists: [], song: [] },  // Track revealed letter positions
     yearRevealed: false  // Track if year has been revealed
 };
 
 // Initialize game
-document.addEventListener('DOMContentLoaded', () => {
-    loadGameData();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadGameData();
     if (!gameState.collection) {
         alert('No game data found. Redirecting to home...');
         window.location.href = 'index.html';
+        return;
     }
     
     // Populate start screen with collection info
     document.getElementById('collectionTitle').textContent = gameState.collection.title;
     document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
     document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty || 'Medium';
-    
-    // Show mode info in button format
-    let modeName = '';
-    let modeDetails = '';
-    let modeClass = '';
-    if (gameState.lives === 999) {
-        modeName = 'Trivial';
-        modeDetails = '∞ Lives • 15s Listen • No Timeout';
-        modeClass = 'trivial';
-    } else if (gameState.lives === 3) {
-        modeName = 'Default';
-        modeDetails = '3 Lives • 10s Listen • No Timeout';
-        modeClass = 'default';
-    } else if (gameState.lives === 1) {
-        modeName = 'Sudden Death';
-        modeDetails = '1 Life • 5s Listen • 5s Timeout';
-        modeClass = 'sudden-death';
-    }
-    document.getElementById('modeName').textContent = modeName;
-    document.getElementById('modeDetails').textContent = modeDetails;
-    document.getElementById('modeDisplay').setAttribute('data-mode', modeClass);
     
     // Show rounds
     const numRounds = gameState.collection.rounds || gameState.collection.songs.length;
@@ -83,13 +64,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function loadGameData() {
-    const settings = sessionStorage.getItem('gameSettings');
-    const collection = sessionStorage.getItem('selectedCollection');
+async function loadGameData() {
+    const MODES = {
+        trivial: { lives: 999, clipDuration: 20, timeout: 0 },
+        default: { lives: 3, clipDuration: 15, timeout: 0 },
+        hard: { lives: 3, clipDuration: 10, timeout: 20 },
+        'sudden-death': { lives: 1, clipDuration: 5, timeout: 10 }
+    };
     
-    if (settings && collection) {
-        gameState.settings = JSON.parse(settings);
-        gameState.collection = JSON.parse(collection);
+    // Get URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const collectionId = params.get('collection');
+    const mode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
+    
+    if (!collectionId) {
+        return; // Will redirect to home
+    }
+    
+    try {
+        // Fetch collection data
+        const response = await fetch('collections.json');
+        const data = await response.json();
+        gameState.collection = data.collections.find(c => c.id === collectionId);
+        
+        if (!gameState.collection) {
+            return; // Will redirect to home
+        }
+        
+        // Always use current MODES definition (ensures fresh settings)
+        gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };
+        
         gameState.lives = gameState.settings.lives;
         gameState.totalLives = gameState.settings.lives;
         gameState.clipDuration = gameState.settings.clipDuration;
@@ -98,20 +102,32 @@ function loadGameData() {
         
         // Initialize lifelines based on mode
         if (gameState.lives === 999) {
-            // Trivial Mode: Hint (infinite), Year (infinite)
+            // Trivial Mode: Hint (infinite), Year (infinite), Skip (infinite)
             gameState.lifelines.hint = { remaining: 999, total: 999 };
             gameState.lifelines.time = { remaining: 0, total: 0 };
             gameState.lifelines.year = { remaining: 999, total: 999 };
+            gameState.lifelines.skip = { remaining: 999, total: 999 };
         } else if (gameState.lives === 3) {
-            // Default Mode: Hint (1x), Year (1x)
-            gameState.lifelines.hint = { remaining: 1, total: 1 };
-            gameState.lifelines.time = { remaining: 0, total: 0 };
-            gameState.lifelines.year = { remaining: 1, total: 1 };
+            // Check timeout to differentiate Default from Hard
+            if (gameState.timeout > 0) {
+                // Hard Mode: Time (1x), Hint (1x), Year (1x), Skip (1x)
+                gameState.lifelines.time = { remaining: 1, total: 1 };
+                gameState.lifelines.hint = { remaining: 1, total: 1 };
+                gameState.lifelines.year = { remaining: 1, total: 1 };
+                gameState.lifelines.skip = { remaining: 1, total: 1 };
+            } else {
+                // Default Mode: Hint (1x), Year (1x), Skip (1x)
+                gameState.lifelines.hint = { remaining: 1, total: 1 };
+                gameState.lifelines.time = { remaining: 0, total: 0 };
+                gameState.lifelines.year = { remaining: 1, total: 1 };
+                gameState.lifelines.skip = { remaining: 1, total: 1 };
+            }
         } else if (gameState.lives === 1) {
-            // Sudden Death: Timer (1x), Hint (1x), Year (1x)
+            // Sudden Death: Timer (1x), Hint (1x), Year (1x), Skip (1x)
             gameState.lifelines.time = { remaining: 1, total: 1 };
             gameState.lifelines.hint = { remaining: 1, total: 1 };
             gameState.lifelines.year = { remaining: 1, total: 1 };
+            gameState.lifelines.skip = { remaining: 1, total: 1 };
         }
     }
 }
@@ -151,7 +167,7 @@ function startRound() {
     gameState.canGuess = true;
     gameState.hintLettersRevealed = { artists: [], song: [] };  // Reset hint state
     gameState.yearRevealed = false;  // Reset year reveal
-    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false };  // Reset per-round usage
+    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };  // Reset per-round usage
     
     // Update total artists/songs counters
     gameState.totalArtistsSoFar += gameState.currentSong.artists.length;
@@ -178,17 +194,11 @@ function startRound() {
     // Update UI (score, lives, round number)
     updateUI();
     
-    // Update skip button text and visibility
-    const skipBtn = document.getElementById('skipBtn');
-    if (gameState.lives === 1) {
-        skipBtn.style.display = 'none';
-    } else {
-        skipBtn.style.display = 'inline-block';
-        if (gameState.lives === 999) {
-            skipBtn.textContent = 'Skip';
-        } else {
-            skipBtn.textContent = 'Skip (-1 Life)';
-        }
+    // Update give up button text and visibility
+    const giveUpBtn = document.getElementById('giveUpBtn');
+    if (giveUpBtn) {
+        giveUpBtn.style.display = 'inline-block';
+        giveUpBtn.textContent = 'Give Up';
     }
     
     // Show timer if has timeout
@@ -256,11 +266,8 @@ function playSong() {
             }
             stopProgressBar();
             
-            // Check if next button is showing (player guessed correctly)
-            const nextBtnShowing = document.getElementById('nextButtonContainer').style.display === 'block';
-            
-            // Show replay button if not in timeout mode OR if next button is showing
-            if (!gameState.hasTimeout || nextBtnShowing) {
+            // Always show replay button after clip ends (unless game is over)
+            if (gameState.lives > 0) {
                 document.getElementById('repeatBtn').style.display = 'inline-block';
             }
         }
@@ -271,13 +278,8 @@ function playSong() {
         // Only stop if we're still on the same round
         if (gameState.currentRoundId === thisRoundId) {
             stopProgressBar();
-            // Check if next button is showing
-            const nextBtnShowing = document.getElementById('nextButtonContainer').style.display === 'block';
-            // Only show replay button if not in timeout mode AND next button is not showing
-            if (!gameState.hasTimeout && !nextBtnShowing) {
-                document.getElementById('repeatBtn').style.display = 'inline-block';
-            } else if (nextBtnShowing) {
-                // Audio ended naturally while next button showing - show replay
+            // Show replay button when audio naturally ends (unless game is over)
+            if (gameState.lives > 0) {
                 document.getElementById('repeatBtn').style.display = 'inline-block';
             }
         }
@@ -349,10 +351,8 @@ function setupProgressBarInteraction() {
             // Set audio to the clicked position
             gameState.audio.currentTime = startTime + targetTime;
             
-            // Resume playing if audio was playing before seek
-            if (wasPlaying) {
-                gameState.audio.play().catch(err => console.error('Error playing audio after seek:', err));
-            }
+            // Always resume playing after seeking
+            gameState.audio.play().catch(err => console.error('Error playing audio after seek:', err));
             
             // Clear and restart the clip timer to maintain the total clip duration
             clearTimeout(gameState.clipTimer);
@@ -368,11 +368,8 @@ function setupProgressBarInteraction() {
                     }
                     stopProgressBar();
                     
-                    // Check if next button is showing (player guessed correctly)
-                    const nextBtnShowing = document.getElementById('nextButtonContainer').style.display === 'block';
-                    
-                    // Show replay button if not in timeout mode OR if next button is showing
-                    if (!gameState.hasTimeout || nextBtnShowing) {
+                    // Always show replay button after clip ends (unless game is over)
+                    if (gameState.lives > 0) {
                         document.getElementById('repeatBtn').style.display = 'inline-block';
                     }
                 }
@@ -572,7 +569,10 @@ function updateAnswerDisplay() {
         }
         return text.split('').map((char, i) => {
             if (char === ' ') return ' ';
-            return revealedIndices.includes(i) ? char : '_';
+            if (revealedIndices.includes(i)) {
+                return `<span class="revealed">${char}</span>`;
+            }
+            return '_';
         }).join('');
     };
     
@@ -585,7 +585,7 @@ function updateAnswerDisplay() {
             const hintLetters = gameState.hintLettersRevealed.artists[index];
             if (hintLetters && hintLetters.length > 0) {
                 const hintText = buildHintDisplay(artist, hintLetters);
-                return `<span class="hidden">${hintText}</span>`;
+                return `<span class="hint">${hintText}</span>`;
             } else {
                 return `<span class="hidden">ARTIST ${index + 1}</span>`;
             }
@@ -594,19 +594,27 @@ function updateAnswerDisplay() {
     
     artistPart.innerHTML = artistDisplay;
     
-    // Build song display
+    // Build song display with optional year
+    let songDisplay = '';
     if (gameState.songRevealed) {
-        songPart.innerHTML = `<span class="revealed">${song.title}</span>`;
+        songDisplay = `<span class="revealed">${song.title}</span>`;
     } else {
         // Check if hints are active for song
         const hintLetters = gameState.hintLettersRevealed.song;
         if (hintLetters && hintLetters.length > 0) {
             const hintText = buildHintDisplay(song.title, hintLetters);
-            songPart.innerHTML = `<span class="hidden">${hintText}</span>`;
+            songDisplay = `<span class="hint">${hintText}</span>`;
         } else {
-            songPart.innerHTML = `<span class="hidden">SONG</span>`;
+            songDisplay = `<span class="hidden">SONG</span>`;
         }
     }
+    
+    // Add year if revealed
+    if (gameState.yearRevealed && song.year) {
+        songDisplay += ` <span class="revealed">(${song.year})</span>`;
+    }
+    
+    songPart.innerHTML = songDisplay;
 }
 
 function showResult(message, resultType) {
@@ -634,7 +642,7 @@ function showResult(message, resultType) {
     }
 }
 
-function skipSong() {
+function giveUp() {
     // Stop audio and timers
     if (gameState.audio) {
         gameState.audio.pause();
@@ -643,20 +651,34 @@ function skipSong() {
     clearInterval(gameState.guessTimer);
     stopProgressBar();
     
-    // Deduct life
-    if (gameState.lives !== 999) {
-        gameState.lives--;
+    // Go directly to end screen (failure)
+    endGame(false);
+}
+
+function useSkipLifeline() {
+    const isInfinite = gameState.lifelines.skip.total === 999;
+    const canUse = isInfinite ? !gameState.lifelineUsedThisRound.skip : gameState.lifelines.skip.remaining > 0;
+    
+    if (!canUse || !gameState.canGuess) return;
+    
+    // Stop audio and timers
+    if (gameState.audio) {
+        gameState.audio.pause();
+    }
+    clearTimeout(gameState.clipTimer);
+    clearInterval(gameState.guessTimer);
+    stopProgressBar();
+    
+    // Mark as used this round or deduct if limited
+    if (isInfinite) {
+        gameState.lifelineUsedThisRound.skip = true;
+    } else {
+        gameState.lifelines.skip.remaining--;
     }
     
-    // Check game over
-    if (gameState.lives <= 0) {
-        updateUI();
-        setTimeout(() => endGame(false), 500);
-    } else {
-        // Go directly to next round
-        gameState.currentSongIndex++;
-        startRound();
-    }
+    // Go directly to next round
+    gameState.currentSongIndex++;
+    startRound();
 }
 
 function repeatSong() {
@@ -709,6 +731,7 @@ function endGame(completed) {
     document.getElementById('answerDisplay').style.display = 'none';
     document.getElementById('guessInput').style.display = 'none';
     document.getElementById('timerDisplay').style.display = 'none';
+    document.getElementById('lifelineButtons').style.display = 'none';
     document.querySelector('.progress-container').style.display = 'none';
     document.querySelector('.game-info').style.display = 'none';
     
@@ -747,6 +770,53 @@ function endGame(completed) {
     document.getElementById('totalArtists').textContent = gameState.totalArtistsSoFar;
     document.getElementById('songsGuessed').textContent = gameState.songsGuessed;
     document.getElementById('totalSongs').textContent = gameState.totalSongsSoFar;
+    
+    // Display lifelines if any were available
+    const lifelineContainer = document.getElementById('resultLifelines');
+    const lifelineDisplay = document.getElementById('resultLifelinesDisplay');
+    const hasLifelines = gameState.lifelines.time.total > 0 || gameState.lifelines.hint.total > 0 || 
+                         gameState.lifelines.year.total > 0 || gameState.lifelines.skip.total > 0;
+    
+    if (hasLifelines) {
+        lifelineContainer.style.display = 'block';
+        let lifelinesHTML = '';
+        
+        // Time lifeline
+        if (gameState.lifelines.time.total > 0) {
+            const used = gameState.lifelines.time.total === 999 ? 
+                         false : gameState.lifelines.time.remaining < gameState.lifelines.time.total;
+            const style = used ? 'filter: grayscale(100%); opacity: 0.5;' : '';
+            lifelinesHTML += `<span style="${style}" title="Time: ${used ? 'Used' : 'Unused'}">⏱️</span>`;
+        }
+        
+        // Hint lifeline
+        if (gameState.lifelines.hint.total > 0) {
+            const used = gameState.lifelines.hint.total === 999 ? 
+                         false : gameState.lifelines.hint.remaining < gameState.lifelines.hint.total;
+            const style = used ? 'filter: grayscale(100%); opacity: 0.5;' : '';
+            lifelinesHTML += `<span style="${style}" title="Hint: ${used ? 'Used' : 'Unused'}">💡</span>`;
+        }
+        
+        // Year lifeline
+        if (gameState.lifelines.year.total > 0) {
+            const used = gameState.lifelines.year.total === 999 ? 
+                         false : gameState.lifelines.year.remaining < gameState.lifelines.year.total;
+            const style = used ? 'filter: grayscale(100%); opacity: 0.5;' : '';
+            lifelinesHTML += `<span style="${style}" title="Year: ${used ? 'Used' : 'Unused'}">📅</span>`;
+        }
+        
+        // Skip lifeline
+        if (gameState.lifelines.skip.total > 0) {
+            const used = gameState.lifelines.skip.total === 999 ? 
+                         false : gameState.lifelines.skip.remaining < gameState.lifelines.skip.total;
+            const style = used ? 'filter: grayscale(100%); opacity: 0.5;' : '';
+            lifelinesHTML += `<span style="${style}" title="Skip: ${used ? 'Used' : 'Unused'}">⏭️</span>`;
+        }
+        
+        lifelineDisplay.innerHTML = lifelinesHTML;
+    } else {
+        lifelineContainer.style.display = 'none';
+    }
 }
 
 function updateUI() {
@@ -794,21 +864,6 @@ function updateUI() {
     
     document.getElementById('round').textContent = gameState.currentSongIndex + 1;
     document.getElementById('total').textContent = gameState.shuffledSongs.length;
-    
-    // Update skip button visibility based on current lives
-    const skipBtn = document.getElementById('skipBtn');
-    if (skipBtn) {
-        if (gameState.lives === 1) {
-            skipBtn.style.display = 'none';
-        } else if (gameState.lives > 1 || gameState.lives === 999) {
-            skipBtn.style.display = 'inline-block';
-            if (gameState.lives === 999) {
-                skipBtn.textContent = 'Skip';
-            } else {
-                skipBtn.textContent = 'Skip (-1 Life)';
-            }
-        }
-    }
 }
 
 // Lifeline Functions
@@ -856,6 +911,19 @@ function updateLifelineButtons() {
         yearBtn.disabled = !canUse || !gameState.canGuess || gameState.yearRevealed;
     } else {
         yearBtn.style.display = 'none';
+    }
+    
+    // Skip lifeline
+    const skipBtn = document.getElementById('skipLifeline');
+    const skipCount = document.getElementById('skipCount');
+    if (gameState.lifelines.skip.total > 0) {
+        skipBtn.style.display = 'inline-block';
+        const isInfinite = gameState.lifelines.skip.total === 999;
+        const canUse = isInfinite ? !gameState.lifelineUsedThisRound.skip : gameState.lifelines.skip.remaining > 0;
+        skipCount.textContent = isInfinite ? '∞' : gameState.lifelines.skip.remaining;
+        skipBtn.disabled = !canUse || !gameState.canGuess;
+    } else {
+        skipBtn.style.display = 'none';
     }
 }
 
@@ -977,22 +1045,9 @@ function useYearLifeline() {
     
     const song = gameState.currentSong;
     
-    // Check if song has year property
+    // Reveal year if available
     if (song.year) {
         gameState.yearRevealed = true;
-        
-        // Display year hint below answer display
-        const answerDisplayWrapper = document.querySelector('.answer-display-wrapper');
-        let yearHint = document.getElementById('yearHint');
-        if (!yearHint) {
-            yearHint = document.createElement('div');
-            yearHint.id = 'yearHint';
-            yearHint.style.fontSize = '0.9rem';
-            yearHint.style.marginTop = '0.5rem';
-            yearHint.style.color = 'rgba(255, 255, 255, 0.7)';
-            answerDisplayWrapper.appendChild(yearHint);
-        }
-        yearHint.textContent = `📅 Released: ${song.year}`;
     }
     
     // Mark as used this round or deduct if limited
@@ -1002,6 +1057,8 @@ function useYearLifeline() {
         gameState.lifelines.year.remaining--;
     }
     
+    // Update display to show year
+    updateAnswerDisplay();
     updateLifelineButtons();
 }
 
@@ -1014,7 +1071,7 @@ document.getElementById('guessInput').addEventListener('keypress', (e) => {
     }
 });
 
-document.getElementById('skipBtn').addEventListener('click', skipSong);
+document.getElementById('giveUpBtn').addEventListener('click', giveUp);
 document.getElementById('nextBtn').addEventListener('click', nextRound);
 
 // Global keydown listener to capture typing anywhere on the page during gameplay
@@ -1054,3 +1111,4 @@ document.getElementById('repeatBtn').addEventListener('click', repeatSong);
 document.getElementById('timeLifeline').addEventListener('click', useTimeLifeline);
 document.getElementById('hintLifeline').addEventListener('click', useHintLifeline);
 document.getElementById('yearLifeline').addEventListener('click', useYearLifeline);
+document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);

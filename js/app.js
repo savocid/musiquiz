@@ -93,7 +93,7 @@ function applyModeTheme(mode, animate = false, callback) {
         
         // After animation completes, switch to new mode
         modeAnimationTimeout = setTimeout(() => {
-            document.body.classList.remove('mode-trivial', 'mode-default', 'mode-sudden-death');
+            document.body.classList.remove('mode-trivial', 'mode-default', 'mode-hard', 'mode-sudden-death');
             document.body.classList.add(`mode-${mode}`);
             document.body.classList.remove('mode-animating');
             document.body.removeAttribute('data-new-mode');
@@ -102,7 +102,7 @@ function applyModeTheme(mode, animate = false, callback) {
         }, 1000);
     } else {
         // Just switch modes without animation
-        document.body.classList.remove('mode-trivial', 'mode-default', 'mode-sudden-death');
+        document.body.classList.remove('mode-trivial', 'mode-default', 'mode-hard', 'mode-sudden-death');
         document.body.classList.add(`mode-${mode}`);
     }
 }
@@ -115,11 +115,16 @@ function updateCSSVariables(mode) {
         root.style.setProperty('--primary-dark', '#2f855a');
         root.style.setProperty('--text-light', 'white');
         root.style.setProperty('--shadow-color', 'rgba(72, 187, 120, 0.4)');
+    } else if (mode === 'hard') {
+        root.style.setProperty('--primary-color', '#ff9800');
+        root.style.setProperty('--primary-dark', '#f57c00');
+        root.style.setProperty('--text-light', 'white');
+        root.style.setProperty('--shadow-color', 'rgba(255, 152, 0, 0.4)');
     } else if (mode === 'sudden-death') {
-        root.style.setProperty('--primary-color', '#e53e3e');
-        root.style.setProperty('--primary-dark', '#9b2c2c');
+        root.style.setProperty('--primary-color', '#ff6b6b');
+        root.style.setProperty('--primary-dark', '#d94a4a');
         root.style.setProperty('--text-light', '#fff5f5');
-        root.style.setProperty('--shadow-color', 'rgba(229, 62, 62, 0.4)');
+        root.style.setProperty('--shadow-color', 'rgba(255, 107, 107, 0.4)');
     } else { // default
         root.style.setProperty('--primary-color', '#667eea');
         root.style.setProperty('--primary-dark', '#764ba2');
@@ -203,24 +208,9 @@ function loadMore() {
 }
 
 function startGame(collectionId) {
-    // Load collection data
-    fetch(collectionsUrl)
-        .then(res => res.json())
-        .then(data => {
-            selectedCollection = data.collections.find(c => c.id === collectionId);
-            
-            // Combine mode settings with collection
-            const gameSettings = {
-                ...MODES[selectedMode],
-                collectionId: selectedCollection.id,
-                mode: selectedMode
-            };
-            
-            // Store in sessionStorage
-            sessionStorage.setItem('gameSettings', JSON.stringify(gameSettings));
-            sessionStorage.setItem('selectedCollection', JSON.stringify(selectedCollection));
-            
-            // Navigate to game
-            window.location.href = 'game.html';
-        });
+    // Navigate to game with URL parameters
+    const params = new URLSearchParams();
+    params.set('collection', collectionId);
+    params.set('mode', selectedMode);
+    window.location.href = `game?${params.toString()}`;
 }

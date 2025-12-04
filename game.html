@@ -21,13 +21,29 @@
             <h3>Settings</h3>
         </div>
         
-        <!-- Current Mode Section -->
+        <!-- Game Mode Section -->
         <div class="panel-section">
-            <h4>Current Mode</h4>
+            <h4>Game Mode</h4>
             <div class="mode-control">
-                <button id="modeDisplay" class="mode-btn-compact active" style="cursor: default; pointer-events: none;">
-                    <strong id="modeName">Loading...</strong>
-                    <span id="modeDetails"></span>
+                <button class="mode-btn-compact" data-mode="trivial">
+                    <strong>Trivial</strong>
+                    <span>∞ Lives • 20s Listen • No Timeout</span>
+                    <span>💡 • 📅 • ⏭️</span>
+                </button>
+                <button class="mode-btn-compact" data-mode="default">
+                    <strong>Default</strong>
+                    <span>3 Lives • 15s Listen • No Timeout</span>
+                    <span>💡 • 📅 • ⏭️</span>
+                </button>
+                <button class="mode-btn-compact" data-mode="hard">
+                    <strong>Hard</strong>
+                    <span>3 Lives • 10s Listen • 20s Timeout</span>
+                    <span>⏱️ • 💡 • 📅 • ⏭️</span>
+                </button>
+                <button class="mode-btn-compact" data-mode="sudden-death">
+                    <strong>Sudden Death</strong>
+                    <span>1 Life • 5s Listen • 10s Timeout</span>
+                    <span>⏱️ • 💡 • 📅 • ⏭️</span>
                 </button>
             </div>
         </div>
@@ -77,13 +93,6 @@
                 <div>Round: <span id="round">1</span> / <span id="total">3</span></div>
             </div>
 
-            <!-- Timer (only shown in timeout modes) -->
-            <div class="timer-container" id="timerDisplay" style="display: none;">
-                <div class="timer">
-                    <span id="timer">5</span>
-                </div>
-            </div>
-
             <!-- Gameplay Wrapper -->
             <div class="gameplay-wrapper">
                 <!-- Progress Bar for Song Playback -->
@@ -91,6 +100,13 @@
                     <div class="progress-bar-wrapper">
                         <div class="progress-bar" id="progressBar"></div>
                         <button class="btn-repeat" id="repeatBtn" style="display: none;">🔄 Replay</button>
+                    </div>
+                </div>
+
+                <!-- Timer (only shown in timeout modes) -->
+                <div class="timer-container" id="timerDisplay" style="display: none;">
+                    <div class="timer">
+                        <span id="timer">5</span>
                     </div>
                 </div>
 
@@ -111,21 +127,24 @@
 
             <!-- Lifeline Buttons -->
             <div class="lifeline-buttons" id="lifelineButtons" style="display: none;">
-                <button class="btn btn-lifeline" id="timeLifeline" style="display: none;">
+                <button class="btn btn-lifeline" id="timeLifeline" style="display: none;" title="Adds 10 seconds to the countdown timer">
                     ⏱️ +10s (<span id="timeCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="hintLifeline" style="display: none;">
+                <button class="btn btn-lifeline" id="hintLifeline" style="display: none;" title="Reveals random letters in the artist and song names">
                     💡 Hint (<span id="hintCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="yearLifeline" style="display: none;">
+                <button class="btn btn-lifeline" id="yearLifeline" style="display: none;" title="Shows the release year of the song">
                     📅 Year (<span id="yearCount">0</span>)
+                </button>
+                <button class="btn btn-lifeline" id="skipLifeline" style="display: none;" title="Skips the current song">
+                    ⏭️ Skip (<span id="skipCount">0</span>)
                 </button>
             </div>
 
             <!-- Action Buttons -->
             <div class="action-buttons" id="actionButtons">
                 <button class="btn btn-primary" id="submitGuess">Submit Answer</button>
-                <button class="btn btn-secondary" id="skipBtn">Skip (-1 Life)</button>
+                <button class="btn btn-secondary" id="giveUpBtn">Give Up</button>
             </div>
 
             <!-- Result Message -->
@@ -153,6 +172,10 @@
                 <h3 style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #ddd; color: #333;">Your Score</h3>
                 <div style="font-size: 1.1rem; line-height: 2; color: #555;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><strong>Mode:</strong></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Rounds:</strong></span>
                         <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">0</span></span>
                     </div>
@@ -164,10 +187,10 @@
                         <span><strong>Songs:</strong></span>
                         <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">0</span></span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><strong>Mode:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
-                    </div>
+                </div>
+                <div id="resultLifelines" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd; display: none;">
+                    <div style="font-size: 0.9rem; color: #777; margin-bottom: 0.5rem;"><strong>Lifelines:</strong></div>
+                    <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;"></div>
                 </div>
                 <div id="resultStatus" style="font-size: 1.6rem; font-weight: bold; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd;">Success!</div>
             </div>
@@ -194,17 +217,44 @@
                 root.style.setProperty('--primary-dark', '#2f855a');
                 root.style.setProperty('--text-light', 'white');
                 root.style.setProperty('--shadow-color', 'rgba(72, 187, 120, 0.4)');
+            } else if (savedMode === 'hard') {
+                root.style.setProperty('--primary-color', '#ff9800');
+                root.style.setProperty('--primary-dark', '#f57c00');
+                root.style.setProperty('--text-light', 'white');
+                root.style.setProperty('--shadow-color', 'rgba(255, 152, 0, 0.4)');
             } else if (savedMode === 'sudden-death') {
-                root.style.setProperty('--primary-color', '#e53e3e');
-                root.style.setProperty('--primary-dark', '#9b2c2c');
+                root.style.setProperty('--primary-color', '#ff6b6b');
+                root.style.setProperty('--primary-dark', '#d94a4a');
                 root.style.setProperty('--text-light', '#fff5f5');
-                root.style.setProperty('--shadow-color', 'rgba(229, 62, 62, 0.4)');
+                root.style.setProperty('--shadow-color', 'rgba(255, 107, 107, 0.4)');
             } else {
                 root.style.setProperty('--primary-color', '#667eea');
                 root.style.setProperty('--primary-dark', '#764ba2');
                 root.style.setProperty('--text-light', 'white');
                 root.style.setProperty('--shadow-color', 'rgba(102, 126, 234, 0.4)');
             }
+            
+            // Highlight active mode button
+            document.querySelectorAll('.mode-btn-compact').forEach(btn => {
+                if (btn.dataset.mode === savedMode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Add click handlers to mode buttons
+            document.querySelectorAll('.mode-btn-compact').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const newMode = this.dataset.mode;
+                    if (newMode !== savedMode) {
+                        if (confirm('Changing the game mode will reload the page. Continue?')) {
+                            localStorage.setItem('selectedMode', newMode);
+                            location.reload();
+                        }
+                    }
+                });
+            });
             
             setTimeout(() => {
                 document.body.classList.remove('preload');

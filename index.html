@@ -27,15 +27,23 @@
             <div class="mode-control">
                 <button class="mode-btn-compact" data-mode="trivial">
                     <strong>Trivial</strong>
-                    <span>∞ Lives • 15s Listen • No Timeout</span>
+                    <span>∞ Lives • 20s Listen • No Timeout</span>
+                    <span>💡 • 📅 • ⏭️</span>
                 </button>
                 <button class="mode-btn-compact" data-mode="default">
                     <strong>Default</strong>
-                    <span>3 Lives • 10s Listen • No Timeout</span>
+                    <span>3 Lives • 15s Listen • No Timeout</span>
+                    <span>💡 • 📅 • ⏭️</span>
+                </button>
+                <button class="mode-btn-compact" data-mode="hard">
+                    <strong>Hard</strong>
+                    <span>3 Lives • 10s Listen • 20s Timeout</span>
+                    <span>⏱️ • 💡 • 📅 • ⏭️</span>
                 </button>
                 <button class="mode-btn-compact" data-mode="sudden-death">
                     <strong>Sudden Death</strong>
-                    <span>1 Life • 5s Listen • 5s Timeout</span>
+                    <span>1 Life • 5s Listen • 10s Timeout</span>
+                    <span>⏱️ • 💡 • 📅 • ⏭️</span>
                 </button>
             </div>
         </div>
@@ -60,7 +68,7 @@
 
         <!-- Collection Selection -->
         <div id="collectionSelection" class="collections-list">
-            <h2>Select a Quiz Collection</h2>
+            <h2>Collections</h2>
             <div id="collectionsList"></div>
             <button id="loadMoreBtn" class="btn btn-secondary" onclick="loadMore()" style="display: none; margin: 1.5rem auto 0; display: block;">Load More</button>
         </div>
