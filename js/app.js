@@ -4,6 +4,8 @@ let selectedMode = localStorage.getItem('selectedMode') || 'default'; // Restore
 let selectedCollection = null;
 let collectionsUrl = 'https://raw.githubusercontent.com/savocid/musiquiz/refs/heads/main/data/collections.json';
 let modeAnimationTimeout = null; // Track animation timeout
+let allCollections = []; // Store all collections
+let displayedCount = 5; // Number of collections to show initially
 
 // Mode configurations
 const MODES = {
@@ -147,7 +149,8 @@ async function loadCollections() {
     try {
         const response = await fetch(collectionsUrl);
         const data = await response.json();
-        displayCollections(data.collections);
+        allCollections = data.collections; // Store all collections
+        displayCollections();
     } catch (error) {
         console.error('Error loading collections:', error);
         document.getElementById('collectionsList').innerHTML = `
@@ -158,15 +161,18 @@ async function loadCollections() {
     }
 }
 
-function displayCollections(collections) {
+function displayCollections() {
     const container = document.getElementById('collectionsList');
     
-    if (collections.length === 0) {
+    if (allCollections.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">No collections available yet.</p>';
         return;
     }
     
-    container.innerHTML = collections.map(collection => `
+    // Get the collections to display (up to displayedCount)
+    const collectionsToShow = allCollections.slice(0, displayedCount);
+    
+    container.innerHTML = collectionsToShow.map(collection => `
         <div class="collection-item">
             <div class="collection-info">
                 <h3>${collection.title}</h3>
@@ -178,6 +184,22 @@ function displayCollections(collections) {
             </button>
         </div>
     `).join('');
+    
+    // Show/hide load more button
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+        if (displayedCount < allCollections.length) {
+            loadMoreBtn.style.display = 'block';
+            loadMoreBtn.textContent = `Load More (${allCollections.length - displayedCount} remaining)`;
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
+    }
+}
+
+function loadMore() {
+    displayedCount += 5;
+    displayCollections();
 }
 
 function startGame(collectionId) {

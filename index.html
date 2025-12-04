@@ -4,12 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MusiQuiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="preload">
-    <div class="container home-container">
-        <div class="controls-wrapper">
-            <!-- Mode Selection -->
+    <!-- Settings Toggle Button -->
+    <button class="panel-toggle panel-toggle-left" id="settingsToggle" aria-label="Toggle Settings">
+        <span>⚙️</span>
+    </button>
+
+    <!-- Settings Panel -->
+    <div class="side-panel side-panel-left" id="settingsPanel">
+        <div class="panel-header">
+            <h3>Settings</h3>
+        </div>
+        
+        <!-- Game Mode Section -->
+        <div class="panel-section">
+            <h4>Game Mode</h4>
             <div class="mode-control">
                 <button class="mode-btn-compact" data-mode="trivial">
                     <strong>Trivial</strong>
@@ -24,24 +38,31 @@
                     <span>1 Life • 5s Listen • 5s Timeout</span>
                 </button>
             </div>
-
-            <!-- Header -->
-            <header>
-                <h1><a href="index.html" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
-            </header>
-
-            <!-- Volume Control -->
+        </div>
+        
+        <!-- Volume Section -->
+        <div class="panel-section">
+            <h4>Volume</h4>
             <div class="volume-control">
                 <label for="volumeSlider">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="50">
                 <span id="volumePercent">50%</span>
             </div>
         </div>
+    </div>
+
+    <div class="container home-container">
+            <!-- Header -->
+            <header>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
+            </header>
+        </div>
 
         <!-- Collection Selection -->
         <div id="collectionSelection" class="collections-list">
             <h2>Select a Quiz Collection</h2>
             <div id="collectionsList"></div>
+            <button id="loadMoreBtn" class="btn btn-secondary" onclick="loadMore()" style="display: none; margin: 1.5rem auto 0; display: block;">Load More</button>
         </div>
     </div>
 
@@ -51,6 +72,7 @@
         <a href="submit.html">submit</a>
     </footer>
 
+    <script src="js/panels.js"></script>
     <script src="js/volume.js"></script>
     <script src="js/app.js"></script>
 </body>

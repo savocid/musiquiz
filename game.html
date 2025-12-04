@@ -4,42 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play - MusiQuiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="preload">
-    <div class="container">
-        <div class="controls-wrapper">
-            <!-- Mode Display (left) -->
+    <!-- Settings Toggle Button -->
+    <button class="panel-toggle panel-toggle-left" id="settingsToggle" aria-label="Toggle Settings">
+        <span>⚙️</span>
+    </button>
+
+    <!-- Settings Panel -->
+    <div class="side-panel side-panel-left" id="settingsPanel">
+        <div class="panel-header">
+            <h3>Settings</h3>
+        </div>
+        
+        <!-- Current Mode Section -->
+        <div class="panel-section">
+            <h4>Current Mode</h4>
             <div class="mode-control">
                 <button id="modeDisplay" class="mode-btn-compact active" style="cursor: default; pointer-events: none;">
                     <strong id="modeName">Loading...</strong>
                     <span id="modeDetails"></span>
                 </button>
             </div>
-
-            <!-- Header -->
-            <header>
-                <h1><a href="index.html" style="color: inherit; text-decoration: none;">MusiQuiz</a></h1>
-            </header>
-
-            <!-- Volume Control (right) -->
+        </div>
+        
+        <!-- Volume Section -->
+        <div class="panel-section">
+            <h4>Volume</h4>
             <div class="volume-control">
                 <label for="volumeSlider">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="50">
                 <span id="volumePercent">50%</span>
             </div>
         </div>
-        <header>
-            <h1><a href="index.html" style="color: inherit; text-decoration: none;">MusiQuiz</a></h1>
-        </header>
+    </div>
+
+    <div class="container">
+        <div class="controls-wrapper">
+            <!-- Header -->
+            <header>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none;">MusiQuiz</a></h1>
+            </header>
+        </div>
         
         <!-- Start Screen -->
-        <div id="startScreen" class="game-container" style="text-align: center;">
+        <div id="startScreen" style="text-align: center;">
             <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem;">Loading...</h2>
-            <p id="collectionDescription" style="color: #666; font-size: 1.1rem; margin-bottom: 1.5rem;"></p>
+            <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;"></p>
             
             <div style="margin: 1rem auto; display: inline-block; text-align: left;">
-                <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #888;">
+                <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
                     <strong>Difficulty:</strong><span id="collectionDifficulty"></span>
                     <strong>Rounds:</strong><span id="gameRounds"></span>
                 </div>
@@ -55,31 +73,53 @@
                     <div>Artist: <span id="artistScore">0/0</span></div>
                     <div>Song: <span id="songScore">0/0</span></div>
                 </div>
-                <div>Lives: <span id="lives">3</span></div>
+                <div><span id="lives">3</span></div>
                 <div>Round: <span id="round">1</span> / <span id="total">3</span></div>
             </div>
 
-            <!-- Progress Bar for Song Playback -->
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-                <button class="btn-repeat" id="repeatBtn" style="display: none;">🔄 Replay</button>
-            </div>
-
             <!-- Timer (only shown in timeout modes) -->
-            <div class="timer" id="timerDisplay" style="display: none;">
-                <span id="timer">5</span>
+            <div class="timer-container" id="timerDisplay" style="display: none;">
+                <div class="timer">
+                    <span id="timer">5</span>
+                </div>
             </div>
 
-            <!-- Answer Display (hidden/revealed artists and song) -->
-            <div class="answer-display" id="answerDisplay">
-                <span class="artist-part" id="artistPart">ARTIST</span>
-                <span class="separator"> - </span>
-                <span class="song-part" id="songPart">SONG</span>
+            <!-- Gameplay Wrapper -->
+            <div class="gameplay-wrapper">
+                <!-- Progress Bar for Song Playback -->
+                <div class="progress-container">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar" id="progressBar"></div>
+                        <button class="btn-repeat" id="repeatBtn" style="display: none;">🔄 Replay</button>
+                    </div>
+                </div>
+
+                <!-- Answer Display (hidden/revealed artists and song) -->
+                <div class="answer-display">
+                    <div class="answer-display-wrapper" id="answerDisplay">
+                        <span class="artist-part" id="artistPart">ARTIST</span>
+                        <span class="separator"> - </span>
+                        <span class="song-part" id="songPart">SONG</span>
+                    </div>
+                </div>
+
+                <!-- Guess Input (always visible) -->
+                <div class="guess-input">
+                    <input type="text" id="guessInput" placeholder="Type artist and/or song name..." autocomplete="off">
+                </div>
             </div>
 
-            <!-- Guess Input (always visible) -->
-            <div class="guess-input">
-                <input type="text" id="guessInput" placeholder="Type artist and/or song name..." autocomplete="off">
+            <!-- Lifeline Buttons -->
+            <div class="lifeline-buttons" id="lifelineButtons" style="display: none;">
+                <button class="btn btn-lifeline" id="timeLifeline" style="display: none;">
+                    ⏱️ +10s (<span id="timeCount">0</span>)
+                </button>
+                <button class="btn btn-lifeline" id="hintLifeline" style="display: none;">
+                    💡 Hint (<span id="hintCount">0</span>)
+                </button>
+                <button class="btn btn-lifeline" id="yearLifeline" style="display: none;">
+                    📅 Year (<span id="yearCount">0</span>)
+                </button>
             </div>
 
             <!-- Action Buttons -->
@@ -95,42 +135,51 @@
             <div id="nextButtonContainer" style="display: none;">
                 <button class="btn btn-primary" id="nextBtn">Next Song</button>
             </div>
-
-            <!-- Result Screen -->
-            <div id="resultScreen" style="display: none; text-align: center;">
-                <p id="resultCollection" style="color: var(--primary-color); font-size: 1.2rem; margin: 0.5rem 0;"></p>
-                
-                <div style="margin: 2rem auto; max-width: 400px; background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
-                    <h3 style="margin-bottom: 1rem; color: #333;">Your Score</h3>
-                    <div style="font-size: 1.3rem; line-height: 2.5; color: #555;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span><strong>Rounds:</strong></span>
-                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">0</span></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span><strong>Artists:</strong></span>
-                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;"><span id="artistsGuessed">0</span>/<span id="totalArtists">0</span></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span><strong>Songs:</strong></span>
-                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">0</span></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span><strong>Mode:</strong></span>
-                            <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
-                        </div>
+        </div>
+        
+        <!-- Result Screen -->
+        <div id="resultScreen" style="display: none; text-align: center;">
+            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem;"></h2>
+            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 0.5rem;"></p>
+            
+            <div style="margin: 0.5rem auto 1rem; display: inline-block; text-align: left;">
+                <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
+                    <strong>Difficulty:</strong><span id="resultDifficulty"></span>
+                    <strong>Rounds:</strong><span id="resultRounds"></span>
+                </div>
+            </div>
+            
+            <div style="margin: 2rem auto;">
+                <h3 style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #ddd; color: #333;">Your Score</h3>
+                <div style="font-size: 1.1rem; line-height: 2; color: #555;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><strong>Rounds:</strong></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">0</span></span>
                     </div>
-                    <div id="resultStatus" style="font-size: 1.8rem; font-weight: bold; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd;">Success!</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><strong>Artists:</strong></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="artistsGuessed">0</span>/<span id="totalArtists">0</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><strong>Songs:</strong></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">0</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><strong>Mode:</strong></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
+                    </div>
                 </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                    <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
-                    <button class="btn btn-secondary" onclick="location.href='index.html'">Home</button>
-                </div>
+                <div id="resultStatus" style="font-size: 1.6rem; font-weight: bold; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd;">Success!</div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
+                <button class="btn btn-secondary" onclick="location.href='index.html'">Home</button>
             </div>
         </div>
     </div>
 
+    <script src="js/panels.js"></script>
     <script src="js/volume.js"></script>
     <script>
         // Apply mode theme on page load

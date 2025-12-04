@@ -4,25 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz - MusiQuiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="preload">
-    <div class="container">
-        <div class="controls-wrapper">
-            <div></div>
-            
-            <!-- Header -->
-            <header>
-                <h1><a href="index.html" style="color: inherit; text-decoration: none;">Create Quiz Collection</a></h1>
-                <p class="tagline">Suggest a new music quiz collection</p>
-            </header>
-            
-            <!-- Volume Control (right) -->
+    <!-- Settings Toggle Button -->
+    <button class="panel-toggle panel-toggle-left" id="settingsToggle" aria-label="Toggle Settings">
+        <span>⚙️</span>
+    </button>
+
+    <!-- Settings Panel -->
+    <div class="side-panel side-panel-left" id="settingsPanel">
+        <div class="panel-header">
+            <h3>Settings</h3>
+        </div>
+        
+        <!-- Volume Section -->
+        <div class="panel-section">
+            <h4>Volume</h4>
             <div class="volume-control">
                 <label for="volumeSlider">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="50">
                 <span id="volumePercent">50%</span>
             </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="controls-wrapper">
+            <!-- Header -->
+            <header>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none;">Create Quiz Collection</a></h1>
+                <p class="tagline">Suggest a new music quiz collection</p>
+            </header>
         </div>
         
         <a href="index.html" class="btn btn-secondary btn-back">← Back to Home</a>
@@ -94,6 +110,7 @@
         </div>
     </div>
 
+    <script src="js/panels.js"></script>
     <script src="js/volume.js"></script>
     <script>
         // Apply mode theme on page load
