@@ -36,20 +36,18 @@
         <div class="controls-wrapper">
             <!-- Header -->
             <header>
-                <h1><a href="index.html" style="color: inherit; text-decoration: none;">Create Quiz Collection</a></h1>
-                <p class="tagline">Suggest a new music quiz collection</p>
+                <h1><a href="index.html" style="color: inherit; text-decoration: none;">MusiQuiz</a></h1>
             </header>
         </div>
-        
-        <a href="index.html" class="btn btn-secondary btn-back">← Back to Home</a>
+
         
         <div class="form-container">
             <form id="createForm">
                 <div class="form-group">
-                    <label for="collectionTitle">Collection Title *</label>
+                    <label for="collectionTitle"><b>* </b>Collection Title</label>
                     <input type="text" id="collectionTitle" name="collectionTitle" required 
                            placeholder="e.g., 90s Rock Classics">
-                    <small>Give your collection a memorable name</small>
+                    <small>Give your collection a unique name</small>
                 </div>
 
                 <div class="form-group">
@@ -59,7 +57,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="difficulty">Difficulty Level</label>
+                    <label for="difficulty"><b>* </b>Difficulty Level</label>
                     <select id="difficulty" name="difficulty">
                         <option value="easy">Easy</option>
                         <option value="medium" selected>Medium</option>
@@ -68,44 +66,31 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="songList">Song List *</label>
+                    <label for="songList"><b>* </b>Song List</label>
                     <textarea id="songList" name="songList" required rows="10"
-                              placeholder="Enter one song per line in format: Artist - Song Title&#10;&#10;Example:&#10;Nirvana - Smells Like Teen Spirit&#10;Pearl Jam - Alive&#10;Soundgarden - Black Hole Sun"></textarea>
-                    <small>Format: Artist - Song Title (one per line)</small>
+                              placeholder="Enter one song per line in format: Artist - Song Title - Year&#10;&#10;Example:&#10;Nirvana - Smells Like Teen Spirit - 1991&#10;Pearl Jam - Alive - 1991&#10;Soundgarden - Black Hole Sun - 1994"></textarea>
+                    <small>Format: Artist - Song Title - Year (one per line)</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="clipDuration">Clip Duration (seconds)</label>
-                    <input type="number" id="clipDuration" name="clipDuration" 
-                           value="15" min="5" max="60">
-                    <small>How long should each clip play? (default: 15 seconds)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="guessTime">Guess Time (seconds)</label>
-                    <input type="number" id="guessTime" name="guessTime" 
-                           value="10" min="5" max="30">
-                    <small>How long to guess after clip ends? (default: 10 seconds)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="submitterName">Your Name (optional)</label>
+                    <label for="submitterName">Note</label>
                     <input type="text" id="submitterName" name="submitterName" 
-                           placeholder="Your name">
+                           placeholder="Note">
+					<small>Anything you'd like to add.</small>
                 </div>
 
-                <div class="form-group">
-                    <label for="submitterEmail">Your Email (optional)</label>
-                    <input type="email" id="submitterEmail" name="submitterEmail" 
-                           placeholder="your@email.com">
-                    <small>In case I need to contact you about your submission</small>
+                <div style="margin-bottom: 1rem;">
+                    <small><b>* </b>= Required</small>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Submit Collection Suggestion</button>
             </form>
 
-            <div id="successMessage" class="success-message">
-                ✓ Thank you! Your collection suggestion has been submitted successfully!
+            <div id="successWrapper" style="display:none;">
+                <a href="index.html" class="btn btn-secondary" style="display:block; margin-bottom:1.2rem; width:max-content;">← Back to Start</a>
+                <div id="successMessage" class="success-message">
+                    ✓ Thank you! Your collection suggestion has been submitted successfully!
+                </div>
             </div>
         </div>
     </div>

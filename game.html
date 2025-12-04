@@ -27,23 +27,23 @@
             <div class="mode-control">
                 <button class="mode-btn-compact" data-mode="trivial">
                     <strong>Trivial</strong>
-                    <span>∞ Lives • 20s Listen • No Timeout</span>
-                    <span>💡 • 📅 • ⏭️</span>
+                    <span>20s Listen • No Timeout</span>
+                    <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
                 </button>
                 <button class="mode-btn-compact" data-mode="default">
                     <strong>Default</strong>
-                    <span>3 Lives • 15s Listen • No Timeout</span>
-                    <span>💡 • 📅 • ⏭️</span>
+                    <span><span class="emoji">❤️❤️❤️</span> • 15s Listen • No Timeout</span>
+                    <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
                 </button>
                 <button class="mode-btn-compact" data-mode="hard">
                     <strong>Hard</strong>
-                    <span>3 Lives • 10s Listen • 20s Timeout</span>
-                    <span>⏱️ • 💡 • 📅 • ⏭️</span>
+                    <span><span class="emoji">❤️❤️❤️</span> • 10s Listen • 20s Timeout</span>
+                    <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
                 </button>
                 <button class="mode-btn-compact" data-mode="sudden-death">
                     <strong>Sudden Death</strong>
-                    <span>1 Life • 5s Listen • 10s Timeout</span>
-                    <span>⏱️ • 💡 • 📅 • ⏭️</span>
+                    <span><span class="emoji">❤️</span> • 5s Listen • 10s Timeout</span>
+                    <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
                 </button>
             </div>
         </div>
@@ -99,6 +99,7 @@
                 <div class="progress-container">
                     <div class="progress-bar-wrapper">
                         <div class="progress-bar" id="progressBar"></div>
+                        <span class="progress-timer" id="progressTimer">0s</span>
                         <button class="btn-repeat" id="repeatBtn" style="display: none;">🔄 Replay</button>
                     </div>
                 </div>
@@ -158,18 +159,18 @@
         
         <!-- Result Screen -->
         <div id="resultScreen" style="display: none; text-align: center;">
-            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem;"></h2>
-            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 0.5rem;"></p>
+            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem;">Example Music Quiz</h2>
+            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 0.5rem;">A sample collection to demonstrate the structure</p>
             
             <div style="margin: 0.5rem auto 1rem; display: inline-block; text-align: left;">
                 <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><span id="resultDifficulty"></span>
-                    <strong>Rounds:</strong><span id="resultRounds"></span>
+                    <strong>Difficulty:</strong><span id="resultDifficulty">Medium</span>
+                    <strong>Rounds:</strong><span id="resultRounds">3</span>
                 </div>
             </div>
             
-            <div style="margin: 2rem auto;">
-                <h3 style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #ddd; color: #333;">Your Score</h3>
+            <div id="resultStatus" style="font-size: 2rem;font-weight: bold;margin-top: 0.5rem;padding: 2rem 0;border-bottom: 2px solid rgb(221, 221, 221);color: rgb(245, 101, 101);">Failure</div><div style="margin: 2rem auto;">
+                
                 <div style="font-size: 1.1rem; line-height: 2; color: #555;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Mode:</strong></span>
@@ -177,25 +178,27 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Rounds:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">0</span></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">3</span></span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Artists:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="artistsGuessed">0</span>/<span id="totalArtists">0</span></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="artistsGuessed">0</span>/<span id="totalArtists">1</span></span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Songs:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">0</span></span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">1</span></span>
                     </div>
                 </div>
-                <div id="resultLifelines" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd; display: none;">
-                    <div style="font-size: 0.9rem; color: #777; margin-bottom: 0.5rem;"><strong>Lifelines:</strong></div>
-                    <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;"></div>
+                <div id="resultHearts" style="padding-top: 1rem; display: block;">
+                    <div id="resultHeartsDisplay" style="font-size: 2rem;"><span style="">❤️</span><span style="">❤️</span><span style="">❤️</span></div>
                 </div>
-                <div id="resultStatus" style="font-size: 1.6rem; font-weight: bold; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ddd;">Success!</div>
+                <div id="resultLifelines" style="padding-top: 1rem;display: block;border-bottom: 2px solid rgb(221, 221, 221);padding-bottom: 1.5rem;">
+                    <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;"><span style="" title="Hint: Unused">💡</span><span style="" title="Year: Unused">📅</span><span style="" title="Skip: Unused">⏭️</span></div>
+                </div>
+                
             </div>
             
-            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+            <div style="display: flex;gap: 1rem;justify-content: center;margin-top: 1.5rem;">
                 <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
                 <button class="btn btn-secondary" onclick="location.href='index.html'">Home</button>
             </div>
@@ -255,7 +258,10 @@
                             const collectionId = params.get('collection');
                             if (collectionId) {
                                 params.set('mode', newMode);
-                                window.location.href = `game?${params.toString()}`;
+                                // Check if running locally (file://) or on a server
+                                const isLocal = window.location.protocol === 'file:';
+                                const url = isLocal ? `game.html?${params.toString()}` : `game?${params.toString()}`;
+                                window.location.href = url;
                             } else {
                                 location.reload();
                             }

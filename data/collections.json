@@ -1,558 +1,210 @@
 {
   "collections": [
     {
-      "id": "example-collection",
-      "title": "Example Music Quiz",
-      "description": "A sample collection to demonstrate the structure",
-      "difficulty": "Medium",
-      "rounds": 3,
+      "id": "Celeste",
+      "title": null,
+      "description": null,
+      "difficulty": null,
+      "rounds": null,
+      "guessSongOnly": true,
       "songs": [
         {
-          "id": 1,
-          "artists": ["Linkin Park"],
-          "title": "Numb",
-          "audioFile": "audio/example-collection/Numb.mp3",
-          "startTime": 15,
-          "year": 2003
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Anxiety",
+          "audioFile": "audio/Celeste/Anxiety.mp3",
+          "startTime": 0,
+          "year": 2023
         },
         {
-          "id": 2,
-          "artists": ["Flyleaf"],
-          "title": "Great Love",
-          "audioFile": "audio/example-collection/Great Love.mp3",
-          "startTime": "0:45",
-          "year": 2014
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Awake",
+          "audioFile": "audio/Celeste/Awake.mp3",
+          "startTime": 0,
+          "year": 2023
         },
         {
-          "id": 3,
-          "artists": ["Daft Punk"],
-          "title": "Technologic",
-          "audioFile": "audio/example-collection/Technologic.mp3",
-          "startTime": "1:05",
-          "year": 2005
-        }
-      ]
-    },
-    {
-      "id": "90s-rock-hits",
-      "title": "90s Rock Classics",
-      "description": "Test your knowledge of iconic 90s rock anthems",
-      "difficulty": "Easy",
-      "rounds": 5,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Nirvana"],
-          "title": "Smells Like Teen Spirit",
-          "audioFile": "audio/90s-rock-hits/smells-like-teen-spirit.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Checking In",
+          "audioFile": "audio/Celeste/Checking In.mp3",
           "startTime": 0,
-          "year": 1991
+          "year": 2023
         },
         {
-          "id": 2,
-          "artists": ["Pearl Jam"],
-          "title": "Alive",
-          "audioFile": "audio/90s-rock-hits/alive.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Confronting Myself",
+          "audioFile": "audio/Celeste/Confronting Myself.mp3",
           "startTime": 0,
-          "year": 1991
+          "year": 2023
         },
         {
-          "id": 3,
-          "artists": ["Soundgarden"],
-          "title": "Black Hole Sun",
-          "audioFile": "audio/90s-rock-hits/black-hole-sun.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Exhale",
+          "audioFile": "audio/Celeste/Exhale.mp3",
           "startTime": 0,
-          "year": 1994
+          "year": 2023
         },
         {
-          "id": 4,
-          "artists": ["Stone Temple Pilots"],
-          "title": "Plush",
-          "audioFile": "audio/90s-rock-hits/plush.mp3",
-          "startTime": 0,
-          "year": 1992
-        },
-        {
-          "id": 5,
-          "artists": ["Alice in Chains"],
-          "title": "Man in the Box",
-          "audioFile": "audio/90s-rock-hits/man-in-the-box.mp3",
-          "startTime": 0,
-          "year": 1990
-        }
-      ]
-    },
-    {
-      "id": "electronic-dance",
-      "title": "Electronic Dance Anthems",
-      "description": "Can you identify these electronic bangers?",
-      "difficulty": "Medium",
-      "rounds": 4,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Avicii"],
-          "title": "Levels",
-          "audioFile": "audio/electronic-dance/levels.mp3",
-          "startTime": 0,
-          "year": 2011
-        },
-        {
-          "id": 2,
-          "artists": ["Deadmau5"],
-          "title": "Strobe",
-          "audioFile": "audio/electronic-dance/strobe.mp3",
-          "startTime": 0,
-          "year": 2009
-        },
-        {
-          "id": 3,
-          "artists": ["Swedish House Mafia"],
-          "title": "Don't You Worry Child",
-          "audioFile": "audio/electronic-dance/dont-you-worry-child.mp3",
-          "startTime": 0,
-          "year": 2012
-        },
-        {
-          "id": 4,
-          "artists": ["Calvin Harris"],
-          "title": "Feel So Close",
-          "audioFile": "audio/electronic-dance/feel-so-close.mp3",
-          "startTime": 0,
-          "year": 2011
-        }
-      ]
-    },
-    {
-      "id": "hip-hop-classics",
-      "title": "Hip-Hop Golden Era",
-      "description": "Old school hip-hop from the golden age",
-      "difficulty": "Hard",
-      "rounds": 6,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Wu-Tang Clan"],
-          "title": "C.R.E.A.M.",
-          "audioFile": "audio/hip-hop-classics/cream.mp3",
-          "startTime": 0,
-          "year": 1993
-        },
-        {
-          "id": 2,
-          "artists": ["Nas"],
-          "title": "N.Y. State of Mind",
-          "audioFile": "audio/hip-hop-classics/ny-state-of-mind.mp3",
-          "startTime": 0,
-          "year": 1994
-        },
-        {
-          "id": 3,
-          "artists": ["A Tribe Called Quest"],
-          "title": "Can I Kick It?",
-          "audioFile": "audio/hip-hop-classics/can-i-kick-it.mp3",
-          "startTime": 0,
-          "year": 1990
-        },
-        {
-          "id": 4,
-          "artists": ["The Notorious B.I.G."],
-          "title": "Juicy",
-          "audioFile": "audio/hip-hop-classics/juicy.mp3",
-          "startTime": 0,
-          "year": 1994
-        },
-        {
-          "id": 5,
-          "artists": ["Gang Starr"],
-          "title": "Mass Appeal",
-          "audioFile": "audio/hip-hop-classics/mass-appeal.mp3",
-          "startTime": 0,
-          "year": 1994
-        },
-        {
-          "id": 6,
-          "artists": ["Eric B. & Rakim"],
-          "title": "Paid in Full",
-          "audioFile": "audio/hip-hop-classics/paid-in-full.mp3",
-          "startTime": 0,
-          "year": 1987
-        }
-      ]
-    },
-    {
-      "id": "indie-rock-2000s",
-      "title": "2000s Indie Rock",
-      "description": "Indie rock gems from the 2000s",
-      "difficulty": "Medium",
-      "rounds": 5,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["The Strokes"],
-          "title": "Last Nite",
-          "audioFile": "audio/indie-rock-2000s/last-nite.mp3",
-          "startTime": 0,
-          "year": 2001
-        },
-        {
-          "id": 2,
-          "artists": ["Arctic Monkeys"],
-          "title": "I Bet You Look Good on the Dancefloor",
-          "audioFile": "audio/indie-rock-2000s/i-bet-you-look-good.mp3",
-          "startTime": 0,
-          "year": 2005
-        },
-        {
-          "id": 3,
-          "artists": ["The White Stripes"],
-          "title": "Seven Nation Army",
-          "audioFile": "audio/indie-rock-2000s/seven-nation-army.mp3",
-          "startTime": 0,
-          "year": 2003
-        },
-        {
-          "id": 4,
-          "artists": ["Franz Ferdinand"],
-          "title": "Take Me Out",
-          "audioFile": "audio/indie-rock-2000s/take-me-out.mp3",
-          "startTime": 0,
-          "year": 2004
-        },
-        {
-          "id": 5,
-          "artists": ["Yeah Yeah Yeahs"],
-          "title": "Maps",
-          "audioFile": "audio/indie-rock-2000s/maps.mp3",
-          "startTime": 0,
-          "year": 2003
-        }
-      ]
-    },
-    {
-      "id": "metal-legends",
-      "title": "Metal Legends",
-      "description": "Iconic tracks from metal's greatest bands",
-      "difficulty": "Easy",
-      "rounds": 4,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Metallica"],
-          "title": "Enter Sandman",
-          "audioFile": "audio/metal-legends/enter-sandman.mp3",
-          "startTime": 0,
-          "year": 1991
-        },
-        {
-          "id": 2,
-          "artists": ["Black Sabbath"],
-          "title": "Iron Man",
-          "audioFile": "audio/metal-legends/iron-man.mp3",
-          "startTime": 0,
-          "year": 1970
-        },
-        {
-          "id": 3,
-          "artists": ["Iron Maiden"],
-          "title": "The Trooper",
-          "audioFile": "audio/metal-legends/the-trooper.mp3",
-          "startTime": 0,
-          "year": 1983
-        },
-        {
-          "id": 4,
-          "artists": ["Judas Priest"],
-          "title": "Breaking the Law",
-          "audioFile": "audio/metal-legends/breaking-the-law.mp3",
-          "startTime": 0,
-          "year": 1980
-        }
-      ]
-    },
-    {
-      "id": "pop-2010s",
-      "title": "2010s Pop Hits",
-      "description": "The biggest pop songs of the 2010s",
-      "difficulty": "Easy",
-      "rounds": 7,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Katy Perry"],
-          "title": "Firework",
-          "audioFile": "audio/pop-2010s/firework.mp3",
-          "startTime": 0,
-          "year": 2010
-        },
-        {
-          "id": 2,
-          "artists": ["Bruno Mars"],
-          "title": "Uptown Funk",
-          "audioFile": "audio/pop-2010s/uptown-funk.mp3",
-          "startTime": 0,
-          "year": 2014
-        },
-        {
-          "id": 3,
-          "artists": ["Adele"],
-          "title": "Rolling in the Deep",
-          "audioFile": "audio/pop-2010s/rolling-in-the-deep.mp3",
-          "startTime": 0,
-          "year": 2010
-        },
-        {
-          "id": 4,
-          "artists": ["Taylor Swift"],
-          "title": "Shake It Off",
-          "audioFile": "audio/pop-2010s/shake-it-off.mp3",
-          "startTime": 0,
-          "year": 2014
-        },
-        {
-          "id": 5,
-          "artists": ["Ed Sheeran"],
-          "title": "Shape of You",
-          "audioFile": "audio/pop-2010s/shape-of-you.mp3",
-          "startTime": 0,
-          "year": 2017
-        },
-        {
-          "id": 6,
-          "artists": ["The Weeknd"],
-          "title": "Blinding Lights",
-          "audioFile": "audio/pop-2010s/blinding-lights.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Farewell",
+          "audioFile": "audio/Celeste/Farewell.mp3",
           "startTime": 0,
           "year": 2019
         },
         {
-          "id": 7,
-          "artists": ["Ariana Grande"],
-          "title": "Thank U, Next",
-          "audioFile": "audio/pop-2010s/thank-u-next.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "First Steps",
+          "audioFile": "audio/Celeste/First Steps.mp3",
           "startTime": 0,
-          "year": 2018
-        }
-      ]
-    },
-    {
-      "id": "jazz-standards",
-      "title": "Jazz Standards",
-      "description": "Classic jazz compositions you should know",
-      "difficulty": "Hard",
-      "rounds": 5,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Miles Davis"],
-          "title": "So What",
-          "audioFile": "audio/jazz-standards/so-what.mp3",
-          "startTime": 0,
-          "year": 1959
+          "year": 2023
         },
         {
-          "id": 2,
-          "artists": ["John Coltrane"],
-          "title": "Giant Steps",
-          "audioFile": "audio/jazz-standards/giant-steps.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Golden",
+          "audioFile": "audio/Celeste/Golden.mp3",
           "startTime": 0,
-          "year": 1960
+          "year": 2023
         },
         {
-          "id": 3,
-          "artists": ["Duke Ellington"],
-          "title": "Take the A Train",
-          "audioFile": "audio/jazz-standards/take-the-a-train.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Heart of the Mountain",
+          "audioFile": "audio/Celeste/Heart of the Mountain.mp3",
           "startTime": 0,
-          "year": 1941
+          "year": 2023
         },
         {
-          "id": 4,
-          "artists": ["Thelonious Monk"],
-          "title": "Round Midnight",
-          "audioFile": "audio/jazz-standards/round-midnight.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "In the Mirror",
+          "audioFile": "audio/Celeste/In the Mirror.mp3",
           "startTime": 0,
-          "year": 1944
+          "year": 2023
         },
         {
-          "id": 5,
-          "artists": ["Charlie Parker"],
-          "title": "Ornithology",
-          "audioFile": "audio/jazz-standards/ornithology.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Little Goth",
+          "audioFile": "audio/Celeste/Little Goth.mp3",
           "startTime": 0,
-          "year": 1946
-        }
-      ]
-    },
-    {
-      "id": "punk-rock",
-      "title": "Punk Rock Essentials",
-      "description": "Fast, loud, and rebellious punk classics",
-      "difficulty": "Medium",
-      "rounds": 4,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["The Ramones"],
-          "title": "Blitzkrieg Bop",
-          "audioFile": "audio/punk-rock/blitzkrieg-bop.mp3",
-          "startTime": 0,
-          "year": 1976
+          "year": 2023
         },
         {
-          "id": 2,
-          "artists": ["The Clash"],
-          "title": "London Calling",
-          "audioFile": "audio/punk-rock/london-calling.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Madeline and Theo",
+          "audioFile": "audio/Celeste/Madeline and Theo.mp3",
           "startTime": 0,
-          "year": 1979
+          "year": 2023
         },
         {
-          "id": 3,
-          "artists": ["Sex Pistols"],
-          "title": "Anarchy in the U.K.",
-          "audioFile": "audio/punk-rock/anarchy-in-the-uk.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "My Dearest Friends",
+          "audioFile": "audio/Celeste/My Dearest Friends.mp3",
           "startTime": 0,
-          "year": 1976
+          "year": 2023
         },
         {
-          "id": 4,
-          "artists": ["Dead Kennedys"],
-          "title": "Holiday in Cambodia",
-          "audioFile": "audio/punk-rock/holiday-in-cambodia.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Postcard from Celeste Mountain",
+          "audioFile": "audio/Celeste/Postcard from Celeste Mountain.mp3",
           "startTime": 0,
-          "year": 1980
-        }
-      ]
-    },
-    {
-      "id": "rnb-soul",
-      "title": "R&B and Soul Classics",
-      "description": "Smooth R&B and soulful vocals",
-      "difficulty": "Medium",
-      "rounds": 6,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Marvin Gaye"],
-          "title": "What's Going On",
-          "audioFile": "audio/rnb-soul/whats-going-on.mp3",
-          "startTime": 0,
-          "year": 1971
+          "year": 2023
         },
         {
-          "id": 2,
-          "artists": ["Aretha Franklin"],
-          "title": "Respect",
-          "audioFile": "audio/rnb-soul/respect.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Prologue",
+          "audioFile": "audio/Celeste/Prologue.mp3",
           "startTime": 0,
-          "year": 1967
+          "year": 2023
         },
         {
-          "id": 3,
-          "artists": ["Stevie Wonder"],
-          "title": "Superstition",
-          "audioFile": "audio/rnb-soul/superstition.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Quiet and Falling",
+          "audioFile": "audio/Celeste/Quiet and Falling.mp3",
           "startTime": 0,
-          "year": 1972
+          "year": 2023
         },
         {
-          "id": 4,
-          "artists": ["Al Green"],
-          "title": "Let's Stay Together",
-          "audioFile": "audio/rnb-soul/lets-stay-together.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Reach for the Summit",
+          "audioFile": "audio/Celeste/Reach for the Summit.mp3",
           "startTime": 0,
-          "year": 1971
+          "year": 2023
         },
         {
-          "id": 5,
-          "artists": ["Otis Redding"],
-          "title": "Sittin' On The Dock of the Bay",
-          "audioFile": "audio/rnb-soul/sittin-on-the-dock.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Reflection",
+          "audioFile": "audio/Celeste/Reflection.mp3",
           "startTime": 0,
-          "year": 1968
+          "year": 2023
         },
         {
-          "id": 6,
-          "artists": ["James Brown"],
-          "title": "I Got You (I Feel Good)",
-          "audioFile": "audio/rnb-soul/i-got-you.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Resurrections",
+          "audioFile": "audio/Celeste/Resurrections.mp3",
           "startTime": 0,
-          "year": 1965
-        }
-      ]
-    },
-    {
-      "id": "country-classics",
-      "title": "Country Classics",
-      "description": "Timeless country music favorites",
-      "difficulty": "Easy",
-      "rounds": 4,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Johnny Cash"],
-          "title": "Ring of Fire",
-          "audioFile": "audio/country-classics/ring-of-fire.mp3",
-          "startTime": 0,
-          "year": 1963
+          "year": 2023
         },
         {
-          "id": 2,
-          "artists": ["Dolly Parton"],
-          "title": "Jolene",
-          "audioFile": "audio/country-classics/jolene.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Scattered and Lost",
+          "audioFile": "audio/Celeste/Scattered and Lost.mp3",
           "startTime": 0,
-          "year": 1973
+          "year": 2023
         },
         {
-          "id": 3,
-          "artists": ["Willie Nelson"],
-          "title": "On the Road Again",
-          "audioFile": "audio/country-classics/on-the-road-again.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Spirit of Hospitality",
+          "audioFile": "audio/Celeste/Spirit of Hospitality.mp3",
           "startTime": 0,
-          "year": 1980
+          "year": 2023
         },
         {
-          "id": 4,
-          "artists": ["Garth Brooks"],
-          "title": "Friends in Low Places",
-          "audioFile": "audio/country-classics/friends-in-low-places.mp3",
+          "artists": [
+            "Lena Raine"
+          ],
+          "title": "Starjump",
+          "audioFile": "audio/Celeste/Starjump.mp3",
           "startTime": 0,
-          "year": 1990
-        }
-      ]
-    },
-    {
-      "id": "reggae-vibes",
-      "title": "Reggae Vibes",
-      "description": "Feel the rhythm of reggae legends",
-      "difficulty": "Medium",
-      "rounds": 3,
-      "songs": [
-        {
-          "id": 1,
-          "artists": ["Bob Marley & The Wailers"],
-          "title": "No Woman, No Cry",
-          "audioFile": "audio/reggae-vibes/no-woman-no-cry.mp3",
-          "startTime": 0,
-          "year": 1974
-        },
-        {
-          "id": 2,
-          "artists": ["Peter Tosh"],
-          "title": "Legalize It",
-          "audioFile": "audio/reggae-vibes/legalize-it.mp3",
-          "startTime": 0,
-          "year": 1976
-        },
-        {
-          "id": 3,
-          "artists": ["Toots and the Maytals"],
-          "title": "Pressure Drop",
-          "audioFile": "audio/reggae-vibes/pressure-drop.mp3",
-          "startTime": 0,
-          "year": 1969
+          "year": 2023
         }
       ]
     }

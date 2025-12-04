@@ -212,5 +212,9 @@ function startGame(collectionId) {
     const params = new URLSearchParams();
     params.set('collection', collectionId);
     params.set('mode', selectedMode);
-    window.location.href = `game?${params.toString()}`;
+    
+    // Check if running locally (file://) or on a server
+    const isLocal = window.location.protocol === 'file:';
+    const url = isLocal ? `game.html?${params.toString()}` : `game?${params.toString()}`;
+    window.location.href = url;
 }
