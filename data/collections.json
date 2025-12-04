@@ -4,7 +4,7 @@
       "id": "example-collection",
       "title": "Example Music Quiz",
       "description": "A sample collection to demonstrate the structure",
-      "difficulty": "medium",
+      "difficulty": "Medium",
       "rounds": 3,
       "songs": [
         {

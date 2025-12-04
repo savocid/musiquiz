@@ -7,11 +7,18 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Volume Control (persistent across site) -->
+    <div class="volume-control">
+        <label for="volumeSlider">🔊</label>
+        <input type="range" id="volumeSlider" min="0" max="100" value="50">
+        <span id="volumePercent">50%</span>
+    </div>
+
     <div class="container">
         <a href="index.html" class="btn btn-secondary btn-back">← Back to Home</a>
         
         <header>
-            <h1>Create Quiz Collection</h1>
+            <h1><a href="index.html" style="color: inherit; text-decoration: none;">Create Quiz Collection</a></h1>
             <p class="tagline">Suggest a new music quiz collection</p>
         </header>
         
@@ -82,6 +89,7 @@
         </div>
     </div>
 
+    <script src="js/volume.js"></script>
     <script src="js/create.js"></script>
 </body>
 </html>

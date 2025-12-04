@@ -14,33 +14,29 @@
         <span id="volumePercent">50%</span>
     </div>
 
+    <!-- Mode Selection (top left) -->
+    <div class="mode-control">
+        <button class="mode-btn-compact" data-mode="trivial">
+            <strong>Trivial</strong>
+            <span>∞ Lives • 15s Listen • No Timeout</span>
+        </button>
+        <button class="mode-btn-compact" data-mode="default">
+            <strong>Default</strong>
+            <span>3 Lives • 10s Listen • No Timeout</span>
+        </button>
+        <button class="mode-btn-compact" data-mode="sudden-death">
+            <strong>Sudden Death</strong>
+            <span>1 Life • 5s Listen • 5s Timeout</span>
+        </button>
+    </div>
+
     <div class="container home-container">
         <header>
-            <h1>MusiQuiz</h1>
-            <p class="tagline">Test your music knowledge!</p>
+            <h1><a href="index.html" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
         </header>
-        
-        <!-- Mode Selection -->
-        <div id="modeSelection" class="mode-selection">
-            <h2>Select Difficulty</h2>
-            <div class="mode-buttons">
-                <button class="mode-btn" data-mode="trivial">
-                    <h3>Trivial</h3>
-                    <p>∞ Lives • 15s Listen • No Timeout</p>
-                </button>
-                <button class="mode-btn" data-mode="default">
-                    <h3>Default</h3>
-                    <p>3 Lives • 10s Listen • No Timeout</p>
-                </button>
-                <button class="mode-btn" data-mode="sudden-death">
-                    <h3>Sudden Death</h3>
-                    <p>1 Life • 5s Listen • 5s Timeout</p>
-                </button>
-            </div>
-        </div>
 
-        <!-- Collection Selection (hidden initially) -->
-        <div id="collectionSelection" class="collections-list" style="display: none;">
+        <!-- Collection Selection -->
+        <div id="collectionSelection" class="collections-list">
             <h2>Select a Quiz Collection</h2>
             <div id="collectionsList"></div>
         </div>
@@ -49,7 +45,7 @@
     <footer class="site-footer">
         <a href="https://github.com/savocid/musiquiz" target="_blank">source</a>
         <span>•</span>
-        <a href="create.html">submit</a>
+        <a href="submit.html">submit</a>
     </footer>
 
     <script src="js/volume.js"></script>

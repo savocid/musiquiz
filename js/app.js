@@ -1,7 +1,8 @@
 // app.js - Handles mode and collection selection
 
-let selectedMode = null;
+let selectedMode = localStorage.getItem('selectedMode') || 'default'; // Restore saved mode or default
 let selectedCollection = null;
+let collectionsUrl = 'https://raw.githubusercontent.com/savocid/musiquiz/refs/heads/main/data/collections.json';
 
 // Mode configurations
 const MODES = {
@@ -24,33 +25,52 @@ const MODES = {
 
 // Load collections when page loads
 document.addEventListener('DOMContentLoaded', async () => {
+    restoreModeSelection(); // Restore first to prevent flash
     setupModeButtons();
+    loadCollections(); // Load immediately
+});
+
+// Handle browser back/forward button
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        // Page was loaded from cache
+        restoreModeSelection();
+    }
 });
 
 function setupModeButtons() {
-    const modeButtons = document.querySelectorAll('.mode-btn');
+    const modeButtons = document.querySelectorAll('.mode-btn-compact');
     modeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const mode = btn.dataset.mode;
-            selectMode(mode);
+            // Remove active class from all buttons
+            modeButtons.forEach(b => b.classList.remove('active'));
+            
+            // Add active class to clicked button
+            btn.classList.add('active');
+            
+            // Update selected mode
+            selectedMode = btn.dataset.mode;
+            
+            // Save to localStorage
+            localStorage.setItem('selectedMode', selectedMode);
         });
     });
 }
 
-function selectMode(mode) {
-    selectedMode = mode;
-    
-    // Hide mode selection, show collection selection
-    document.getElementById('modeSelection').style.display = 'none';
-    document.getElementById('collectionSelection').style.display = 'block';
-    
-    // Load collections
-    loadCollections();
+function restoreModeSelection() {
+    const modeButtons = document.querySelectorAll('.mode-btn-compact');
+    modeButtons.forEach(btn => {
+        if (btn.dataset.mode === selectedMode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
 }
 
 async function loadCollections() {
     try {
-        const response = await fetch('data/collections.json');
+        const response = await fetch(collectionsUrl);
         const data = await response.json();
         displayCollections(data.collections);
     } catch (error) {
@@ -87,7 +107,7 @@ function displayCollections(collections) {
 
 function startGame(collectionId) {
     // Load collection data
-    fetch('data/collections.json')
+    fetch(collectionsUrl)
         .then(res => res.json())
         .then(data => {
             selectedCollection = data.collections.find(c => c.id === collectionId);

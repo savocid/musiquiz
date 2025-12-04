@@ -12,6 +12,95 @@ body {
     color: #333;
 }
 
+/* Volume Control */
+.volume-control {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.volume-control label {
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.volume-control input[type="range"] {
+    width: 100px;
+    cursor: pointer;
+}
+
+.volume-control span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #667eea;
+    min-width: 35px;
+}
+
+/* Mode Control (mirrored from volume control) */
+.mode-control {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.75rem;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.mode-btn-compact {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    text-align: left;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.mode-btn-compact strong {
+    font-size: 1rem;
+}
+
+.mode-btn-compact span {
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: #666;
+}
+
+.mode-btn-compact:hover {
+    background: #f0f0ff;
+    transform: translateX(3px);
+}
+
+.mode-btn-compact.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.mode-btn-compact.active span {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -31,9 +120,66 @@ header h1 {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
-.tagline {
-    font-size: 1.2rem;
-    opacity: 0.9;
+/* Footer */
+.site-footer {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-size: 0.85rem;
+}
+
+.site-footer a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.site-footer a:hover {
+    color: #5568d3;
+    text-decoration: underline;
+}
+
+.site-footer span {
+    color: #999;
+    margin: 0 0.5rem;
+}
+
+/* Mode Selection */
+.mode-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    justify-content: flex-start;
+}
+
+.mode-btn-small {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.mode-btn-small:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.mode-btn-small.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 /* Home Menu */
@@ -193,10 +339,51 @@ header h1 {
     font-weight: 600;
 }
 
-.timer {
-    font-size: 3rem;
-    color: #667eea;
+/* Progress Bar */
+.progress-container {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    background: #e9ecef;
     margin: 2rem 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.05s linear;
+    width: 0%;
+}
+
+.btn-repeat {
+    position: absolute;
+    right: 0px;
+	height:100%;
+	width:100%;
+    background: none;
+	border: none;
+    color: #667eea;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+	text-shadow: 1px 1px 1px black;
+}
+
+.btn-repeat:hover {
+    color: white;
+}
+
+/* Timer Display */
+.timer {
+    font-size: 5rem;
+    color: #667eea;
+    margin: 1rem 0;
     font-weight: bold;
 }
 
@@ -210,13 +397,35 @@ header h1 {
     50% { opacity: 0.5; }
 }
 
+/* Answer Display */
+.answer-display {
+    font-size: 1.5rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+.answer-display .hidden {
+    color: #999;
+    font-style: italic;
+}
+
+.answer-display .revealed {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.answer-display .separator {
+    color: #666;
+}
+
 .guess-input {
     margin: 2rem 0;
 }
 
 .guess-input input {
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
     padding: 1rem;
     font-size: 1.2rem;
     border: 3px solid #667eea;
@@ -224,22 +433,29 @@ header h1 {
     text-align: center;
 }
 
-.result {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1.1rem;
+/* I updated this, dont change */
+.guess-input input:disabled {
+    display: none;
 }
 
-.result.correct {
-    background: #d4edda;
-    color: #155724;
+/* Shake animation for incorrect guess */
+.guess-input input.shake-error {
+    animation: shake 0.5s;
+    border-color: #dc3545;
+    background: #ffe6e6;
 }
 
-.result.incorrect {
-    background: #f8d7da;
-    color: #721c24;
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1rem 0;
 }
 
 /* Collections List */
@@ -250,19 +466,31 @@ header h1 {
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
+.collections-list h2 {
+    text-align: center;
+    color: #667eea;
+    margin-bottom: 1.5rem;
+}
+
 .collection-item {
     padding: 1.5rem;
     margin-bottom: 1rem;
     background: #f8f9fa;
     border-radius: 8px;
     border-left: 4px solid #667eea;
-    cursor: pointer;
     transition: all 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
 .collection-item:hover {
     background: #e9ecef;
-    transform: translateX(5px);
+}
+
+.collection-info {
+    flex: 1;
 }
 
 .collection-item h3 {
@@ -273,6 +501,7 @@ header h1 {
 .collection-item p {
     color: #666;
     font-size: 0.9rem;
+    margin: 0.25rem 0;
 }
 
 /* Song List */
@@ -327,8 +556,70 @@ header h1 {
         grid-template-columns: 1fr;
     }
     
+    .mode-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .mode-btn-small {
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    .mode-buttons {
+        grid-template-columns: 1fr;
+    }
+    
     .game-info {
         flex-direction: column;
         gap: 0.5rem;
+    }
+    
+    .collection-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .volume-control {
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .volume-control input[type="range"] {
+        width: 80px;
+    }
+    
+    .mode-control {
+        top: 0.5rem;
+        left: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .mode-btn-compact {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+        min-width: 160px;
+    }
+    
+    .mode-btn-compact strong {
+        font-size: 0.9rem;
+    }
+    
+    .mode-btn-compact span {
+        font-size: 0.7rem;
+    }
+    
+    .answer-display {
+        font-size: 1.2rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .action-buttons button {
+        width: 100%;
     }
 }
