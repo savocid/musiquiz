@@ -2,10 +2,10 @@
   "collections": [
     {
       "id": "Celeste",
-      "title": null,
-      "description": null,
-      "difficulty": null,
-      "rounds": null,
+      "title": "Celeste Collection",
+      "description": "Music from the Celeste Original Soundtrack.",
+      "difficulty": "Hard",
+      "rounds": 5,
       "guessSongOnly": true,
       "songs": [
         {
