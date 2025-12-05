@@ -1,6 +1,6 @@
 // game.js - Main game logic with partial matching and progress bar
 
-let collectionsUrl = 'https://raw.githubusercontent.com/savocid/musiquiz/refs/heads/main/data/collections.json';
+let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 
 let gameState = {
     collection: null,
@@ -37,33 +37,35 @@ let gameState = {
     yearRevealed: false  // Track if year has been revealed
 };
 
+function showCollectionsUrlScreen() {
+    document.getElementById('collectionsUrlScreen').style.display = 'flex';
+    document.getElementById('gameContent').style.display = 'none';
+    document.getElementById('collectionsUrlInput').value = collectionsUrl || '';
+}
+
+function hideCollectionsUrlScreen() {
+    document.getElementById('collectionsUrlScreen').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+}
+
 // Initialize game
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadGameData();
-    if (!gameState.collection) {
-        alert('No game data found. Redirecting to home...');
-        window.location.href = 'index.html';
-        return;
+    if (!collectionsUrl) {
+        showCollectionsUrlScreen();
+    } else {
+        hideCollectionsUrlScreen();
+        await loadGameData();
     }
-    
-    // Populate start screen with collection info
-    document.getElementById('collectionTitle').textContent = gameState.collection.title;
-    document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
-    document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty || 'Medium';
-    
-    // Show rounds
-    const numRounds = gameState.collection.rounds || gameState.collection.songs.length;
-    document.getElementById('gameRounds').textContent = numRounds;
-    
-    // Set up start button
-    const startBtn = document.getElementById('startGameBtn');
-    if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameContent').style.display = 'block';
-            initializeGame();
-        });
-    }
+
+    document.getElementById('collectionsUrlSubmit').addEventListener('click', () => {
+        const url = document.getElementById('collectionsUrlInput').value.trim();
+        if (url) {
+            collectionsUrl = url;
+            localStorage.setItem('collectionsUrl', collectionsUrl);
+            hideCollectionsUrlScreen();
+            loadGameData();
+        }
+    });
 });
 
 async function loadGameData() {
