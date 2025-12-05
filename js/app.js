@@ -2,7 +2,7 @@
 
 let selectedMode = localStorage.getItem('selectedMode') || 'default'; // Restore saved mode or default
 let selectedCollection = null;
-let collectionsUrl = 'https://raw.githubusercontent.com/savocid/musiquiz/refs/heads/main/data/collections.json';
+let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 let modeAnimationTimeout = null; // Track animation timeout
 let allCollections = []; // Store all collections
 let displayedCount = 5; // Number of collections to show initially
@@ -30,12 +30,44 @@ const MODES = {
 document.addEventListener('DOMContentLoaded', async () => {
     restoreModeSelection(); // Restore first
     setupModeButtons();
-    loadCollections(); // Load immediately
+    
+    // Check for data URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataParam = urlParams.get('data');
+    if (dataParam) {
+        collectionsUrl = cleanUrl(dataParam);
+        // Reconstruct full URL for fetching
+        let fullUrl = 'https://' + collectionsUrl;
+        loadCollections(fullUrl, collectionsUrl); // Pass cleaned to save on success
+    } else if (collectionsUrl) {
+        // Reconstruct full URL for fetching
+        let fullUrl = 'https://' + collectionsUrl;
+        loadCollections(fullUrl);
+    } else {
+        showCollectionsUrlScreen();
+    }
+    
+    // Set input values after DOM is ready
+    if (collectionsUrlInputMain) {
+        collectionsUrlInputMain.value = collectionsUrl;
+    }
+    if (collectionsUrlInputScreen) {
+        collectionsUrlInputScreen.value = collectionsUrl;
+    }
     
     // Remove preload class after a brief moment to enable transitions
     setTimeout(() => {
         document.body.classList.remove('preload');
     }, 100);
+    
+    // Clear data button
+    const clearDataBtn = document.getElementById('clearDataBtn');
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', () => {
+            localStorage.clear();
+            location.reload();
+        });
+    }
 });
 
 // Handle browser back/forward button
@@ -150,25 +182,93 @@ function restoreModeSelection() {
     updateCSSVariables(selectedMode);
 }
 
-async function loadCollections() {
+function showCollectionsUrlScreen() {
+    const screen = document.getElementById('collectionsUrlScreen');
+    if (screen) {
+        screen.style.display = 'flex';
+        document.getElementById('mainContent').style.display = 'none';
+    }
+}
+
+function hideCollectionsUrlScreen() {
+    const screen = document.getElementById('collectionsUrlScreen');
+    if (screen) {
+        screen.style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+    }
+}
+
+// Collections URL input logic
+const collectionsUrlInputMain = document.getElementById('collectionsUrlInputMain');
+const collectionsUrlInputScreen = document.getElementById('collectionsUrlInputScreen');
+const collectionsUrlSubmit = document.getElementById('collectionsUrlSubmit');
+
+// Function to clean URL
+function cleanUrl(url) {
+    return url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+}
+
+// Clean input on blur
+if (collectionsUrlInputMain) {
+    collectionsUrlInputMain.addEventListener('blur', () => {
+        collectionsUrlInputMain.value = cleanUrl(collectionsUrlInputMain.value.trim());
+    });
+}
+if (collectionsUrlInputScreen) {
+    collectionsUrlInputScreen.addEventListener('blur', () => {
+        collectionsUrlInputScreen.value = cleanUrl(collectionsUrlInputScreen.value.trim());
+    });
+}
+
+if (collectionsUrlSubmit) {
+    collectionsUrlSubmit.addEventListener('click', () => {
+        let url = '';
+        if (collectionsUrlInputMain && collectionsUrlInputMain.offsetParent !== null) {
+            url = collectionsUrlInputMain.value.trim();
+        } else if (collectionsUrlInputScreen && collectionsUrlInputScreen.offsetParent !== null) {
+            url = collectionsUrlInputScreen.value.trim();
+        }
+        if (url) {
+            // Clean the URL by removing https:// and www.
+            let cleanedUrl = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+            // Construct full URL for fetching
+            let fullUrl = 'https://' + cleanedUrl;
+            loadCollections(fullUrl, cleanedUrl);
+        }
+    });
+}
+
+async function loadCollections(fullUrl, cleanedUrl = null) {
+    if (!fullUrl) {
+        document.getElementById('collectionsList').innerHTML = `<p style="color: #721c24; text-align: center; padding: 2rem;">Please enter a collections data URL above.</p>`;
+        if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
+        return;
+    }
+    let dataUrl = fullUrl;
+    if (dataUrl.endsWith('/')) {
+        dataUrl += 'data.json';
+    } else if (!dataUrl.endsWith('/data.json')) {
+        dataUrl += '/data.json';
+    }
     try {
-        const response = await fetch(collectionsUrl);
+        const response = await fetch(dataUrl);
         const data = await response.json();
-        allCollections = data.collections; // Store all collections
+        allCollections = data.collections || [];
         displayCollections();
+        hideCollectionsUrlScreen();
+        // Save only if successful and cleanedUrl provided
+        if (cleanedUrl) {
+            localStorage.setItem('collectionsUrl', cleanedUrl);
+        }
     } catch (error) {
         console.error('Error loading collections:', error);
-        document.getElementById('collectionsList').innerHTML = `
-            <p style="color: #721c24; text-align: center; padding: 2rem;">
-                Error loading collections. Please make sure collections.json exists.
-            </p>
-        `;
+        document.getElementById('collectionsList').innerHTML = `<p style=\"color: #721c24; text-align: center; padding: 2rem;\">Error loading collections. Please check the URL.</p>`;
+        if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
     }
 }
 
 function displayCollections() {
     const container = document.getElementById('collectionsList');
-    
     if (allCollections.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">No collections available yet.</p>';
         return;
@@ -189,17 +289,7 @@ function displayCollections() {
             </button>
         </div>
     `).join('');
-    
-    // Show/hide load more button
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if (loadMoreBtn) {
-        if (displayedCount < allCollections.length) {
-            loadMoreBtn.style.display = 'block';
-            loadMoreBtn.textContent = `Load More (${allCollections.length - displayedCount} remaining)`;
-        } else {
-            loadMoreBtn.style.display = 'none';
-        }
-    }
+
 }
 
 function loadMore() {
@@ -213,8 +303,8 @@ function startGame(collectionId) {
     params.set('collection', collectionId);
     params.set('mode', selectedMode);
     
-    // Check if running locally (file://) or on a server
-    const isLocal = window.location.protocol === 'file:';
+    // Check if running locally (file:// or localhost)
+    const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const url = isLocal ? `game.html?${params.toString()}` : `game?${params.toString()}`;
     window.location.href = url;
 }

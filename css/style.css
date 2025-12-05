@@ -993,6 +993,11 @@ header h1 {
     /* No longer needed, wrapper controls visibility */
 }
 
+/* Hide Load More button if no collections are shown */
+#collectionsList:empty ~ #loadMoreBtn {
+  display: none !important;
+}
+
 /* Responsive */
 @media (max-width: 1400px) {
     

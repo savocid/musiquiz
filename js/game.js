@@ -5,6 +5,7 @@ let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 let gameState = {
     collection: null,
     settings: null,
+    baseUrl: '',
     currentSongIndex: 0,
     score: 0,
     artistsGuessed: 0,  // Total artists guessed correctly
@@ -37,35 +38,18 @@ let gameState = {
     yearRevealed: false  // Track if year has been revealed
 };
 
-function showCollectionsUrlScreen() {
-    document.getElementById('collectionsUrlScreen').style.display = 'flex';
-    document.getElementById('gameContent').style.display = 'none';
-    document.getElementById('collectionsUrlInput').value = collectionsUrl || '';
-}
-
-function hideCollectionsUrlScreen() {
-    document.getElementById('collectionsUrlScreen').style.display = 'none';
-    document.getElementById('gameContent').style.display = 'block';
-}
-
 // Initialize game
 document.addEventListener('DOMContentLoaded', async () => {
-    if (!collectionsUrl) {
-        showCollectionsUrlScreen();
-    } else {
-        hideCollectionsUrlScreen();
-        await loadGameData();
+    // Clear data button
+    const clearDataBtn = document.getElementById('clearDataBtn');
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', () => {
+            localStorage.clear();
+            location.reload();
+        });
     }
-
-    document.getElementById('collectionsUrlSubmit').addEventListener('click', () => {
-        const url = document.getElementById('collectionsUrlInput').value.trim();
-        if (url) {
-            collectionsUrl = url;
-            localStorage.setItem('collectionsUrl', collectionsUrl);
-            hideCollectionsUrlScreen();
-            loadGameData();
-        }
-    });
+    
+    await loadGameData();
 });
 
 async function loadGameData() {
@@ -83,23 +67,35 @@ async function loadGameData() {
     
     if (!collectionId) {
         console.error('No collection ID in URL');
-        return; // Will redirect to home
+        showCollectionError();
+        return;
     }
     
     try {
         // Fetch collection data
-        const response = await fetch(collectionsUrl);
+        let dataUrl = collectionsUrl;
+        if (dataUrl.endsWith('/')) {
+            dataUrl += 'data.json';
+        } else if (!dataUrl.endsWith('/data.json')) {
+            dataUrl += '/data.json';
+        }
+        const response = await fetch('https://' + dataUrl);
         if (!response.ok) {
             console.error('Failed to fetch collections.json:', response.status, response.statusText);
-            return; // Will redirect to home
+            showCollectionError();
+            return;
         }
         const data = await response.json();
         gameState.collection = data.collections.find(c => c.id === collectionId);
         
         if (!gameState.collection) {
             console.error('Collection not found:', collectionId);
-            return; // Will redirect to home
+            showCollectionError();
+            return;
         }
+        
+        // Set base URL for audio files
+        gameState.baseUrl = 'https://' + collectionsUrl;
         
         // Always use current MODES definition (ensures fresh settings)
         gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };
@@ -139,10 +135,32 @@ async function loadGameData() {
             gameState.lifelines.year = { remaining: 1, total: 1 };
             gameState.lifelines.skip = { remaining: 1, total: 1 };
         }
+        
+        // Populate start screen
+        document.getElementById('collectionTitle').textContent = gameState.collection.title;
+        document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
+        document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty || 'Medium';
+        document.getElementById('gameRounds').textContent = gameState.collection.rounds || gameState.collection.songs.length;
+        
+        // Add start button listener
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            // Hide start screen, show game
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameContent').style.display = 'block';
+            initializeGame();
+        });
     } catch (error) {
         console.error('Failed to load collection:', error);
-        return; // Will redirect to home
+        showCollectionError();
     }
+}
+
+function showCollectionError() {
+    document.getElementById('collectionTitle').style.display = 'none';
+    document.getElementById('collectionDescription').style.display = 'none';
+    document.querySelector('#startScreen > div').style.display = 'none'; // Hide the difficulty/rounds grid
+    document.getElementById('startGameBtn').style.display = 'none';
+    document.getElementById('errorMessage').style.display = 'block';
 }
 
 function initializeGame() {
@@ -252,7 +270,8 @@ function playSong(restartCountdown = false) {
     }
     
     // Create and configure audio
-    gameState.audio = new Audio("https://raw.githubusercontent.com/savocid/musiquiz/main/"+song.audioFile);
+    let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/' + song.audioFile;
+    gameState.audio = new Audio(audioUrl);
     gameState.audio.volume = getCurrentVolume();
     gameState.audio.currentTime = startTime;
 

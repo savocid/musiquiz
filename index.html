@@ -8,67 +8,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/cleanUrls.js"></script>
 </head>
 <body class="preload">
-    <!-- Settings Toggle Button -->
-    <button class="panel-toggle panel-toggle-left" id="settingsToggle" aria-label="Toggle Settings">
-        <span>⚙️</span>
-    </button>
-
-    <!-- Settings Panel -->
-    <div class="side-panel side-panel-left" id="settingsPanel">
-        <div class="panel-header">
-            <h3>Settings</h3>
-        </div>
-        
-        <!-- Game Mode Section -->
-        <div class="panel-section">
-            <h4>Game Mode</h4>
-            <div class="mode-control">
-                <button class="mode-btn-compact" data-mode="trivial">
-                    <strong>Trivial</strong>
-                    <span>20s Listen • No Timeout</span>
-                    <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
-                </button>
-                <button class="mode-btn-compact" data-mode="default">
-                    <strong>Default</strong>
-                    <span><span class="emoji">❤️❤️❤️</span> • 15s Listen • No Timeout</span>
-                    <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
-                </button>
-                <button class="mode-btn-compact" data-mode="hard">
-                    <strong>Hard</strong>
-                    <span><span class="emoji">❤️❤️❤️</span> • 10s Listen • 20s Timeout</span>
-                    <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
-                </button>
-                <button class="mode-btn-compact" data-mode="sudden-death">
-                    <strong>Sudden Death</strong>
-                    <span><span class="emoji">❤️</span> • 5s Listen • 10s Timeout</span>
-                    <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Volume Section -->
-        <div class="panel-section">
-            <h4>Volume</h4>
-            <div class="volume-control">
-                <label for="volumeSlider">🔊</label>
-                <input type="range" id="volumeSlider" min="0" max="100" value="50">
-                <span id="volumePercent">50%</span>
-            </div>
-        </div>
-    </div>
-
     <div class="container home-container">
             <!-- Header -->
             <header>
-                <h1><a href="index.html" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
+                <h1><a href="/" style="color: inherit; text-decoration: none; cursor: pointer;">MusiQuiz</a></h1>
             </header>
         </div>
 
         <!-- Collection Selection -->
         <div id="collectionSelection" class="collections-list">
+            <!-- Collections Data URL Input -->
+            <div style="margin-bottom:1rem;">
+                <input type="text" id="collectionsUrlInputMain" placeholder="Collections data URL" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;margin:0;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <button id="collectionsUrlSubmit" style="padding:0.5rem 1.5rem;font-size:1rem;">Set</button>
+            </div>
             <h2>Collections</h2>
+
             <div id="collectionsList"></div>
             <button id="loadMoreBtn" class="btn btn-secondary" onclick="loadMore()" style="display: none; margin: 1.5rem auto 0; display: block;">Load More</button>
         </div>
@@ -77,17 +35,21 @@
     <!-- Collections Data URL Input (shown on first load) -->
     <div id="collectionsUrlScreen" style="display:none; align-items:center; justify-content:center; flex-direction:column; min-height:100vh;">
         <h2>Enter Collections Data URL</h2>
-        <input type="text" id="collectionsUrlInput" placeholder="https://musiquiz-collections.netlify.app/data.json" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;">
+        <input type="text" id="collectionsUrlInputScreen" placeholder="https://musiquiz-collections.netlify.app/data.json" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button id="collectionsUrlSubmit" style="margin-top:1rem;padding:0.5rem 1.5rem;font-size:1rem;">Continue</button>
         <p style="margin-top:1rem;color:#888;font-size:0.9rem;">This will be saved for future visits.</p>
+    </div>
+    <div id="mainContent">
+        <!-- ...your main app content here... -->
     </div>
 
     <footer class="site-footer">
         <a href="https://github.com/savocid/musiquiz" target="_blank">source</a>
         <span>•</span>
-        <a href="submit.html">submit</a>
+        <a href="submit">submit</a>
     </footer>
 
+    <script src="js/settingsPanel.js"></script>
     <script src="js/panels.js"></script>
     <script src="js/volume.js"></script>
     <script src="js/app.js"></script>
