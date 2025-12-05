@@ -634,6 +634,16 @@ function checkGuess() {
     if (artistCorrect || songCorrect) {
         showResult(resultMsg, 'correct');
     } else {
+        // Add shake animation to answer display
+        const answerDisplay = document.querySelector('.answer-display');
+        if (answerDisplay) {
+            answerDisplay.classList.remove('shake');
+            // Force reflow to restart animation if needed
+            void answerDisplay.offsetWidth;
+            answerDisplay.classList.add('shake');
+            // Remove the class after animation ends
+            setTimeout(() => answerDisplay.classList.remove('shake'), 400);
+        }
         showResult(resultMsg, 'incorrect');
     }
     
