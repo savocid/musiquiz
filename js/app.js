@@ -43,16 +43,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Reconstruct full URL for fetching
         let fullUrl = 'https://' + collectionsUrl;
         loadCollections(fullUrl);
-    } else {
-        showCollectionsUrlScreen();
     }
     
     // Set input values after DOM is ready
     if (collectionsUrlInputMain) {
         collectionsUrlInputMain.value = collectionsUrl;
-    }
-    if (collectionsUrlInputScreen) {
-        collectionsUrlInputScreen.value = collectionsUrl;
     }
     
     // Remove preload class after a brief moment to enable transitions
@@ -182,25 +177,8 @@ function restoreModeSelection() {
     updateCSSVariables(selectedMode);
 }
 
-function showCollectionsUrlScreen() {
-    const screen = document.getElementById('collectionsUrlScreen');
-    if (screen) {
-        screen.style.display = 'flex';
-        document.getElementById('mainContent').style.display = 'none';
-    }
-}
-
-function hideCollectionsUrlScreen() {
-    const screen = document.getElementById('collectionsUrlScreen');
-    if (screen) {
-        screen.style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-    }
-}
-
 // Collections URL input logic
 const collectionsUrlInputMain = document.getElementById('collectionsUrlInputMain');
-const collectionsUrlInputScreen = document.getElementById('collectionsUrlInputScreen');
 const collectionsUrlSubmit = document.getElementById('collectionsUrlSubmit');
 
 // Function to clean URL
@@ -214,20 +192,10 @@ if (collectionsUrlInputMain) {
         collectionsUrlInputMain.value = cleanUrl(collectionsUrlInputMain.value.trim());
     });
 }
-if (collectionsUrlInputScreen) {
-    collectionsUrlInputScreen.addEventListener('blur', () => {
-        collectionsUrlInputScreen.value = cleanUrl(collectionsUrlInputScreen.value.trim());
-    });
-}
 
 if (collectionsUrlSubmit) {
     collectionsUrlSubmit.addEventListener('click', () => {
-        let url = '';
-        if (collectionsUrlInputMain && collectionsUrlInputMain.offsetParent !== null) {
-            url = collectionsUrlInputMain.value.trim();
-        } else if (collectionsUrlInputScreen && collectionsUrlInputScreen.offsetParent !== null) {
-            url = collectionsUrlInputScreen.value.trim();
-        }
+        let url = collectionsUrlInputMain.value.trim();
         if (url) {
             // Clean the URL by removing https:// and www.
             let cleanedUrl = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
@@ -255,7 +223,6 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
         const data = await response.json();
         allCollections = data.collections || [];
         displayCollections();
-        hideCollectionsUrlScreen();
         // Save only if successful and cleanedUrl provided
         if (cleanedUrl) {
             localStorage.setItem('collectionsUrl', cleanedUrl);
@@ -289,6 +256,12 @@ function displayCollections() {
             </button>
         </div>
     `).join('');
+
+    // Show/hide load more button
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = displayedCount < allCollections.length ? 'block' : 'none';
+    }
 
 }
 

@@ -81,7 +81,7 @@ async function loadGameData() {
         }
         const response = await fetch('https://' + dataUrl);
         if (!response.ok) {
-            console.error('Failed to fetch collections.json:', response.status, response.statusText);
+            console.error('Failed to fetch data.json:', response.status, response.statusText);
             showCollectionError();
             return;
         }

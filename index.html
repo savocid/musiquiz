@@ -21,26 +21,15 @@
         <!-- Collection Selection -->
         <div id="collectionSelection" class="collections-list">
             <!-- Collections Data URL Input -->
-            <div style="margin-bottom:1rem;">
-                <input type="text" id="collectionsUrlInputMain" placeholder="Collections data URL" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;margin:0;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div style="margin-bottom:1rem; text-align: center;">
+                <input type="text" id="collectionsUrlInputMain" placeholder="Collections data URL" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;margin:0;outline:none;" autocomplete="off">
                 <button id="collectionsUrlSubmit" style="padding:0.5rem 1.5rem;font-size:1rem;">Set</button>
             </div>
             <h2>Collections</h2>
 
             <div id="collectionsList"></div>
-            <button id="loadMoreBtn" class="btn btn-secondary" onclick="loadMore()" style="display: none; margin: 1.5rem auto 0; display: block;">Load More</button>
+            <button id="loadMoreBtn" class="btn btn-secondary" onclick="loadMore()" style="display: none; margin: 1.5rem auto 0;">Load More</button>
         </div>
-    </div>
-
-    <!-- Collections Data URL Input (shown on first load) -->
-    <div id="collectionsUrlScreen" style="display:none; align-items:center; justify-content:center; flex-direction:column; min-height:100vh;">
-        <h2>Enter Collections Data URL</h2>
-        <input type="text" id="collectionsUrlInputScreen" placeholder="https://musiquiz-collections.netlify.app/data.json" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <button id="collectionsUrlSubmit" style="margin-top:1rem;padding:0.5rem 1.5rem;font-size:1rem;">Continue</button>
-        <p style="margin-top:1rem;color:#888;font-size:0.9rem;">This will be saved for future visits.</p>
-    </div>
-    <div id="mainContent">
-        <!-- ...your main app content here... -->
     </div>
 
     <footer class="site-footer">
