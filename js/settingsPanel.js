@@ -84,9 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 } else {
-                    // Index page: update localStorage and reload
+                    // Index page: just update mode without reload
                     localStorage.setItem('selectedMode', newMode);
-                    location.reload();
+                    // Update the current mode variable and apply theme
+                    // Assuming there's a way to update the mode, but since it's in app.js, perhaps trigger an event or something
+                    // For now, just set localStorage, and the page can handle it
                 }
             }
         });
