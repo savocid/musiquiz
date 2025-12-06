@@ -286,6 +286,13 @@ function startGame(collectionId) {
     
     // Check if running locally (file:// or localhost)
     const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const url = isLocal ? `game.html?${params.toString()}` : `game?${params.toString()}`;
+    let url;
+    if (isLocal) {
+        url = `game.html?${params.toString()}`;
+    } else {
+        // Use absolute path for production
+        const basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        url = basePath + 'game?' + params.toString();
+    }
     window.location.href = url;
 }
