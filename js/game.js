@@ -136,6 +136,15 @@ async function loadGameData() {
             gameState.lifelines.skip = { remaining: 1, total: 1 };
         }
         
+        // Disable lifelines based on collection settings
+        if (gameState.collection.disabledLifelines && Array.isArray(gameState.collection.disabledLifelines)) {
+            gameState.collection.disabledLifelines.forEach(lifeline => {
+                if (gameState.lifelines[lifeline]) {
+                    gameState.lifelines[lifeline] = { remaining: 0, total: 0 };
+                }
+            });
+        }
+        
         // Populate start screen
         document.getElementById('collectionTitle').textContent = gameState.collection.title;
         document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
