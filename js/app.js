@@ -60,7 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (clearDataBtn) {
         clearDataBtn.addEventListener('click', () => {
             localStorage.clear();
-            location.reload();
+            // Remove data parameter from URL and reload
+            window.location.href = window.location.pathname;
         });
     }
     
