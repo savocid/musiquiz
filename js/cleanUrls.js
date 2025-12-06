@@ -9,6 +9,9 @@
     }
 })();
 
+// Compute base path for the project
+const basePath = window.location.pathname.split('/').slice(0, -1).join('/') + '/';
+
 // Set correct home links based on environment
 document.addEventListener('DOMContentLoaded', () => {
     const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -17,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLocal) {
             link.href = 'index.html';
         } else {
-            link.href = '/';
+            link.href = basePath;
         }
     });
     // For submit link in footer
@@ -26,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLocal) {
             link.href = 'submit.html';
         } else {
-            link.href = 'submit';
+            link.href = basePath + 'submit';
         }
     });
 });
@@ -37,6 +40,6 @@ window.goHome = function() {
     if (isLocal) {
         window.location.href = 'index.html';
     } else {
-        window.location.href = '/';
+        window.location.href = basePath;
     }
 };
