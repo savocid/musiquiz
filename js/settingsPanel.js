@@ -59,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.insertAdjacentHTML('afterbegin', settingsPanelHTML);
     
     // Attach mode button listeners based on page
-    const isGamePage = window.location.pathname.includes('game.html');
+    const params = new URLSearchParams(window.location.search);
+    const isGamePage = params.get('collection') !== null;
     const modeButtons = document.querySelectorAll('.mode-btn-compact');
     
     modeButtons.forEach(btn => {
@@ -95,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Apply current mode styling
-    const params = new URLSearchParams(window.location.search);
     const savedMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
     document.body.classList.add(`mode-${savedMode}`);
     
