@@ -63,6 +63,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             location.reload();
         });
     }
+    
+    // Normalize URL to remove trailing slash for cleaner appearance
+    if (window.location.pathname.endsWith('/') && window.location.pathname !== '/') {
+        const newPath = window.location.pathname.slice(0, -1);
+        const newUrl = window.location.origin + newPath + window.location.search;
+        history.replaceState(null, '', newUrl);
+    }
 });
 
 // Handle browser back/forward button
@@ -208,7 +215,7 @@ if (collectionsUrlSubmit) {
 
 async function loadCollections(fullUrl, cleanedUrl = null) {
     if (!fullUrl) {
-        document.getElementById('collectionsList').innerHTML = `<p style="color: #721c24; text-align: center; padding: 2rem;">Please enter a collections data URL above.</p>`;
+        document.getElementById('collectionsList').innerHTML = `<p style="color: #fff; text-align: center; padding: 2rem;">Please enter a collections data URL above.</p>`;
         if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
         return;
     }
@@ -229,7 +236,7 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
         }
     } catch (error) {
         console.error('Error loading collections:', error);
-        document.getElementById('collectionsList').innerHTML = `<p style=\"color: #721c24; text-align: center; padding: 2rem;\">Error loading collections. Please check the URL.</p>`;
+        document.getElementById('collectionsList').innerHTML = `<p style=\"color: #fff; text-align: center; padding: 2rem;\">Error loading collections. Please check the URL.</p>`;
         if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
     }
 }
