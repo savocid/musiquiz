@@ -291,8 +291,7 @@ function startGame(collectionId) {
         url = `game.html?${params.toString()}`;
     } else {
         // Use absolute path for production
-        let basePath = window.location.pathname;
-        if (!basePath.endsWith('/')) basePath += '/';
+        const basePath = '/' + window.location.pathname.split('/')[1] + '/';
         url = basePath + 'game?' + params.toString();
     }
     window.location.href = url;

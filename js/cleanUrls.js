@@ -10,8 +10,7 @@
 })();
 
 // Compute base path for the project
-let basePath = window.location.pathname;
-if (!basePath.endsWith('/')) basePath += '/';
+const basePath = '/' + window.location.pathname.split('/')[1] + '/';
 
 // Set correct home links based on environment
 document.addEventListener('DOMContentLoaded', () => {
