@@ -324,12 +324,6 @@ function startRound() {
 function playSong(restartCountdown = false) {
     const song = gameState.currentSong;
     
-    // Log song info to console
-    const sources = song.sources.filter(s => s[0]).map(s => s[1]).join(' / ');
-    const title = getTitle(song);
-    const year = song.year || 'Unknown';
-    console.log(`${sources} - ${title} (${year})`);
-    
     // Mark this round as active
     const roundId = Date.now() + Math.random(); // Unique ID for this playback
     gameState.currentRoundId = roundId;
@@ -806,15 +800,23 @@ function updateAnswerDisplay() {
     
     // Helper function to build hint display
     const buildHintDisplay = (text, revealedIndices) => {
+        const chars = text.split('');
         if (!revealedIndices || revealedIndices.length === 0) {
-            return text.split('').map(char => char === ' ' ? ' ' : '_').join('');
+            return chars.map(char => {
+                if (char === ' ') return ' ';
+                if (/[a-zA-Z0-9]/.test(char)) return '_';
+                return ''; // remove punctuation
+            }).join('');
         }
-        return text.split('').map((char, i) => {
+        return chars.map((char, i) => {
             if (char === ' ') return ' ';
-            if (revealedIndices.includes(i)) {
-                return `<span class="revealed">${char}</span>`;
+            if (/[a-zA-Z0-9]/.test(char)) {
+                if (revealedIndices.includes(i)) {
+                    return `<span class="revealed">${char}</span>`;
+                }
+                return '_';
             }
-            return '_';
+            return ''; // remove punctuation
         }).join('');
     };
     
@@ -825,7 +827,47 @@ function updateAnswerDisplay() {
     if (gameStyle === 3) { // only song, hide source
         sourcePart.innerHTML = '';
         if (separator) separator.style.display = 'none';
+        // Build song display with optional year
+        let songDisplay = '';
+        if (gameState.songRevealed) {
+            songDisplay = `<span class="revealed">${getTitle(song)}</span>`;
+        } else {
+            // Check if hints are active for song
+            const hintLetters = gameState.hintLettersRevealed.song;
+            if (hintLetters && hintLetters.length > 0) {
+                const hintText = buildHintDisplay(getTitle(song), hintLetters);
+                songDisplay = `<span class="hint">${hintText}</span>`;
+            } else {
+                songDisplay = `<span class="hidden">Song</span>`;
+            }
+        }
+        
+        // Add year if revealed
+        if (gameState.yearRevealed && song.year) {
+            songDisplay += ` <span class="revealed">(${song.year})</span>`;
+        }
+        
+        songPart.innerHTML = songDisplay;
     } else if (gameStyle === 2) { // only source, hide song
+        const sourceName = gameState.collection.sourceName || "Source";
+        const requiredSources = song.sources.filter(s => s[0]);
+        const sourceDisplay = requiredSources.map((source, requiredIndex) => {
+            const globalIndex = song.sources.indexOf(source);
+            if (gameState.sourceRevealed.includes(globalIndex)) {
+                return `<span class="revealed">${source[1]}</span>`;
+            } else {
+                // Check if hints are active for this source
+                const hintLetters = gameState.hintLettersRevealed.source[requiredIndex];
+                if (hintLetters && hintLetters.length > 0) {
+                    const hintText = buildHintDisplay(source[1], hintLetters);
+                    return `<span class="hint">${hintText}</span>`;
+                } else {
+                    const label = requiredSources.length === 1 ? sourceName : `${sourceName} ${requiredIndex + 1}`;
+                    return `<span class="hidden">${label}</span>`;
+                }
+            }
+        }).join(', ');
+        sourcePart.innerHTML = sourceDisplay;
         songPart.innerHTML = '';
         if (separator) separator.style.display = 'none';
     } else { // gameStyle 1, show both
@@ -849,29 +891,29 @@ function updateAnswerDisplay() {
         }).join(', ');
         sourcePart.innerHTML = sourceDisplay;
         if (separator) separator.style.display = '';
-    }
-    
-    // Build song display with optional year
-    let songDisplay = '';
-    if (gameState.songRevealed) {
-        songDisplay = `<span class="revealed">${getTitle(song)}</span>`;
-    } else {
-        // Check if hints are active for song
-        const hintLetters = gameState.hintLettersRevealed.song;
-        if (hintLetters && hintLetters.length > 0) {
-            const hintText = buildHintDisplay(getTitle(song), hintLetters);
-            songDisplay = `<span class="hint">${hintText}</span>`;
+        
+        // Build song display with optional year
+        let songDisplay = '';
+        if (gameState.songRevealed) {
+            songDisplay = `<span class="revealed">${getTitle(song)}</span>`;
         } else {
-            songDisplay = `<span class="hidden">SONG</span>`;
+            // Check if hints are active for song
+            const hintLetters = gameState.hintLettersRevealed.song;
+            if (hintLetters && hintLetters.length > 0) {
+                const hintText = buildHintDisplay(getTitle(song), hintLetters);
+                songDisplay = `<span class="hint">${hintText}</span>`;
+            } else {
+                songDisplay = `<span class="hidden">Song</span>`;
+            }
         }
+        
+        // Add year if revealed
+        if (gameState.yearRevealed && song.year) {
+            songDisplay += ` <span class="revealed">(${song.year})</span>`;
+        }
+        
+        songPart.innerHTML = songDisplay;
     }
-    
-    // Add year if revealed
-    if (gameState.yearRevealed && song.year) {
-        songDisplay += ` <span class="revealed">(${song.year})</span>`;
-    }
-    
-    songPart.innerHTML = songDisplay;
 }
 
 function showResult(message, resultType) {

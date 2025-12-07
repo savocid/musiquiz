@@ -761,6 +761,11 @@ header h1 a, .btn-secondary a {
     padding: 0;
     margin: 0;
 }
+.answer-display .hidden,
+.answer-display .hint:not(:has( .revealed)) {
+	text-transform: uppercase;
+}
+
 
 .answer-display-wrapper {
     font-size: 1.5rem;
@@ -994,10 +999,6 @@ header h1 a, .btn-secondary a {
     padding: 1rem;
     border-radius: 8px;
     margin-top: 1rem;
-}
-
-.success-message.show {
-    /* No longer needed, wrapper controls visibility */
 }
 
 /* Hide Load More button if no collections are shown */
