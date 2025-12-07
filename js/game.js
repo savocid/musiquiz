@@ -1,4 +1,17 @@
-// game.js - Main game logic with partial matching and progress bar
+// Helper function to get the primary title
+function getTitle(song) {
+    return song.titles ? song.titles[0] : song.title;
+}
+
+// Helper function to check if guess matches any title
+function matchesTitle(song, normalizedInput) {
+    if (song.titles) {
+        return song.titles.some(title => normalize(title) === normalizedInput || normalizedInput.includes(normalize(title)));
+    } else {
+        const normalizedTitle = normalize(song.title);
+        return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
+    }
+}
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 
@@ -560,8 +573,7 @@ function checkGuess() {
     if (guessSongOnly) {
         // Only check song title
         if (!gameState.songRevealed) {
-            const normalizedTitle = normalize(song.title);
-            if (normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle)) {
+            if (matchesTitle(song, normalizedInput)) {
                 gameState.songRevealed = true;
                 songCorrect = true;
                 newCorrectGuess = true;
@@ -581,8 +593,7 @@ function checkGuess() {
         });
         // Check song title - exact match or contained in input
         if (!gameState.songRevealed) {
-            const normalizedTitle = normalize(song.title);
-            if (normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle)) {
+            if (matchesTitle(song, normalizedInput)) {
                 gameState.songRevealed = true;
                 songCorrect = true;
                 newCorrectGuess = true;
@@ -737,12 +748,12 @@ function updateAnswerDisplay() {
     // Build song display with optional year
     let songDisplay = '';
     if (gameState.songRevealed) {
-        songDisplay = `<span class="revealed">${song.title}</span>`;
+        songDisplay = `<span class="revealed">${getTitle(song)}</span>`;
     } else {
         // Check if hints are active for song
         const hintLetters = gameState.hintLettersRevealed.song;
         if (hintLetters && hintLetters.length > 0) {
-            const hintText = buildHintDisplay(song.title, hintLetters);
+            const hintText = buildHintDisplay(getTitle(song), hintLetters);
             songDisplay = `<span class="hint">${hintText}</span>`;
         } else {
             songDisplay = `<span class="hidden">SONG</span>`;
@@ -1177,7 +1188,7 @@ function useHintLifeline() {
             gameState.hintLettersRevealed.song = [];
         }
         
-        const letters = song.title.split('');
+        const letters = getTitle(song).split('');
         const letterIndices = letters.map((_, i) => i).filter(i => letters[i] !== ' ');
         const unrevealed = letterIndices.filter(i => !gameState.hintLettersRevealed.song.includes(i));
         
