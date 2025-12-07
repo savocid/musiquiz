@@ -45,7 +45,7 @@
             <!-- Game Info Header -->
             <div class="game-info">
                 <div>
-                    <div>Artist: <span id="artistScore">0/0</span></div>
+                    <div><span id="sourceLabel">Source</span>: <span id="sourceScore">0/0</span></div>
                     <div>Song: <span id="songScore">0/0</span></div>
                 </div>
                 <div><span id="lives">3</span></div>
@@ -70,10 +70,10 @@
                     </div>
                 </div>
 
-                <!-- Answer Display (hidden/revealed artists and song) -->
+                <!-- Answer Display (hidden/revealed sources and song) -->
                 <div class="answer-display">
                     <div class="answer-display-wrapper" id="answerDisplay">
-                        <span class="artist-part" id="artistPart">ARTIST</span>
+                        <span class="source-part" id="sourcePart">Source</span>
                         <span class="separator"> - </span>
                         <span class="song-part" id="songPart">SONG</span>
                     </div>
@@ -81,7 +81,7 @@
 
                 <!-- Guess Input (always visible) -->
                 <div class="guess-input">
-                    <input type="text" id="guessInput" placeholder="Type artist and/or song name..." autocomplete="off" style="outline:none;">
+                    <input type="text" id="guessInput" placeholder="Type source and/or song name..." autocomplete="off" style="outline:none;">
                 </div>
             </div>
 
@@ -90,7 +90,7 @@
                 <button class="btn btn-lifeline" id="timeLifeline" style="display: none;" title="Adds 10 seconds to the countdown timer">
                     ⏱️ +10s (<span id="timeCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="hintLifeline" style="display: none;" title="Reveals random letters in the artist and song names">
+                <button class="btn btn-lifeline" id="hintLifeline" style="display: none;" title="Reveals random letters in the source and song names">
                     💡 Hint (<span id="hintCount">0</span>)
                 </button>
                 <button class="btn btn-lifeline" id="yearLifeline" style="display: none;" title="Shows the release year of the song">
@@ -140,8 +140,8 @@
                         <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">3</span></span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><strong>Artists:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="artistsGuessed">0</span>/<span id="totalArtists">1</span></span>
+                        <span><strong id="sourcesLabel">Sources</strong>:</span>
+                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="sourcesGuessed">0</span>/<span id="totalSources">1</span></span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Songs:</strong></span>

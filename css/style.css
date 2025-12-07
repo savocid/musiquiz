@@ -781,6 +781,7 @@ header h1 a, .btn-secondary a {
     color: rgba(255, 255, 255, 0.5);
     font-style: italic;
     letter-spacing: 0.08em;
+    word-spacing: 0.5em;
 }
 
 .answer-display .hint .revealed {

@@ -230,6 +230,10 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
         const response = await fetch(dataUrl);
         const data = await response.json();
         allCollections = data.collections || [];
+        allCollections.sort((a, b) => {
+            return a.title.localeCompare(b.title, undefined, { numeric: true });
+        });
+
         displayCollections();
         // Save only if successful and cleanedUrl provided
         if (cleanedUrl) {

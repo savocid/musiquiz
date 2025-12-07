@@ -3,6 +3,11 @@ function getTitle(song) {
     return song.titles ? song.titles[0] : song.title;
 }
 
+// Helper function to normalize strings for comparison
+function normalize(str) {
+    return str.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+}
+
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
     if (song.titles) {
@@ -21,9 +26,9 @@ let gameState = {
     baseUrl: '',
     currentSongIndex: 0,
     score: 0,
-    artistsGuessed: 0,  // Total artists guessed correctly
+    sourceGuessed: 0,  // Total sources guessed correctly
     songsGuessed: 0,    // Total songs guessed correctly
-    totalArtistsSoFar: 0,  // Total artists encountered so far
+    totalSourcesSoFar: 0,  // Total sources encountered so far
     totalSongsSoFar: 0,    // Total songs encountered so far
     lives: 3,
     totalLives: 3,  // Track total lives to keep hearts in DOM
@@ -33,7 +38,7 @@ let gameState = {
     guessTimer: null,
     progressInterval: null,
     currentSong: null,
-    artistsRevealed: [],  // Track which artists have been guessed
+    sourceRevealed: [],  // Track which sources have been guessed
     songRevealed: false,   // Track if song has been guessed
     hasTimeout: false,
     clipDuration: 10,
@@ -47,7 +52,7 @@ let gameState = {
         skip: { remaining: 0, total: 0 }
     },
     lifelineUsedThisRound: { time: false, hint: false, year: false, skip: false },  // Track per-round usage
-    hintLettersRevealed: { artists: [], song: [] },  // Track revealed letter positions
+    hintLettersRevealed: { source: [], song: [] },  // Track revealed letter positions
     yearRevealed: false  // Track if year has been revealed
 };
 
@@ -105,6 +110,51 @@ async function loadGameData() {
             console.error('Collection not found:', collectionId);
             showCollectionError();
             return;
+        }
+        
+        // Set the source label based on collection's sourceName
+        const gameStyle = gameState.collection.gameStyle || 1;
+        document.getElementById('sourceLabel').textContent = gameState.collection.sourceName || "Source";
+        document.getElementById('sourcesLabel').textContent = (gameState.collection.sourceName || "Source") + "s";
+        
+        // Set placeholder based on game style
+        let placeholder = "Type ";
+        if (gameStyle === 1) {
+            placeholder += `${gameState.collection.sourceName ? gameState.collection.sourceName.toLowerCase() : "source"} and/or song name...`;
+        } else if (gameStyle === 2) {
+            placeholder += `${gameState.collection.sourceName ? gameState.collection.sourceName.toLowerCase() : "source"} name...`;
+        } else if (gameStyle === 3) {
+            placeholder += "song name...";
+        }
+        document.getElementById('guessInput').placeholder = placeholder;
+        
+        // Set hint title based on game style
+        let hintTitle = "Reveals random letters in the ";
+        if (gameStyle === 1) {
+            hintTitle += `${gameState.collection.sourceName ? gameState.collection.sourceName.toLowerCase() : "source"} and song names`;
+        } else if (gameStyle === 2) {
+            hintTitle += `${gameState.collection.sourceName ? gameState.collection.sourceName.toLowerCase() : "source"} names`;
+        } else if (gameStyle === 3) {
+            hintTitle += "song names";
+        }
+        document.getElementById('hintLifeline').title = hintTitle;
+        
+        // Hide score displays based on game style
+        if (gameStyle === 2) {
+            const songScoreDiv = document.querySelector('.game-info > div:first-child > div:last-child');
+            if (songScoreDiv) songScoreDiv.style.display = 'none';
+        } else if (gameStyle === 3) {
+            const sourceScoreDiv = document.querySelector('.game-info > div:first-child > div:first-child');
+            if (sourceScoreDiv) sourceScoreDiv.style.display = 'none';
+        }
+        
+        // Hide stats based on game style
+        if (gameStyle === 3) {
+            const sourcesStatsDiv = document.querySelector('.stats > div:nth-child(2)');
+            if (sourcesStatsDiv) sourcesStatsDiv.style.display = 'none';
+        } else if (gameStyle === 2) {
+            const songsStatsDiv = document.querySelector('.stats > div:nth-child(3)');
+            if (songsStatsDiv) songsStatsDiv.style.display = 'none';
         }
         
         // Set base URL for audio files
@@ -218,15 +268,15 @@ function startRound() {
     clearInterval(gameState.guessTimer);
     gameState.guessTimer = null;
     gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
-    gameState.artistsRevealed = [];
+    gameState.sourceRevealed = [];
     gameState.songRevealed = false;
     gameState.canGuess = true;
-    gameState.hintLettersRevealed = { artists: [], song: [] };  // Reset hint state
+    gameState.hintLettersRevealed = { source: [], song: [] };  // Reset hint state
     gameState.yearRevealed = false;  // Reset year reveal
     gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };  // Reset per-round usage
     
-    // Update total artists/songs counters
-    gameState.totalArtistsSoFar += gameState.currentSong.artists.length;
+    // Update total sources/songs counters
+    gameState.totalSourcesSoFar += gameState.currentSong.sources.filter(s => s[0]).length;
     gameState.totalSongsSoFar += 1;
     
     // Clear input
@@ -273,6 +323,12 @@ function startRound() {
 
 function playSong(restartCountdown = false) {
     const song = gameState.currentSong;
+    
+    // Log song info to console
+    const sources = song.sources.filter(s => s[0]).map(s => s[1]).join(' / ');
+    const title = getTitle(song);
+    const year = song.year || 'Unknown';
+    console.log(`${sources} - ${title} (${year})`);
     
     // Mark this round as active
     const roundId = Date.now() + Math.random(); // Unique ID for this playback
@@ -538,7 +594,7 @@ function handleTimeout() {
     // Check game over
     if (gameState.lives <= 0) {
         // On game over, reveal the answer
-        gameState.artistsRevealed = gameState.currentSong.artists.map((_, i) => i);
+        gameState.sourceRevealed = gameState.currentSong.sources.map((s, i) => s[0] ? i : null).filter(i => i !== null);
         gameState.songRevealed = true;
         updateAnswerDisplay();
         
@@ -559,18 +615,17 @@ function checkGuess() {
     const userInput = document.getElementById('guessInput').value.trim();
     if (!userInput) return;
     
-    // Normalize function
-    const normalize = (str) => str.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     const normalizedInput = normalize(userInput);
     
     const song = gameState.currentSong;
-    let artistCorrect = false;
+    let sourceCorrect = false;
     let songCorrect = false;
     let newCorrectGuess = false;
-    let artistsRevealedBefore = gameState.artistsRevealed.length;
+    let sourceRevealedBefore = gameState.sourceRevealed.length;
     
-    const guessSongOnly = gameState.collection && gameState.collection.guessSongOnly;
-    if (guessSongOnly) {
+    const gameStyle = gameState.collection ? gameState.collection.gameStyle || 1 : 1;
+    
+    if (gameStyle === 3) {
         // Only check song title
         if (!gameState.songRevealed) {
             if (matchesTitle(song, normalizedInput)) {
@@ -579,15 +634,35 @@ function checkGuess() {
                 newCorrectGuess = true;
             }
         }
-    } else {
-        // Check each artist - exact match or contained in input
-        song.artists.forEach((artist, index) => {
-            if (!gameState.artistsRevealed.includes(index)) {
-                const normalizedArtist = normalize(artist);
-                if (normalizedInput === normalizedArtist || normalizedInput.includes(normalizedArtist)) {
-                    gameState.artistsRevealed.push(index);
-                    artistCorrect = true;
-                    newCorrectGuess = true;
+    } else if (gameStyle === 2) {
+        // Only check sources
+        song.sources.forEach((source, index) => {
+            if (source[0] && !gameState.sourceRevealed.includes(index)) {
+                for (let i = 1; i < source.length; i++) {
+                    const spelling = source[i];
+                    const normalizedSpelling = normalize(spelling);
+                    if (normalizedInput === normalizedSpelling || normalizedInput.includes(normalizedSpelling)) {
+                        gameState.sourceRevealed.push(index);
+                        sourceCorrect = true;
+                        newCorrectGuess = true;
+                        break;
+                    }
+                }
+            }
+        });
+    } else { // gameStyle 1
+        // Check each source - if required and not revealed
+        song.sources.forEach((source, index) => {
+            if (source[0] && !gameState.sourceRevealed.includes(index)) {
+                for (let i = 1; i < source.length; i++) {
+                    const spelling = source[i];
+                    const normalizedSpelling = normalize(spelling);
+                    if (normalizedInput === normalizedSpelling || normalizedInput.includes(normalizedSpelling)) {
+                        gameState.sourceRevealed.push(index);
+                        sourceCorrect = true;
+                        newCorrectGuess = true;
+                        break;
+                    }
                 }
             }
         });
@@ -606,24 +681,35 @@ function checkGuess() {
     
     // Award points and check completion
     let fullyGuessed = false;
-    if (guessSongOnly) {
+    if (gameStyle === 3) {
+        // Song only
         if (songCorrect) {
             gameState.score += 100;
             gameState.songsGuessed++;
             fullyGuessed = gameState.songRevealed;
         }
-    } else {
-        if (artistCorrect) {
+    } else if (gameStyle === 2) {
+        // Source only
+        if (sourceCorrect) {
             gameState.score += 50;
-            const artistsRevealedAfter = gameState.artistsRevealed.length;
-            gameState.artistsGuessed += (artistsRevealedAfter - artistsRevealedBefore);
+            const sourceRevealedAfter = gameState.sourceRevealed.length;
+            gameState.sourceGuessed += (sourceRevealedAfter - sourceRevealedBefore);
+            const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.filter(s => s[0]).length;
+            fullyGuessed = allSourcesRevealed;
+        }
+    } else {
+        // Both
+        if (sourceCorrect) {
+            gameState.score += 50;
+            const sourceRevealedAfter = gameState.sourceRevealed.length;
+            gameState.sourceGuessed += (sourceRevealedAfter - sourceRevealedBefore);
         }
         if (songCorrect) {
             gameState.score += 100;
             gameState.songsGuessed++;
         }
-        const allArtistsRevealed = gameState.artistsRevealed.length === song.artists.length;
-        fullyGuessed = allArtistsRevealed && gameState.songRevealed;
+        const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.filter(s => s[0]).length;
+        fullyGuessed = allSourcesRevealed && gameState.songRevealed;
     }
     // Only stop countdown timer if fully guessed (but keep clip timer running)
     if (fullyGuessed) {
@@ -633,7 +719,8 @@ function checkGuess() {
     
     // Build result message
     let resultMsg = '';
-    if (guessSongOnly) {
+    if (gameStyle === 3) {
+        // Song only
         if (songCorrect) {
             resultMsg = '✓ Song Correct!';
         } else {
@@ -642,11 +729,22 @@ function checkGuess() {
                 gameState.lives--;
             }
         }
+    } else if (gameStyle === 2) {
+        // Source only
+        if (sourceCorrect) {
+            resultMsg = '✓ Source Correct!';
+        } else {
+            resultMsg = '✗ Incorrect';
+            if (!newCorrectGuess && gameState.lives !== 999) {
+                gameState.lives--;
+            }
+        }
     } else {
-        if (artistCorrect && songCorrect) {
-            resultMsg = '✓ Artist and Song Correct!';
-        } else if (artistCorrect) {
-            resultMsg = '✓ Artist Correct!';
+        // Both
+        if (sourceCorrect && songCorrect) {
+            resultMsg = '✓ Source and Song Correct!';
+        } else if (sourceCorrect) {
+            resultMsg = '✓ Source Correct!';
         } else if (songCorrect) {
             resultMsg = '✓ Song Correct!';
         } else {
@@ -672,7 +770,7 @@ function checkGuess() {
     }
     
     // Show result (only if not game over)
-    if (artistCorrect || songCorrect) {
+    if (sourceCorrect || songCorrect) {
         showResult(resultMsg, 'correct');
     } else {
         // Add shake animation to answer display
@@ -702,7 +800,7 @@ function checkGuess() {
 
 function updateAnswerDisplay() {
     const song = gameState.currentSong;
-    const artistPart = document.getElementById('artistPart');
+    const sourcePart = document.getElementById('sourcePart');
     const songPart = document.getElementById('songPart');
     const separator = document.querySelector('.answer-display-wrapper .separator');
     
@@ -720,28 +818,36 @@ function updateAnswerDisplay() {
         }).join('');
     };
     
-    // Hide artist display if guessSongOnly is enabled
-    const guessSongOnly = gameState.collection && gameState.collection.guessSongOnly;
-    if (guessSongOnly) {
-        artistPart.innerHTML = '';
-        // Hide the separator if no artist part, but keep SONG placeholder visible
+    // Get game style
+    const gameStyle = gameState.collection ? gameState.collection.gameStyle || 1 : 1;
+    
+    // Hide parts based on game style
+    if (gameStyle === 3) { // only song, hide source
+        sourcePart.innerHTML = '';
         if (separator) separator.style.display = 'none';
-    } else {
-        const artistDisplay = song.artists.map((artist, index) => {
-            if (gameState.artistsRevealed.includes(index)) {
-                return `<span class="revealed">${artist}</span>`;
+    } else if (gameStyle === 2) { // only source, hide song
+        songPart.innerHTML = '';
+        if (separator) separator.style.display = 'none';
+    } else { // gameStyle 1, show both
+        const sourceName = gameState.collection.sourceName || "Source";
+        const requiredSources = song.sources.filter(s => s[0]);
+        const sourceDisplay = requiredSources.map((source, requiredIndex) => {
+            const globalIndex = song.sources.indexOf(source);
+            if (gameState.sourceRevealed.includes(globalIndex)) {
+                return `<span class="revealed">${source[1]}</span>`;
             } else {
-                // Check if hints are active for this artist
-                const hintLetters = gameState.hintLettersRevealed.artists[index];
+                // Check if hints are active for this source
+                const hintLetters = gameState.hintLettersRevealed.source[requiredIndex];
                 if (hintLetters && hintLetters.length > 0) {
-                    const hintText = buildHintDisplay(artist, hintLetters);
+                    const hintText = buildHintDisplay(source[1], hintLetters);
                     return `<span class="hint">${hintText}</span>`;
                 } else {
-                    return `<span class="hidden">ARTIST ${index + 1}</span>`;
+                    const label = requiredSources.length === 1 ? sourceName : `${sourceName} ${requiredIndex + 1}`;
+                    return `<span class="hidden">${label}</span>`;
                 }
             }
         }).join(', ');
-        artistPart.innerHTML = artistDisplay;
+        sourcePart.innerHTML = sourceDisplay;
         if (separator) separator.style.display = '';
     }
     
@@ -773,8 +879,8 @@ function showResult(message, resultType) {
     
     // Check if fully guessed
     const song = gameState.currentSong;
-    const allArtistsRevealed = gameState.artistsRevealed.length === song.artists.length;
-    const fullyGuessed = allArtistsRevealed && gameState.songRevealed;
+    const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.filter(s => s[0]).length;
+    const fullyGuessed = allSourcesRevealed && gameState.songRevealed;
     
     // Show next button and disable input if fully guessed or timeout (but not if game over)
     if ((fullyGuessed || !gameState.canGuess) && gameState.lives > 0) {
@@ -933,10 +1039,20 @@ function endGame(completed) {
     const roundsCompleted = completed ? gameState.shuffledSongs.length : gameState.currentSongIndex;
     document.getElementById('roundsAchieved').textContent = roundsCompleted;
     document.getElementById('totalRounds').textContent = gameState.shuffledSongs.length;
-    document.getElementById('artistsGuessed').textContent = gameState.artistsGuessed;
-    document.getElementById('totalArtists').textContent = gameState.totalArtistsSoFar;
+    document.getElementById('sourcesGuessed').textContent = gameState.sourceGuessed;
+    document.getElementById('totalSources').textContent = gameState.totalSourcesSoFar;
     document.getElementById('songsGuessed').textContent = gameState.songsGuessed;
     document.getElementById('totalSongs').textContent = gameState.totalSongsSoFar;
+    
+    // Hide stats based on game style
+    const gameStyle = gameState.collection ? gameState.collection.gameStyle || 1 : 1;
+    if (gameStyle === 3) {
+        const sourcesDiv = document.querySelector('#resultScreen > div > div > div:nth-child(3)');
+        if (sourcesDiv) sourcesDiv.style.display = 'none';
+    } else if (gameStyle === 2) {
+        const songsDiv = document.querySelector('#resultScreen > div > div > div:nth-child(4)');
+        if (songsDiv) songsDiv.style.display = 'none';
+    }
     
     // Display hearts if mode uses lives
     const heartsContainer = document.getElementById('resultHearts');
@@ -1007,8 +1123,8 @@ function endGame(completed) {
 }
 
 function updateUI() {
-    // Update score display with artist/song stats
-    document.getElementById('artistScore').textContent = `${gameState.artistsGuessed}/${gameState.totalArtistsSoFar}`;
+    // Update score display with source/song stats
+    document.getElementById('sourceScore').textContent = `${gameState.sourceGuessed}/${gameState.totalSourcesSoFar}`;
     document.getElementById('songScore').textContent = `${gameState.songsGuessed}/${gameState.totalSongsSoFar}`;
     
     // Update lives display with hearts
@@ -1156,43 +1272,48 @@ function useHintLifeline() {
     if (!canUse || !gameState.canGuess) return;
     
     const song = gameState.currentSong;
-    let lettersToReveal = 2;
-
+    const gameStyle = gameState.collection ? gameState.collection.gameStyle || 1 : 1;
     
-    // Reveal letters for each artist
-    song.artists.forEach((artist, artistIndex) => {
-        if (!gameState.artistsRevealed.includes(artistIndex)) {
-            if (!gameState.hintLettersRevealed.artists[artistIndex]) {
-                gameState.hintLettersRevealed.artists[artistIndex] = [];
+    // Reveal letters for each source
+    if (gameStyle !== 3) {
+        song.sources.forEach((source, globalIndex) => {
+            if (source[0] && !gameState.sourceRevealed.includes(globalIndex)) {
+                const requiredIndex = song.sources.slice(0, globalIndex).filter(s => s[0]).length;
+                if (!gameState.hintLettersRevealed.source[requiredIndex]) {
+                    gameState.hintLettersRevealed.source[requiredIndex] = [];
+                }
+                
+                const sourceName = source[1]; // Use first spelling for hints
+                const letters = sourceName.split('').filter(c => c !== ' ');
+                const letterIndices = letters.map((_, i) => i);
+                const unrevealed = letterIndices.filter(i => !gameState.hintLettersRevealed.source[requiredIndex].includes(i));
+                
+                const lettersToReveal = Math.max(2, Math.floor(unrevealed.length * 0.3));
+                // Special rule: if calculated amount equals total unrevealed, reveal one less
+                const adjustedCount = unrevealed.length === lettersToReveal ? lettersToReveal - 1 : lettersToReveal;
+                const toReveal = Math.min(adjustedCount, unrevealed.length);
+                
+                for (let i = 0; i < toReveal; i++) {
+                    const randomIndex = Math.floor(Math.random() * unrevealed.length);
+                    const letterIndex = unrevealed.splice(randomIndex, 1)[0];
+                    gameState.hintLettersRevealed.source[requiredIndex].push(letterIndex);
+                }
             }
-            
-            const letters = artist.split('');
-            const letterIndices = letters.map((_, i) => i).filter(i => letters[i] !== ' ');
-            const unrevealed = letterIndices.filter(i => !gameState.hintLettersRevealed.artists[artistIndex].includes(i));
-            
-            // Special rule: if name length equals letters to reveal, reveal one less
-            const adjustedCount = unrevealed.length === lettersToReveal ? lettersToReveal - 1 : lettersToReveal;
-            const toReveal = Math.min(adjustedCount, unrevealed.length);
-            
-            for (let i = 0; i < toReveal; i++) {
-                const randomIndex = Math.floor(Math.random() * unrevealed.length);
-                const letterIndex = unrevealed.splice(randomIndex, 1)[0];
-                gameState.hintLettersRevealed.artists[artistIndex].push(letterIndex);
-            }
-        }
-    });
+        });
+    }
     
     // Reveal letters for song title if not revealed
-    if (!gameState.songRevealed) {
+    if (gameStyle !== 2 && !gameState.songRevealed) {
         if (!gameState.hintLettersRevealed.song) {
             gameState.hintLettersRevealed.song = [];
         }
         
-        const letters = getTitle(song).split('');
-        const letterIndices = letters.map((_, i) => i).filter(i => letters[i] !== ' ');
+        const letters = getTitle(song).split('').filter(c => c !== ' ');
+        const letterIndices = letters.map((_, i) => i);
         const unrevealed = letterIndices.filter(i => !gameState.hintLettersRevealed.song.includes(i));
         
-        // Special rule: if name length equals letters to reveal, reveal one less
+        const lettersToReveal = Math.max(2, Math.floor(unrevealed.length * 0.3));
+        // Special rule: if calculated amount equals total unrevealed, reveal one less
         const adjustedCount = unrevealed.length === lettersToReveal ? lettersToReveal - 1 : lettersToReveal;
         const toReveal = Math.min(adjustedCount, unrevealed.length);
         
