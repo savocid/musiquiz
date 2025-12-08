@@ -31,6 +31,11 @@ function matchesTitle(song, normalizedInput) {
     }
 }
 
+// Helper function to get the primary title
+function getTitle(song) {
+    return song.titles ? song.titles[0] : song.title;
+}
+
 let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 
 let gameState = {
@@ -85,9 +90,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadGameData() {
     const MODES = {
-        trivial: { lives: 999, clipDuration: 20, timeout: 0 },
-        default: { lives: 3, clipDuration: 15, timeout: 0 },
-        hard: { lives: 3, clipDuration: 10, timeout: 20 },
+        'trivial': { lives: 999, clipDuration: 20, timeout: 0 },
+        'default': { lives: 3, clipDuration: 15, timeout: 0 },
+        'intense': { lives: 3, clipDuration: 10, timeout: 20 },
         'sudden-death': { lives: 1, clipDuration: 5, timeout: 10 }
     };
     
@@ -190,9 +195,9 @@ async function loadGameData() {
             gameState.lifelines.year = { remaining: 999, total: 999 };
             gameState.lifelines.skip = { remaining: 999, total: 999 };
         } else if (gameState.lives === 3) {
-            // Check timeout to differentiate Default from Hard
+            // Check timeout to differentiate Default from Intense
             if (gameState.timeout > 0) {
-                // Hard Mode: Time (1x), Hint (1x), Year (1x), Skip (1x)
+                // Intense Mode: Time (1x), Hint (1x), Year (1x), Skip (1x)
                 gameState.lifelines.time = { remaining: 1, total: 1 };
                 gameState.lifelines.hint = { remaining: 1, total: 1 };
                 gameState.lifelines.year = { remaining: 1, total: 1 };
@@ -297,7 +302,7 @@ async function startRound() {
             const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
                 gameState.currentSong.audioFile : 
                 gameState.baseUrl + '/' + gameState.currentSong.audioFile;
-            const duration = await getAudioDuration(audioUrl);console.log(duration);
+            const duration = await getAudioDuration(audioUrl);
             
             // Generate random start time: startTime + clipDuration + 5s <= duration
             const maxStartTime = Math.max(0, duration - gameState.clipDuration - 5);
@@ -306,6 +311,7 @@ async function startRound() {
             console.error('Failed to get audio duration, using 0:', error);
             gameState.currentSong.startTime = 0;
         }
+		console.log(gameState.currentSong.startTime)
     }
     
     // Update total sources/songs counters
@@ -632,6 +638,8 @@ function handleTimeout() {
         // Go directly to game over immediately
         endGame(false);
     } else {
+        // Disable input and show result when timed out but still have lives
+        document.getElementById('guessInput').disabled = true;
         // Show result and next button if still alive (without revealing answer)
         showResult();
     }
@@ -1067,9 +1075,9 @@ function endGame(completed) {
     if (gameState.lives === 999 || (gameState.settings && gameState.settings.lives === 999)) {
         modeName = 'Trivial';
     } else if (gameState.lives === 3 || (gameState.settings && gameState.settings.lives === 3)) {
-        // Check timeout to differentiate Default from Hard
+        // Check timeout to differentiate Default from Intense
         if (gameState.timeout > 0 || (gameState.settings && gameState.settings.timeout > 0)) {
-            modeName = 'Hard';
+            modeName = 'Intense';
         } else {
             modeName = 'Default';
         }

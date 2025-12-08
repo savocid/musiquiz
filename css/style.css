@@ -60,7 +60,7 @@ body.mode-default {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
-body.mode-hard {
+body.mode-intense {
     background: linear-gradient(90deg, #ff9800 0%, #d84315 100%);
 }
 
@@ -106,7 +106,7 @@ body.mode-animating[data-new-mode="default"]::before {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
-body.mode-animating[data-new-mode="hard"]::before {
+body.mode-animating[data-new-mode="intense"]::before {
     background: linear-gradient(90deg, #ff9800 0%, #d84315 100%);
 }
 
@@ -318,16 +318,16 @@ body.mode-animating[data-new-mode="sudden-death"]::before {
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 
-.mode-btn-compact[data-mode="hard"] {
+.mode-btn-compact[data-mode="intense"] {
     border-color: #ff9800;
     color: #ff9800;
 }
 
-.mode-btn-compact[data-mode="hard"]:hover {
+.mode-btn-compact[data-mode="intense"]:hover {
     background: #fff3e0;
 }
 
-.mode-btn-compact[data-mode="hard"].active {
+.mode-btn-compact[data-mode="intense"].active {
     background: #ff9800;
     border-color: #ff9800;
     color: white;

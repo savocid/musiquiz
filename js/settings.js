@@ -24,8 +24,8 @@ const settingsPanelHTML = `
                 <span><span class="emoji">❤️❤️❤️</span> • 15s Listen • No Timeout</span>
                 <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
             </button>
-            <button class="mode-btn-compact" data-mode="hard">
-                <strong>Hard</strong>
+            <button class="mode-btn-compact" data-mode="intense">
+                <strong>Intense</strong>
                 <span><span class="emoji">❤️❤️❤️</span> • 10s Listen • 20s Timeout</span>
                 <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
             </button>
@@ -129,7 +129,7 @@ window.applyModeTheme = function(mode, animate = false, callback) {
         
         // Apply new theme after animation completes
         setTimeout(() => {
-            document.body.classList.remove('mode-trivial', 'mode-default', 'mode-hard', 'mode-sudden-death');
+            document.body.classList.remove('mode-trivial', 'mode-default', 'mode-intense', 'mode-sudden-death');
             document.body.classList.add(`mode-${mode}`);
             
             // Remove animation class
@@ -138,7 +138,7 @@ window.applyModeTheme = function(mode, animate = false, callback) {
         }, 1000);
     } else {
         // Just switch modes without animation
-        document.body.classList.remove('mode-trivial', 'mode-default', 'mode-hard', 'mode-sudden-death');
+        document.body.classList.remove('mode-trivial', 'mode-default', 'mode-intense', 'mode-sudden-death');
         document.body.classList.add(`mode-${mode}`);
     }
 };
@@ -151,7 +151,7 @@ function updateCSSVariables(mode) {
         root.style.setProperty('--primary-dark', '#2f855a');
         root.style.setProperty('--text-light', 'white');
         root.style.setProperty('--shadow-color', 'rgba(72, 187, 120, 0.4)');
-    } else if (mode === 'hard') {
+    } else if (mode === 'intense') {
         root.style.setProperty('--primary-color', '#ff9800');
         root.style.setProperty('--primary-dark', '#f57c00');
         root.style.setProperty('--text-light', 'white');
