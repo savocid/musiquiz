@@ -23,15 +23,8 @@ function normalize(str) {
 
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
-    if (song.titles) {
-        return song.titles.some(title => {
-            if (Array.isArray(title) && title.length > 1) {
-                return title.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)));
-            } else if (typeof title === 'string') {
-                return normalize(title) === normalizedInput || normalizedInput.includes(normalize(title));
-            }
-            return false;
-        });
+    if (song.titles && song.titles.length > 1) {
+        return song.titles.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)));
     } else if (song.title) {
         const normalizedTitle = normalize(song.title);
         return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
@@ -41,13 +34,8 @@ function matchesTitle(song, normalizedInput) {
 
 // Helper function to get the primary title
 function getTitle(song) {
-    if (song.titles && song.titles.length > 0) {
-        const firstTitle = song.titles[0];
-        if (Array.isArray(firstTitle) && firstTitle.length > 1) {
-            return firstTitle[1];
-        } else if (typeof firstTitle === 'string') {
-            return firstTitle;
-        }
+    if (song.titles && song.titles.length > 1) {
+        return song.titles[1];
     } else if (song.title) {
         return song.title;
     }
@@ -75,7 +63,7 @@ let gameState = {
     progressInterval: null,
     currentSong: null,
     sourceRevealed: [],  // Track which sources have been guessed
-    songRevealed: [],   // Track which titles have been guessed
+    songRevealed: false,   // Track if song has been guessed
     hasTimeout: false,
     clipDuration: 10,
     timeout: 0,
@@ -341,7 +329,7 @@ async function startRound() {
     gameState.guessTimer = null;
     gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
     gameState.sourceRevealed = [];
-    gameState.songRevealed = [];
+    gameState.songRevealed = false;
     gameState.canGuess = true;
     gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };  // Reset hint state
     gameState.yearRevealed = false;  // Reset year reveal
@@ -680,7 +668,7 @@ function handleTimeout() {
     if (gameState.lives <= 0) {
         // On game over, reveal the answer
         gameState.sourceRevealed = gameState.currentSong.sources.map((s, i) => s[0] ? i : null).filter(i => i !== null);
-        gameState.songRevealed = gameState.currentSong.titles.map((_, i) => i);
+        gameState.songRevealed = true;
         updateAnswerDisplay();
         
         // Hide action buttons immediately
@@ -714,15 +702,13 @@ function checkGuess() {
     
     if (gameStyle === 3) {
         // Only check song title
-        song.titles.forEach((title, index) => {
-            if (!gameState.songRevealed.includes(index)) {
-                if (title.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)))) {
-                    gameState.songRevealed.push(index);
-                    songCorrect = true;
-                    newCorrectGuess = true;
-                }
+        if (!gameState.songRevealed) {
+            if (matchesTitle(song, normalizedInput)) {
+                gameState.songRevealed = true;
+                songCorrect = true;
+                newCorrectGuess = true;
             }
-        });
+        }
     } else if (gameStyle === 2) {
         // Only check sources
         song.sources.forEach((source, index) => {
@@ -755,16 +741,14 @@ function checkGuess() {
                 }
             }
         });
-        // Check song titles
-        song.titles.forEach((title, index) => {
-            if (!gameState.songRevealed.includes(index)) {
-                if (title.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)))) {
-                    gameState.songRevealed.push(index);
-                    songCorrect = true;
-                    newCorrectGuess = true;
-                }
+        // Check song title - exact match or contained in input
+        if (!gameState.songRevealed) {
+            if (matchesTitle(song, normalizedInput)) {
+                gameState.songRevealed = true;
+                songCorrect = true;
+                newCorrectGuess = true;
             }
-        });
+        }
     }
     
     // Update display
@@ -779,10 +763,8 @@ function checkGuess() {
             gameState.score += 100;
             gameState.songsGuessed++;
         }
-        const requiredTitleIndices = song.titles.map((t, i) => t[0] ? i : null).filter(i => i !== null);
-        const allRequiredTitlesRevealed = requiredTitleIndices.every(i => gameState.songRevealed.includes(i));
-        requiredGuessed = allRequiredTitlesRevealed;
-        allGuessed = gameState.songRevealed.length === song.titles.length;
+        requiredGuessed = song.titles[0] ? gameState.songRevealed : true;
+        allGuessed = gameState.songRevealed;
     } else if (gameStyle === 2) {
         // Source only
         if (sourceCorrect) {
@@ -805,10 +787,8 @@ function checkGuess() {
             gameState.songsGuessed++;
         }
         const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
-        const requiredTitleIndices = song.titles.map((t, i) => t[0] ? i : null).filter(i => i !== null);
-        const allRequiredTitlesRevealed = requiredTitleIndices.every(i => gameState.songRevealed.includes(i));
-        requiredGuessed = allSourcesRevealed && allRequiredTitlesRevealed;
-        allGuessed = allSourcesRevealed && gameState.songRevealed.length === song.titles.length;
+        requiredGuessed = allSourcesRevealed && (song.titles[0] ? gameState.songRevealed : true);
+        allGuessed = allSourcesRevealed && gameState.songRevealed;
     }
     // Only stop countdown timer if all guessed (but keep clip timer running)
     if (allGuessed) {
@@ -901,18 +881,14 @@ function updateAnswerDisplay() {
         if (separator) separator.style.display = 'none';
         // Build song display with optional year
         let songDisplay = '';
-        if (gameState.songRevealed.length > 0) {
-            const revealedTitles = gameState.songRevealed.map(i => {
-                const title = song.titles[i];
-                const isRequired = title[0];
-                return `<span class="revealed${isRequired ? '' : ' optional'}">${title[1]}</span>`;
-            });
-            songDisplay = revealedTitles.join(' / ');
+        if (gameState.songRevealed) {
+            const isRequired = song.titles[0];
+            const titleText = song.titles.slice(1).join(' / ');
+            songDisplay = `<span class="revealed${isRequired ? '' : ' optional'}">${titleText}</span>`;
         } else {
             // Check if hints are active for song
             const hintLetters = gameState.hintLettersRevealed.song;
-            const primaryTitle = song.titles[0];
-            const isPrimaryOptional = primaryTitle && !primaryTitle[0];
+            const isPrimaryOptional = song.titles[0] === false;
             if (hintLetters && hintLetters.length > 0) {
                 const hintText = buildHintDisplay(getTitle(song), hintLetters);
                 songDisplay = `<span class="hint${isPrimaryOptional ? ' optional' : ''}">${hintText}</span>`;
@@ -922,7 +898,7 @@ function updateAnswerDisplay() {
         }
         
         // Add year if revealed or lifeline used
-        if ((gameState.yearRevealed || (allSourcesRevealed && gameState.songRevealed.length > 0)) && song.year) {
+        if ((gameState.yearRevealed || (allSourcesRevealed && gameState.songRevealed)) && song.year) {
             songDisplay += ` <span class="revealed">(${song.year})</span>`;
         }
         
@@ -979,18 +955,14 @@ function updateAnswerDisplay() {
         
         // Build song display with optional year
         let songDisplay = '';
-        if (gameState.songRevealed.length > 0) {
-            const revealedTitles = gameState.songRevealed.map(i => {
-                const title = song.titles[i];
-                const isRequired = title[0];
-                return `<span class="revealed${isRequired ? '' : ' optional'}">${title[1]}</span>`;
-            });
-            songDisplay = revealedTitles.join(' / ');
+        if (gameState.songRevealed) {
+            const isRequired = song.titles[0];
+            const titleText = song.titles.slice(1).join(' / ');
+            songDisplay = `<span class="revealed${isRequired ? '' : ' optional'}">${titleText}</span>`;
         } else {
             // Check if hints are active for song
             const hintLetters = gameState.hintLettersRevealed.song;
-            const primaryTitle = song.titles[0];
-            const isPrimaryOptional = primaryTitle && !primaryTitle[0];
+            const isPrimaryOptional = song.titles[0] === false;
             if (hintLetters && hintLetters.length > 0) {
                 const hintText = buildHintDisplay(getTitle(song), hintLetters);
                 songDisplay = `<span class="hint${isPrimaryOptional ? ' optional' : ''}">${hintText}</span>`;
@@ -1000,7 +972,7 @@ function updateAnswerDisplay() {
         }
         
         // Add year if revealed or lifeline used
-        if ((gameState.yearRevealed || (allSourcesRevealed && gameState.songRevealed.length > 0)) && song.year) {
+        if ((gameState.yearRevealed || (allSourcesRevealed && gameState.songRevealed)) && song.year) {
             songDisplay += ` <span class="revealed">(${song.year})</span>`;
         }
         
@@ -1017,15 +989,12 @@ function showResult() {
     let requiredGuessed = false;
     
     if (gameStyle === 3) {
-        const requiredTitleIndices = song.titles.map((t, i) => t[0] ? i : null).filter(i => i !== null);
-        requiredGuessed = requiredTitleIndices.every(i => gameState.songRevealed.includes(i));
+        requiredGuessed = song.titles[0] ? gameState.songRevealed : true;
     } else if (gameStyle === 2) {
         requiredGuessed = gameState.sourceRevealed.length === song.sources.length;
     } else {
         const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
-        const requiredTitleIndices = song.titles.map((t, i) => t[0] ? i : null).filter(i => i !== null);
-        const allRequiredTitlesRevealed = requiredTitleIndices.every(i => gameState.songRevealed.includes(i));
-        requiredGuessed = allSourcesRevealed && allRequiredTitlesRevealed;
+        requiredGuessed = allSourcesRevealed && (song.titles[0] ? gameState.songRevealed : true);
     }
     
     // Show next button and disable input if required guessed or timeout (but not if game over)
