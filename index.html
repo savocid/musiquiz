@@ -48,6 +48,7 @@
                 document.body.classList.remove('preload');
             }, 100);
         })();
+		if (window.location.href.includes("https://")) { document.head.innerHTML = document.head.innerHTML + "<base href='./musiquiz/' />"; }
     </script>
     <script src="js/app.js"></script>
 </body>

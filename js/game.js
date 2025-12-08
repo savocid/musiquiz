@@ -1010,10 +1010,14 @@ function showResult() {
         document.getElementById('nextButtonContainer').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
         document.getElementById('lifelineButtons').style.display = 'none';
+
+		console.log("1")
         
         // Stop the countdown timer when next button appears
         clearInterval(gameState.guessTimer);
         
+		console.log("2")
+
         // Disable all lifeline buttons during next phase
         document.querySelectorAll('.btn-lifeline').forEach(btn => {
             btn.disabled = true;
@@ -1518,8 +1522,8 @@ document.addEventListener('keydown', (e) => {
     
     // Handle Enter key for next round if next button is active
     if (e.key === 'Enter' && guessInput.disabled) {
-        const nextBtn = document.getElementById('nextBtn');
-        if (nextBtn && nextBtn.style.display !== 'none') {
+        const nextButtonContainer = document.getElementById('nextButtonContainer');
+        if (nextButtonContainer && nextButtonContainer.style.display !== 'none') {
             nextRound();
             return;
         }
