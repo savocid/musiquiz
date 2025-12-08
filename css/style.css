@@ -393,7 +393,7 @@ header h1 a, .btn-secondary a {
 /* Footer */
 .site-footer {
   position: relative;
-  margin-top: 3rem;
+  margin-top: auto;
   margin-bottom: 1rem;
   margin-left: auto;
   margin-right: auto;
@@ -966,6 +966,27 @@ header h1 a, .btn-secondary a {
     color: #666;
     font-size: 0.9rem;
     margin: 0.25rem 0;
+}
+
+/* Difficulty colors */
+.difficulty-easy {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.difficulty-medium {
+    color: #667eea;
+    font-weight: bold;
+}
+
+.difficulty-hard {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.difficulty-extreme {
+    color: #dc3545;
+    font-weight: bold;
 }
 
 /* Song List */

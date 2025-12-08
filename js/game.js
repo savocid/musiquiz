@@ -114,7 +114,7 @@ async function loadGameData() {
         
         // Set the source label based on collection's sourceName
         const gameStyle = gameState.collection.gameStyle || 1;
-        document.getElementById('sourceLabel').textContent = gameState.collection.sourceName || "Source";
+        document.getElementById('sourceLabel').textContent = gameState.collection.sourceName+"s" || "Sources";
         document.getElementById('sourcesLabel').textContent = (gameState.collection.sourceName || "Source") + "s";
         
         // Set placeholder based on game style
@@ -1134,8 +1134,8 @@ function endGame(completed) {
 
 function updateUI() {
     // Update score display with source/song stats
-    document.getElementById('sourceScore').textContent = `${gameState.sourceGuessed}/${gameState.totalSourcesSoFar}`;
-    document.getElementById('songScore').textContent = `${gameState.songsGuessed}/${gameState.totalSongsSoFar}`;
+    document.getElementById('sourceScore').textContent = `${gameState.sourceGuessed}`;
+    document.getElementById('songScore').textContent = `${gameState.songsGuessed}`;
     
     // Update lives display with hearts
     const livesElement = document.getElementById('lives');

@@ -261,7 +261,7 @@ function displayCollections() {
             <div class="collection-info">
                 <h3>${collection.title}</h3>
                 <p>${collection.description || 'No description'}</p>
-                <p><strong>Difficulty:</strong> ${collection.difficulty} | <strong>Songs:</strong> ${collection.songs.length} | <strong>Rounds:</strong> ${collection.rounds || collection.songs.length}</p>
+                <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Rounds:</strong> ${collection.rounds || collection.songs.length}</p>
             </div>
             <button class="btn btn-success" onclick="startGame('${collection.id}')">
                 ▶ Start Game
