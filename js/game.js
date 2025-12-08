@@ -24,10 +24,10 @@ function normalize(str) {
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
     if (song.titles && song.titles.length > 1) {
-        return song.titles.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)));
+        return song.titles.slice(1).some(t => normalize(t) === normalizedInput);
     } else if (song.title) {
         const normalizedTitle = normalize(song.title);
-        return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
+        return normalizedInput === normalizedTitle;
     }
     return false;
 }
