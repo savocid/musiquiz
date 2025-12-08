@@ -842,8 +842,8 @@ function updateAnswerDisplay() {
             }
         }
         
-        // Add year if revealed
-        if (gameState.yearRevealed && song.year) {
+        // Add year if revealed or lifeline used
+        if ((gameState.yearRevealed || gameState.songRevealed) && song.year) {
             songDisplay += ` <span class="revealed">(${song.year})</span>`;
         }
         
@@ -870,6 +870,10 @@ function updateAnswerDisplay() {
         sourcePart.innerHTML = sourceDisplay;
         songPart.innerHTML = '';
         if (separator) separator.style.display = 'none';
+        // For gameStyle 2, show year with source since song is hidden
+        if ((gameState.yearRevealed || gameState.sourceRevealed.length === requiredSources.length) && song.year) {
+            sourcePart.innerHTML += ` <span class="revealed">(${song.year})</span>`;
+        }
     } else { // gameStyle 1, show both
         const sourceName = gameState.collection.sourceName || "Source";
         const requiredSources = song.sources.filter(s => s[0]);
@@ -907,8 +911,8 @@ function updateAnswerDisplay() {
             }
         }
         
-        // Add year if revealed
-        if (gameState.yearRevealed && song.year) {
+        // Add year if revealed or lifeline used
+        if ((gameState.yearRevealed || gameState.songRevealed) && song.year) {
             songDisplay += ` <span class="revealed">(${song.year})</span>`;
         }
         
