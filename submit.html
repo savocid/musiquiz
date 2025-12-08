@@ -12,27 +12,6 @@
     <script src="js/cleanUrls.js"></script>
 </head>
 <body class="preload">
-    <!-- Settings Toggle Button -->
-    <button class="panel-toggle panel-toggle-left" id="settingsToggle" aria-label="Toggle Settings">
-        <span>⚙️</span>
-    </button>
-
-    <!-- Settings Panel -->
-    <div class="side-panel side-panel-left" id="settingsPanel">
-        <div class="panel-header">
-            <h3>Settings</h3>
-        </div>
-        
-        <!-- Volume Section -->
-        <div class="panel-section">
-            <h4>Volume</h4>
-            <div class="volume-control">
-                <label for="volumeSlider">🔊</label>
-                <input type="range" id="volumeSlider" min="0" max="100" value="50">
-                <span id="volumePercent">50%</span>
-            </div>
-        </div>
-    </div>
 
     <div class="container">
         <div class="controls-wrapper">
@@ -42,7 +21,6 @@
             </header>
         </div>
 
-        
         <div class="form-container">
             <form id="createForm">
                 <div class="form-group">
@@ -103,43 +81,16 @@
         <a href="submit">submit</a>
     </footer>
 
-    <script src="js/panels.js"></script>
+	<script src="js/settings.js"></script>
     <script src="js/volume.js"></script>
     <script>
         // Apply mode theme on page load
         (function() {
-            const savedMode = localStorage.getItem('selectedMode') || 'default';
-            document.body.classList.add(`mode-${savedMode}`);
-            
-            // Update CSS variables immediately
-            const root = document.documentElement;
-            if (savedMode === 'trivial') {
-                root.style.setProperty('--primary-color', '#48bb78');
-                root.style.setProperty('--primary-dark', '#2f855a');
-                root.style.setProperty('--text-light', 'white');
-                root.style.setProperty('--shadow-color', 'rgba(72, 187, 120, 0.4)');
-            } else if (savedMode === 'hard') {
-                root.style.setProperty('--primary-color', '#ff9800');
-                root.style.setProperty('--primary-dark', '#f57c00');
-                root.style.setProperty('--text-light', 'white');
-                root.style.setProperty('--shadow-color', 'rgba(255, 152, 0, 0.4)');
-            } else if (savedMode === 'sudden-death') {
-                root.style.setProperty('--primary-color', '#ff6b6b');
-                root.style.setProperty('--primary-dark', '#d94a4a');
-                root.style.setProperty('--text-light', '#fff5f5');
-                root.style.setProperty('--shadow-color', 'rgba(255, 107, 107, 0.4)');
-            } else {
-                root.style.setProperty('--primary-color', '#667eea');
-                root.style.setProperty('--primary-dark', '#764ba2');
-                root.style.setProperty('--text-light', 'white');
-                root.style.setProperty('--shadow-color', 'rgba(102, 126, 234, 0.4)');
-            }
-            
             setTimeout(() => {
                 document.body.classList.remove('preload');
             }, 100);
         })();
     </script>
-    <script src="js/create.js"></script>
+    <script src="js/submit.js"></script>
 </body>
 </html>

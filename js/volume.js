@@ -1,5 +1,3 @@
-// volume.js - Persistent volume control across all pages
-
 // Initialize volume slider on page load AND on back/forward navigation
 function initVolumeControl() {
     const volumeSlider = document.getElementById('volumeSlider');

@@ -353,13 +353,15 @@ body.mode-animating[data-new-mode="sudden-death"]::before {
 .container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 1rem;
     position: relative;
     z-index: 2;
     width: 100%;
 }
 
 /* Header */
+header {
+	margin: 5rem 0 2rem;
+}
 .controls-wrapper {
     text-align: center;
     margin-bottom: 1rem;
@@ -374,7 +376,7 @@ header h1 {
 header h1 {
 	--test1: gold;
 	--test2: cyan;
-    font-size: 3.5rem;
+    font-size: 4rem;
     margin-bottom: 0.5rem;
     text-shadow: 2px 2px 0px rgba(0,0,0,0.15);
     letter-spacing: 2px;
@@ -504,7 +506,7 @@ header h1 a, .btn-secondary a {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     max-width: 800px;
-    margin: 0 auto;
+    margin: 0 auto 5rem;
 }
 
 .form-group {
@@ -667,6 +669,7 @@ header h1 a, .btn-secondary a {
     border-radius: 8px;
     overflow: hidden;
     margin: 0 3rem;
+	user-select: none;
 }
 
 /* Progress Bar */
@@ -694,7 +697,7 @@ header h1 a, .btn-secondary a {
 
 .progress-bar {
     height: 100%;
-    background: var(--primary-color);
+    background: #667eea;
     transition: width 0.05s linear;
     width: 0%;
 }
@@ -713,8 +716,8 @@ header h1 a, .btn-secondary a {
 
 .btn-repeat {
 	display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    align-items: center;
+    justify-content: flex-end;
     position: absolute;
     right: 0px;
 	height:100%;
@@ -748,7 +751,7 @@ header h1 a, .btn-secondary a {
     color: white;
     font-weight: bold;
     text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-    padding: 3rem 1.5rem;
+    padding: 1rem 1.5rem;
     background: transparent;
     backdrop-filter: none;
 }
@@ -925,7 +928,7 @@ header h1 a, .btn-secondary a {
 /* Collections List */
 .collections-list {
     background: transparent;
-    padding: 2rem;
+    padding: 1rem;
     border-radius: 15px;
     box-shadow: none;
     max-width: 1200px;
@@ -1040,6 +1043,7 @@ header h1 a, .btn-secondary a {
 #collectionsList:empty ~ #loadMoreBtn {
   display: none !important;
 }
+
 
 /* Responsive */
 @media (max-width: 1400px) {

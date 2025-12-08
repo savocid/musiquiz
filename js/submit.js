@@ -1,5 +1,3 @@
-// create.js - Handles quiz collection submission form
-
 // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5GNzvlZpHUbZp84SnEk-koOaXlmNAxy2pw-BwxZEIqNj9eIhyrCUxmeFFwXrdiMPkFA/exec';
 

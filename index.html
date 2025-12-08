@@ -29,7 +29,7 @@
             <h2>Collections</h2>
 
             <div id="collectionsList"></div>
-            <button id="loadMoreBtn" class="btn btn-primary" onclick="loadMore()" style="display: none; margin: 1.5rem auto 0;">Load More</button>
+            <button id="loadMoreBtn" class="btn btn-primary" onclick="loadMore()" style="display: none; margin: 1.5rem auto;">Load More</button>
         </div>
     </div>
 
@@ -39,9 +39,16 @@
         <a href="submit">submit</a>
     </footer>
 
-    <script src="js/settingsPanel.js"></script>
-    <script src="js/panels.js"></script>
+    <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>
+    <script>
+        // Apply mode theme on page load
+        (function() {
+            setTimeout(() => {
+                document.body.classList.remove('preload');
+            }, 100);
+        })();
+    </script>
     <script src="js/app.js"></script>
 </body>
 </html>
