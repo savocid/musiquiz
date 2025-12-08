@@ -1,6 +1,19 @@
-// Helper function to get the primary title
-function getTitle(song) {
-    return song.titles ? song.titles[0] : song.title;
+// Helper function to get audio duration
+function getAudioDuration(audioUrl) {
+    return new Promise((resolve, reject) => {
+        const audio = new Audio();
+        
+        audio.addEventListener('loadedmetadata', () => {
+            resolve(audio.duration);
+        });
+        
+        audio.addEventListener('error', (error) => {
+            reject(error);
+        });
+        
+        audio.src = audioUrl;
+        audio.load();
+    });
 }
 
 // Helper function to normalize strings for comparison
@@ -238,7 +251,7 @@ function showCollectionError() {
     document.getElementById('errorMessage').style.display = 'block';
 }
 
-function initializeGame() {
+async function initializeGame() {
     // Get number of rounds (use collection.rounds or all songs)
     const numRounds = gameState.collection.rounds || gameState.collection.songs.length;
     
@@ -256,10 +269,10 @@ function initializeGame() {
     });
     
     // Start first round
-    startRound();
+    await startRound();
 }
 
-function startRound() {
+async function startRound() {
     if (gameState.currentSongIndex >= gameState.shuffledSongs.length) {
         // All rounds complete - check if game over or win
         endGame(true);  // true = completed all rounds
@@ -277,6 +290,23 @@ function startRound() {
     gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };  // Reset hint state
     gameState.yearRevealed = false;  // Reset year reveal
     gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };  // Reset per-round usage
+    
+    // Generate random startTime if not specified
+    if (gameState.currentSong.startTime === null) {
+        try {
+            const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
+                gameState.currentSong.audioFile : 
+                gameState.baseUrl + '/' + gameState.currentSong.audioFile;
+            const duration = await getAudioDuration(audioUrl);console.log(duration);
+            
+            // Generate random start time: startTime + clipDuration + 5s <= duration
+            const maxStartTime = Math.max(0, duration - gameState.clipDuration - 5);
+            gameState.currentSong.startTime = Math.random() * maxStartTime;
+        } catch (error) {
+            console.error('Failed to get audio duration, using 0:', error);
+            gameState.currentSong.startTime = 0;
+        }
+    }
     
     // Update total sources/songs counters
     gameState.totalSourcesSoFar += gameState.currentSong.sources.filter(s => s[0]).length;
@@ -332,9 +362,9 @@ function playSong(restartCountdown = false) {
     const roundId = Date.now() + Math.random(); // Unique ID for this playback
     gameState.currentRoundId = roundId;
     
-    // Parse startTime (support both formats)
+    // Parse startTime (support both formats and null for random)
     let startTime = 0;
-    if (song.startTime) {
+    if (song.startTime !== null) {
         if (typeof song.startTime === 'string' && song.startTime.includes(':')) {
             // Format: "1:30" or "0:45"
             const parts = song.startTime.split(':');
@@ -462,7 +492,7 @@ function setupProgressBarInteraction() {
             
             // Parse startTime
             let startTime = 0;
-            if (song.startTime) {
+            if (song.startTime !== null) {
                 if (typeof song.startTime === 'string' && song.startTime.includes(':')) {
                     const parts = song.startTime.split(':');
                     startTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
@@ -929,7 +959,7 @@ function giveUp() {
     endGame(false);
 }
 
-function useSkipLifeline() {
+async function useSkipLifeline() {
     const isInfinite = gameState.lifelines.skip.total === 999;
     const canUse = isInfinite ? !gameState.lifelineUsedThisRound.skip : gameState.lifelines.skip.remaining > 0;
     
@@ -952,7 +982,7 @@ function useSkipLifeline() {
     
     // Go directly to next round
     gameState.currentSongIndex++;
-    startRound();
+    await startRound();
 }
 
 function repeatSong() {
@@ -974,7 +1004,7 @@ function repeatSong() {
     playSong(false);
 }
 
-function nextRound() {
+async function nextRound() {
     // Stop audio and all timers
     if (gameState.audio) {
         gameState.audio.pause();
@@ -986,7 +1016,7 @@ function nextRound() {
     stopProgressBar();
     
     gameState.currentSongIndex++;
-    startRound();
+    await startRound();
     
     // Re-enable lifeline buttons for new round (they'll be updated based on availability)
     updateLifelineButtons();
