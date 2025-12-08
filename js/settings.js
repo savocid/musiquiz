@@ -74,6 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const currentMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
             
+			console.log(newMode)
+			console.log(currentMode)
+
             if (newMode !== currentMode) {
                 if (isGamePage) {
                     // Game page: confirm and reload with mode param
@@ -116,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.remove('active');
         }
     });
+	console.log(localStorage.getItem('selectedMode'))
+	console.log(savedMode)
 });
 
 // Global function for mode theme application (used by app.js)

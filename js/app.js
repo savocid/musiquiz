@@ -152,6 +152,8 @@ function loadMore() {
 }
 
 function startGame(collectionId) {
+	let selectedMode = localStorage.getItem('selectedMode') || 'default'; 
+
     // Navigate to game with URL parameters
     const params = new URLSearchParams();
     params.set('collection', collectionId);

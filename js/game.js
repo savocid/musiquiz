@@ -18,16 +18,16 @@ function getAudioDuration(audioUrl) {
 
 // Helper function to normalize strings for comparison
 function normalize(str) {
-    return str.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    return str.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
 }
 
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
     if (song.titles && song.titles.length > 1) {
-        return song.titles.slice(1).some(t => normalize(t) === normalizedInput);
+        return song.titles.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)));
     } else if (song.title) {
         const normalizedTitle = normalize(song.title);
-        return normalizedInput === normalizedTitle;
+        return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
     }
     return false;
 }
@@ -721,7 +721,6 @@ function checkGuess() {
                         gameState.sourceRevealed.push(index);
                         sourceCorrect = true;
                         newCorrectGuess = true;
-                        break;
                     }
                 }
             }
@@ -737,7 +736,6 @@ function checkGuess() {
                         gameState.sourceRevealed.push(index);
                         sourceCorrect = true;
                         newCorrectGuess = true;
-                        break;
                     }
                 }
             }
@@ -752,10 +750,14 @@ function checkGuess() {
         }
     }
     
+    console.log('Guess:', normalizedInput, 'sourceCorrect:', sourceCorrect, 'songCorrect:', songCorrect);
+    
     // Update display
     updateAnswerDisplay();
     
     // Award points and check completion
+    const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
+    const allRequiredSourcesRevealed = song.sources.every((source, index) => !source[0] || gameState.sourceRevealed.includes(index));
     let requiredGuessed = false;
     let allGuessed = false;
     if (gameStyle === 3) {
@@ -773,7 +775,7 @@ function checkGuess() {
             const sourceRevealedAfter = gameState.sourceRevealed.length;
             gameState.sourceGuessed += (sourceRevealedAfter - sourceRevealedBefore);
             const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
-            requiredGuessed = allSourcesRevealed;
+            requiredGuessed = allRequiredSourcesRevealed;
             allGuessed = allSourcesRevealed;
         }
     } else {
@@ -788,7 +790,7 @@ function checkGuess() {
             gameState.songsGuessed++;
         }
         const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
-        requiredGuessed = allSourcesRevealed && (song.titles[0] ? gameState.songRevealed : true);
+        requiredGuessed = allRequiredSourcesRevealed && (song.titles[0] ? gameState.songRevealed : true);
         allGuessed = allSourcesRevealed && gameState.songRevealed;
     }
     // Only stop countdown timer if all guessed (but keep clip timer running)
@@ -799,19 +801,7 @@ function checkGuess() {
         document.getElementById('guessInput').style.display = 'none';
     }
     
-    // Update UI first so lives count is correct
-    updateUI();
-    
-    // Check game over BEFORE showing result
-    if (gameState.lives <= 0) {
-        // Hide action buttons immediately
-        document.getElementById('actionButtons').style.display = 'none';
-        document.getElementById('guessInput').disabled = true;
-        document.getElementById('guessInput').value = '';
-        // Go directly to game over immediately
-        endGame(false);
-        return; // Exit early, don't show result or check for fully guessed
-    }
+
     
     // Show result (only if not game over)
     if (sourceCorrect || songCorrect) {
@@ -827,7 +817,24 @@ function checkGuess() {
             // Remove the class after animation ends
             setTimeout(() => answerDisplay.classList.remove('shake'), 400);
         }
+		if (gameState.lives !== 999) {
+			gameState.lives--;
+		}
         showResult();
+    }
+
+    // Update UI first so lives count is correct
+    updateUI();
+    
+    // Check game over BEFORE showing result
+    if (gameState.lives <= 0) {
+        // Hide action buttons immediately
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('guessInput').disabled = true;
+        document.getElementById('guessInput').value = '';
+        // Go directly to game over immediately
+        endGame(false);
+        return; // Exit early, don't show result or check for fully guessed
     }
     
     // Clear input for next guess
@@ -884,7 +891,7 @@ function updateAnswerDisplay() {
         let songDisplay = '';
         if (gameState.songRevealed) {
             const isRequired = song.titles[0];
-            const titleText = song.titles.slice(1).join(' / ');
+            const titleText = song.titles[1];
             songDisplay = `<span class="revealed${isRequired ? '' : ' optional'}">${titleText}</span>`;
         } else {
             // Check if hints are active for song
@@ -958,7 +965,7 @@ function updateAnswerDisplay() {
         let songDisplay = '';
         if (gameState.songRevealed) {
             const isRequired = song.titles[0];
-            const titleText = song.titles.slice(1).join(' / ');
+            const titleText = song.titles[1];
             songDisplay = `<span class="revealed${isRequired ? '' : ' optional'}">${titleText}</span>`;
         } else {
             // Check if hints are active for song
@@ -1280,8 +1287,7 @@ function updateUI() {
         const hearts = livesElement.querySelectorAll('.heart');
         hearts.forEach((heart, index) => {
             if (index < gameState.lives) {
-                heart.style.visibility = 'visible';
-                heart.style.opacity = '1';
+				heart.style.visibility = 'visible';
             } else if (index === gameState.lives) {
                 // This is the heart that just got lost - animate it
                 heart.style.visibility = 'visible'; // Keep visible during animation
@@ -1291,7 +1297,6 @@ function updateUI() {
             } else {
                 // Hearts already lost
                 heart.style.visibility = 'hidden';
-                heart.style.opacity = '0';
                 heart.classList.remove('heartbeat');
             }
         });
