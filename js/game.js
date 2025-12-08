@@ -211,7 +211,9 @@ async function loadGameData() {
         // Populate start screen
         document.getElementById('collectionTitle').textContent = gameState.collection.title;
         document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
-        document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty || 'Medium';
+        const difficulty = gameState.collection.difficulty || 'Medium';
+        document.getElementById('collectionDifficulty').textContent = difficulty;
+        document.getElementById('collectionDifficulty').className = `difficulty-${difficulty.toLowerCase().replace(' ', '-')}`;
         document.getElementById('gameRounds').textContent = gameState.collection.rounds || gameState.collection.songs.length;
         
         // Add start button listener
@@ -219,6 +221,7 @@ async function loadGameData() {
             // Hide start screen, show game
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameContent').style.display = 'block';
+            document.getElementById('gameCollectionTitle').textContent = gameState.collection.title;
             initializeGame();
         });
     } catch (error) {
@@ -1024,7 +1027,9 @@ function endGame(completed) {
     // Update collection info
     document.getElementById('resultCollection').textContent = gameState.collection.title;
     document.getElementById('resultDescription').textContent = gameState.collection.description || '';
-    document.getElementById('resultDifficulty').textContent = gameState.collection.difficulty || 'Medium';
+    const resultDifficulty = gameState.collection.difficulty || 'Medium';
+    document.getElementById('resultDifficulty').textContent = resultDifficulty;
+    document.getElementById('resultDifficulty').className = `difficulty-${resultDifficulty.toLowerCase().replace(' ', '-')}`;
     document.getElementById('resultRounds').textContent = gameState.shuffledSongs.length;
     
     // Update mode info (just the name, not "Mode")

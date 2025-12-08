@@ -374,11 +374,11 @@ header h1 {
 header h1 {
     font-size: 3.5rem;
     margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.15);
     letter-spacing: 2px;
     font-weight: 900;
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(90deg, #ffb366 0%, #ffb366 50%,#60a5fa 50%, #60a5fa 100%);
+    background: linear-gradient(90deg, #ffa500 0%, #ffa500 50%,#1e90ff 50%, #1e90ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -558,6 +558,7 @@ header h1 a, .btn-secondary a {
     transition: all 0.3s;
     text-decoration: none;
     display: inline-block;
+	border: 2px solid rgba(0,0,0,0.1);
 }
 
 .btn-primary {

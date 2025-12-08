@@ -27,8 +27,8 @@
             
             <div style="margin: 1rem auto; display: inline-block; text-align: left;">
                 <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><span id="collectionDifficulty"></span>
-                    <strong>Rounds:</strong><span id="gameRounds"></span>
+                    <strong>Difficulty:</strong><b id="collectionDifficulty"></b>
+                    <strong>Rounds:</strong><b id="gameRounds"></b>
                 </div>
             </div>
             <button id="startGameBtn" class="btn btn-success" style="font-size: 1.5rem; padding: 1.5rem 3rem; margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;">🎵 Start Game</button>
@@ -42,6 +42,7 @@
         
         <!-- Game Content (hidden initially) -->
         <div id="gameContent" class="game-container" style="display: none;">
+            <h2 id="gameCollectionTitle" style="color: var(--primary-color); text-align: center; margin-top: 2rem;"></h2>
             <!-- Game Info Header -->
             <div class="game-info">
                 <div>
@@ -123,8 +124,8 @@
             
             <div style="margin: 0.5rem auto 1rem; display: inline-block; text-align: left;">
                 <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><span id="resultDifficulty">Medium</span>
-                    <strong>Rounds:</strong><span id="resultRounds">3</span>
+                    <strong>Difficulty:</strong><b id="resultDifficulty">Medium</b>
+                    <strong>Rounds:</strong><b id="resultRounds">3</b>
                 </div>
             </div>
             
