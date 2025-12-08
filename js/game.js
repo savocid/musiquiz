@@ -5,7 +5,7 @@ function getTitle(song) {
 
 // Helper function to normalize strings for comparison
 function normalize(str) {
-    return str.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    return str.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 }
 
 // Helper function to check if guess matches any title
