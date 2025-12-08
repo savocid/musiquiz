@@ -237,7 +237,9 @@ async function loadGameData() {
         const startScreenCover = document.getElementById('startScreenCover');
         if (gameState.collection.covers && gameState.collection.covers.length > 0) {
             const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
-            startScreenCover.src = randomCover;
+            // Resolve cover path relative to collections base URL
+            const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/' + randomCover.replace('./', '');
+            startScreenCover.src = coverUrl;
             startScreenCover.alt = `${gameState.collection.title} cover`;
             startScreenCover.style.display = 'block';
         } else {
@@ -1105,7 +1107,9 @@ function endGame(completed) {
     const resultScreenCover = document.getElementById('resultScreenCover');
     if (gameState.collection.covers && gameState.collection.covers.length > 0) {
         const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
-        resultScreenCover.src = randomCover;
+        // Resolve cover path relative to collections base URL
+        const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/' + randomCover.replace('./', '');
+        resultScreenCover.src = coverUrl;
         resultScreenCover.alt = `${gameState.collection.title} cover`;
         resultScreenCover.style.display = 'block';
     } else {

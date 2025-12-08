@@ -119,7 +119,9 @@ function displayCollections() {
         let coverImage = '';
         if (collection.covers && collection.covers.length > 0) {
             const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
-            coverImage = `<img src="${randomCover}" alt="${collection.title} cover" class="collection-cover" loading="lazy">`;
+            // Resolve cover path relative to collections base URL
+            const coverUrl = randomCover.startsWith('http') ? randomCover : 'https://' + collectionsUrl + '/' + randomCover.replace('./', '');
+            coverImage = `<img src="${coverUrl}" alt="${collection.title} cover" class="collection-cover" loading="lazy">`;
         }
         
         return `

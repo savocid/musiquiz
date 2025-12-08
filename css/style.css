@@ -964,7 +964,7 @@ header h1 a, .btn-secondary a {
 }
 
 .collection-cover {
-    width: 80px;
+    max-width: 200px;
     height: 80px;
     object-fit: cover;
     border-radius: 6px;
