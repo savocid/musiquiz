@@ -129,7 +129,7 @@ async function loadGameData() {
         document.getElementById('guessInput').placeholder = placeholder;
         
         // Set hint title based on game style
-        let hintTitle = "Reveals random letters in the ";
+        let hintTitle = "Reveals some letters in the ";
         if (gameStyle === 1) {
             hintTitle += `${gameState.collection.sourceName ? gameState.collection.sourceName.toLowerCase() : "source"} and song names`;
         } else if (gameStyle === 2) {
@@ -379,7 +379,7 @@ function playSong(restartCountdown = false) {
             
             // Always show replay button after clip ends (unless game is over)
             if (gameState.lives > 0) {
-                document.getElementById('repeatBtn').style.display = 'inline-block';
+                document.getElementById('repeatBtn').style.display = 'flex';
                 document.getElementById('progressTimer').style.display = 'none';
             }
         }
@@ -392,7 +392,7 @@ function playSong(restartCountdown = false) {
             stopProgressBar();
             // Show replay button when audio naturally ends (unless game is over)
             if (gameState.lives > 0) {
-                document.getElementById('repeatBtn').style.display = 'inline-block';
+                document.getElementById('repeatBtn').style.display = 'flex';
                 document.getElementById('progressTimer').style.display = 'none';
             }
         }
@@ -518,7 +518,7 @@ function setupProgressBarInteraction() {
                     
                     // Always show replay button after clip ends (unless game is over)
                     if (gameState.lives > 0) {
-                        document.getElementById('repeatBtn').style.display = 'inline-block';
+                        document.getElementById('repeatBtn').style.display = 'flex';
                         document.getElementById('progressTimer').style.display = 'none';
                     }
                 }
