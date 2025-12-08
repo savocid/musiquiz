@@ -92,11 +92,17 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
             return a.title.localeCompare(b.title, undefined, { numeric: true });
         });
 
-        displayCollections();
+		const container = document.getElementById('collectionsList');
+		if (allCollections.length === 0) {
+			container.innerHTML = '<p style="text-align: center; padding: 2rem;">No collections available yet.</p>';
+			return;
+		}
+
         // Save only if successful and cleanedUrl provided
         if (cleanedUrl) {
             localStorage.setItem('collectionsUrl', cleanedUrl);
         }
+        displayCollections();
     } catch (error) {
         console.error('Error loading collections:', error);
         document.getElementById('collectionsList').innerHTML = `<p style=\"color: #fff; text-align: center; padding: 2rem;\">Error loading collections. Please check the URL.</p>`;
@@ -105,16 +111,14 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
 }
 
 function displayCollections() {
-    const container = document.getElementById('collectionsList');
-    if (allCollections.length === 0) {
-        container.innerHTML = '<p style="text-align: center; padding: 2rem;">No collections available yet.</p>';
-        return;
-    }
-    
+	const container = document.getElementById('collectionsList');
+
     // Get the collections to display (up to displayedCount)
     const collectionsToShow = allCollections.slice(0, displayedCount);
     
     container.innerHTML = collectionsToShow.map(collection => {
+		let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
+
         // Get random cover image if available
         let coverImage = '';
         if (collection.covers && collection.covers.length > 0) {
@@ -158,6 +162,7 @@ function startGame(collectionId) {
     const params = new URLSearchParams();
     params.set('collection', collectionId);
     params.set('mode', selectedMode);
+	params.set('data', collectionsUrl);
     
     // Check if running locally (file:// or localhost)
     const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';

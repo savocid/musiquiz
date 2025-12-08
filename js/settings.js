@@ -73,9 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const newMode = this.dataset.mode;
             const params = new URLSearchParams(window.location.search);
             const currentMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
-            
-			console.log(newMode)
-			console.log(currentMode)
 
             if (newMode !== currentMode) {
                 if (isGamePage) {
@@ -119,11 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.remove('active');
         }
     });
-	console.log(localStorage.getItem('selectedMode'))
-	console.log(savedMode)
 });
 
-// Global function for mode theme application (used by app.js)
+// Global function for mode theme application
 window.applyModeTheme = function(mode, animate = false, callback) {
     updateCSSVariables(mode)
     

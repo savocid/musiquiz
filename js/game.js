@@ -17,16 +17,16 @@ function getAudioDuration(audioUrl) {
 }
 
 // Helper function to normalize strings for comparison
-function normalize(str) {
-    return str.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+function normalize_str(str) {
+    return str.toLowerCase().trim().replace(/^the\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
 }
 
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
     if (song.titles && song.titles.length > 1) {
-        return song.titles.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)));
+        return song.titles.slice(1).some(t => normalize_str(t) === normalizedInput || normalizedInput.includes(normalize_str(t)));
     } else if (song.title) {
-        const normalizedTitle = normalize(song.title);
+        const normalizedTitle = normalize_str(song.title);
         return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
     }
     return false;
@@ -41,8 +41,6 @@ function getTitle(song) {
     }
     return '';
 }
-
-let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 
 let gameState = {
     collection: null,
@@ -101,12 +99,15 @@ async function loadGameData() {
         'intense': { lives: 3, clipDuration: 10, timeout: 20 },
         'sudden-death': { lives: 1, clipDuration: 5, timeout: 10 }
     };
+
     
     // Get URL parameters
     const params = new URLSearchParams(window.location.search);
     const collectionId = params.get('collection');
     const mode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
-    
+	let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || '';
+
+
     if (!collectionId) {
         console.error('No collection ID in URL');
         showCollectionError();
@@ -691,7 +692,7 @@ function checkGuess() {
     const userInput = document.getElementById('guessInput').value.trim();
     if (!userInput) return;
     
-    const normalizedInput = normalize(userInput);
+    const normalizedInput = normalize_str(userInput);
     
     const song = gameState.currentSong;
     let sourceCorrect = false;
@@ -716,7 +717,7 @@ function checkGuess() {
             if (source[0] && !gameState.sourceRevealed.includes(index)) {
                 for (let i = 1; i < source.length; i++) {
                     const spelling = source[i];
-                    const normalizedSpelling = normalize(spelling);
+                    const normalizedSpelling = normalize_str(spelling);
                     if (normalizedInput === normalizedSpelling || normalizedInput.includes(normalizedSpelling)) {
                         gameState.sourceRevealed.push(index);
                         sourceCorrect = true;
@@ -731,7 +732,7 @@ function checkGuess() {
             if (!gameState.sourceRevealed.includes(index)) {
                 for (let i = 1; i < source.length; i++) {
                     const spelling = source[i];
-                    const normalizedSpelling = normalize(spelling);
+                    const normalizedSpelling = normalize_str(spelling);
                     if (normalizedInput === normalizedSpelling || normalizedInput.includes(normalizedSpelling)) {
                         gameState.sourceRevealed.push(index);
                         sourceCorrect = true;
@@ -749,8 +750,6 @@ function checkGuess() {
             }
         }
     }
-    
-    console.log('Guess:', normalizedInput, 'sourceCorrect:', sourceCorrect, 'songCorrect:', songCorrect);
     
     // Update display
     updateAnswerDisplay();
