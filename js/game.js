@@ -140,6 +140,8 @@ async function loadGameData() {
         const gameStyle = gameState.collection.gameStyle || 1;
         document.getElementById('sourceLabel').textContent = gameState.collection.sourceName+"s" || "Sources";
         document.getElementById('sourcesLabel').textContent = (gameState.collection.sourceName || "Source") + "s";
+
+		document.getElementById('sourcePart').innerHTML = `<span>${gameState.collection.sourceName || "Source"}</span>`;
         
         // Set placeholder based on game style
         let placeholder = "Type ";
@@ -350,7 +352,6 @@ async function startRound() {
             console.error('Failed to get audio duration, using 0:', error);
             gameState.currentSong.startTime = 0;
         }
-		console.log(gameState.currentSong.startTime)
     }
     
     // Update total sources/songs counters
