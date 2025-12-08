@@ -377,15 +377,15 @@ header h1 {
 }
 
 header h1 {
-	--test1: gold;
-	--test2: cyan;
+	--color1: gold;
+	--color2: cyan;
     font-size: 4rem;
     margin-bottom: 0.5rem;
     text-shadow: 2px 2px 0px rgba(0,0,0,0.15);
     letter-spacing: 2px;
     font-weight: 900;
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(90deg, var(--test1) 0%, var(--test1) 50%,var(--test2) 50%, var(--test2) 100%);
+    background: linear-gradient(90deg, var(--color1) 0%, var(--color1) 50%,var(--color2) 50%, var(--color2) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
