@@ -625,6 +625,16 @@ header h1 a, .btn-secondary a {
     width: fit-content;
     margin: 0 auto;
 }
+#resultScreen *:has(> * > #resultDifficulty),
+#startScreen *:has(> * > #collectionDifficulty),
+#resultScreen *:has(> #resultScreenCover):has(img:not([src=''])),
+#startScreen *:has(> #startScreenCover):has(img:not([src=''])) {
+	width: 50%;
+}
+
+#resultScreen:has(#resultScreenCover[src='']) *:has(> * > #resultDifficulty) {
+	width: 100%;
+}
 
 #gameContent {
     padding: 0;
@@ -965,7 +975,7 @@ header h1 a, .btn-secondary a {
 
 .collection-cover {
     max-width: 200px;
-    height: 80px;
+    max-height: 100px;
     object-fit: cover;
     border-radius: 6px;
     flex-shrink: 0;

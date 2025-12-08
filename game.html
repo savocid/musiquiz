@@ -23,17 +23,17 @@
         <!-- Start Screen -->
         <div id="startScreen" style="text-align: center;">
             <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem;">Loading...</h2>
-            <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;"></p>
+            <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;"></p>
             
             <!-- Game Setup Layout -->
             <div style="display: flex; gap: 2rem; align-items: center; justify-content: center; margin: 1rem auto 2rem; max-width: 800px;">
                 <!-- Cover Image -->
-                <div style="flex-shrink: 0; width: 50%;">
+                <div style="flex-shrink: 0;">
                     <img id="startScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: none;">
                 </div>
                 
                 <!-- Game Controls -->
-                <div style="flex: 1; text-align: left; width: 50%;">
+                <div  style="flex: 1; text-align: left;">
                     <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem; margin-bottom: 1rem;">
                         <strong>Difficulty:</strong><strong id="collectionDifficulty"></strong>
                         <strong>Rounds:</strong><span id="roundsValue">10</span>
@@ -134,24 +134,24 @@
         <!-- Result Screen -->
         <div id="resultScreen" style="display: none;">
             <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem; text-align:center;">Example Music Quiz</h2>
-            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;">A sample collection to demonstrate the structure</p>
+            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;">A sample collection to demonstrate the structure</p>
 
             <!-- Image and Difficulty/Rounds Layout -->
             <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px;">
                 <!-- Cover Image -->
-                <div style="flex-shrink: 0; width: 50%;">
+                <div style="flex-shrink: 0;">
                     <img id="resultScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: none;">
                 </div>
 
                 <!-- Game Info / Result Details Grid -->
-                <div style="display: inline-block; width: 50%">
+                <div style="display: inline-block;">
 					<strong id="resultStatus" style="display: flex;justify-content: center;margin-bottom: 0.5rem;font-size: 1.5rem;font-weight: bold;color: rgb(245, 101, 101);">Failure</strong>
                     <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
                         <strong>Difficulty:</strong><strong id="resultDifficulty">Medium</strong>
-						<strong>Mode:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
-                        <strong>Rounds:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">3</span></span>
-                        <strong id="sourcesLabel">Sources:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="sourcesGuessed">0</span>/<span id="totalSources">1</span></span>
-                        <strong>Songs:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">1</span></span>
+						<strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
+                        <strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">3</span></span>
+                        <strong id="sourcesLabel">Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span id="sourcesGuessed">0</span>/<span id="totalSources">1</span></span>
+                        <strong>Songs:</strong><span style="color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">1</span></span>
                     </div>
                 </div>
             </div>
