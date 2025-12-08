@@ -25,10 +25,17 @@
             <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem;">Loading...</h2>
             <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;"></p>
             
+            <img id="startScreenCover" src="" alt="" style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1.5rem; display: none;">
+            
             <div style="margin: 1rem auto; display: inline-block; text-align: left;">
                 <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><b id="collectionDifficulty"></b>
-                    <strong>Rounds:</strong><b id="gameRounds"></b>
+                    <strong>Difficulty:</strong><strong id="collectionDifficulty"></strong>
+                    <strong>Rounds:</strong><span id="roundsValue">10</span>
+                </div>
+                
+                <!-- Round Selection Slider -->
+                <div style="margin-top: 1rem; text-align: center;">
+                    <input type="range" id="roundsSlider" min="1" max="50" value="10" step="1" style="width: 100%; max-width: 300px;">
                 </div>
             </div>
             <button id="startGameBtn" class="btn btn-success" style="font-size: 1.5rem; padding: 1.5rem 3rem; margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;">🎵 Start Game</button>
@@ -122,10 +129,12 @@
             <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem;">Example Music Quiz</h2>
             <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 0.5rem;">A sample collection to demonstrate the structure</p>
             
+            <img id="resultScreenCover" src="" alt="" style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; display: none;">
+            
             <div style="margin: 0.5rem auto 1rem; display: inline-block; text-align: left;">
                 <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><b id="resultDifficulty">Medium</b>
-                    <strong>Rounds:</strong><b id="resultRounds">3</b>
+                    <strong>Difficulty:</strong><strong id="resultDifficulty">Medium</strong>
+                    <strong>Rounds:</strong><span id="resultRounds">3</span>
                 </div>
             </div>
             

@@ -114,18 +114,27 @@ function displayCollections() {
     // Get the collections to display (up to displayedCount)
     const collectionsToShow = allCollections.slice(0, displayedCount);
     
-    container.innerHTML = collectionsToShow.map(collection => `
+    container.innerHTML = collectionsToShow.map(collection => {
+        // Get random cover image if available
+        let coverImage = '';
+        if (collection.covers && collection.covers.length > 0) {
+            const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
+            coverImage = `<img src="${randomCover}" alt="${collection.title} cover" class="collection-cover" loading="lazy">`;
+        }
+        
+        return `
         <div class="collection-item">
+            ${coverImage}
             <div class="collection-info">
                 <h3>${collection.title}</h3>
                 <p>${collection.description || 'No description'}</p>
-                <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Rounds:</strong> ${collection.rounds || collection.songs.length}</p>
+                <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length}</p>
             </div>
             <button class="btn btn-success" onclick="startGame('${collection.id}')">
                 ▶ Start Game
             </button>
         </div>
-    `).join('');
+    `}).join('');
 
     // Show/hide load more button
     const loadMoreBtn = document.getElementById('loadMoreBtn');

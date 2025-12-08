@@ -20,18 +20,18 @@ const settingsPanelHTML = `
                 <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
             </button>
             <button class="mode-btn-compact" data-mode="default">
-                <strong>Default</strong>
-                <span><span class="emoji">❤️❤️❤️</span> • 15s Listen • No Timeout</span>
+                <strong>Default<span class="emoji">❤️❤️❤️</span></strong>
+                <span>15s Listen • No Timeout</span>
                 <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
             </button>
             <button class="mode-btn-compact" data-mode="intense">
-                <strong>Intense</strong>
-                <span><span class="emoji">❤️❤️❤️</span> • 10s Listen • 20s Timeout</span>
+                <strong>Intense<span class="emoji">❤️❤️❤️</span></strong>
+                <span>10s Listen • 20s Timeout</span>
                 <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
             </button>
             <button class="mode-btn-compact" data-mode="sudden-death">
-                <strong>Sudden Death</strong>
-                <span><span class="emoji">❤️</span> • 5s Listen • 10s Timeout</span>
+                <strong>Sudden Death<span class="emoji">❤️</span></strong>
+                <span>5s Listen • 10s Timeout</span>
                 <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
             </button>
         </div>

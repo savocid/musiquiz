@@ -232,7 +232,38 @@ async function loadGameData() {
         const difficulty = gameState.collection.difficulty || 'Medium';
         document.getElementById('collectionDifficulty').textContent = difficulty;
         document.getElementById('collectionDifficulty').className = `difficulty-${difficulty.toLowerCase().replace(' ', '-')}`;
-        document.getElementById('gameRounds').textContent = gameState.collection.rounds || gameState.collection.songs.length;
+        
+        // Show random cover image if available
+        const startScreenCover = document.getElementById('startScreenCover');
+        if (gameState.collection.covers && gameState.collection.covers.length > 0) {
+            const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
+            startScreenCover.src = randomCover;
+            startScreenCover.alt = `${gameState.collection.title} cover`;
+            startScreenCover.style.display = 'block';
+        } else {
+            startScreenCover.style.display = 'none';
+        }
+        
+        // Set up rounds slider
+        const roundsSlider = document.getElementById('roundsSlider');
+        const roundsValue = document.getElementById('roundsValue');
+        const totalSongs = gameState.collection.songs.length;
+        
+        // Calculate number of digits for padding
+        const maxDigits = totalSongs.toString().length;
+        
+        // Function to pad number with leading zeros
+        const padNumber = (num) => num.toString().padStart(maxDigits, '0');
+        
+        // Set slider max to total songs, default to 10 or 50% of max (whichever is smaller)
+        roundsSlider.max = totalSongs;
+        roundsSlider.value = totalSongs >= 10 ? 10 : Math.ceil(totalSongs * 0.5);
+        roundsValue.textContent = padNumber(roundsSlider.value);
+        
+        // Update display when slider changes
+        roundsSlider.addEventListener('input', () => {
+            roundsValue.textContent = padNumber(roundsSlider.value);
+        });
         
         // Add start button listener
         document.getElementById('startGameBtn').addEventListener('click', () => {
@@ -251,14 +282,14 @@ async function loadGameData() {
 function showCollectionError() {
     document.getElementById('collectionTitle').style.display = 'none';
     document.getElementById('collectionDescription').style.display = 'none';
-    document.querySelector('#startScreen > div').style.display = 'none'; // Hide the difficulty/rounds grid
+    document.querySelector('#startScreen > div').style.display = 'none'; // Hide the difficulty and rounds selection
     document.getElementById('startGameBtn').style.display = 'none';
     document.getElementById('errorMessage').style.display = 'block';
 }
 
 async function initializeGame() {
-    // Get number of rounds (use collection.rounds or all songs)
-    const numRounds = gameState.collection.rounds || gameState.collection.songs.length;
+    // Get number of rounds from slider
+    const numRounds = parseInt(document.getElementById('roundsSlider').value);
     
     // Shuffle and select songs
     const shuffled = [...gameState.collection.songs].sort(() => Math.random() - 0.5);
@@ -1069,6 +1100,17 @@ function endGame(completed) {
     document.getElementById('resultDifficulty').textContent = resultDifficulty;
     document.getElementById('resultDifficulty').className = `difficulty-${resultDifficulty.toLowerCase().replace(' ', '-')}`;
     document.getElementById('resultRounds').textContent = gameState.shuffledSongs.length;
+    
+    // Show random cover image if available
+    const resultScreenCover = document.getElementById('resultScreenCover');
+    if (gameState.collection.covers && gameState.collection.covers.length > 0) {
+        const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
+        resultScreenCover.src = randomCover;
+        resultScreenCover.alt = `${gameState.collection.title} cover`;
+        resultScreenCover.style.display = 'block';
+    } else {
+        resultScreenCover.style.display = 'none';
+    }
     
     // Update mode info (just the name, not "Mode")
     let modeName = '';
