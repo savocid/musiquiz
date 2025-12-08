@@ -561,14 +561,14 @@ header h1 a, .btn-secondary a {
 }
 
 .btn-primary {
-    background: var(--primary-color);
+    background: #007bff;
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--primary-dark);
+    background: #0056b3;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--shadow-color);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
 }
 
 .btn-secondary {
@@ -800,6 +800,10 @@ header h1 a, .btn-secondary a {
     color: #4ade80;
     font-weight: bold;
     text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+.answer-display .optional {
+    opacity: 0.5;
 }
 
 

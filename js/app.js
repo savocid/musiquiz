@@ -263,7 +263,7 @@ function displayCollections() {
                 <p>${collection.description || 'No description'}</p>
                 <p><strong>Difficulty:</strong> ${collection.difficulty} | <strong>Songs:</strong> ${collection.songs.length} | <strong>Rounds:</strong> ${collection.rounds || collection.songs.length}</p>
             </div>
-            <button class="btn btn-primary" onclick="startGame('${collection.id}')">
+            <button class="btn btn-success" onclick="startGame('${collection.id}')">
                 ▶ Start Game
             </button>
         </div>

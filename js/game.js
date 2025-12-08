@@ -271,7 +271,7 @@ function startRound() {
     gameState.sourceRevealed = [];
     gameState.songRevealed = false;
     gameState.canGuess = true;
-    gameState.hintLettersRevealed = { source: [], song: [] };  // Reset hint state
+    gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };  // Reset hint state
     gameState.yearRevealed = false;  // Reset year reveal
     gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };  // Reset per-round usage
     
@@ -282,6 +282,7 @@ function startRound() {
     // Clear input
     document.getElementById('guessInput').value = '';
     document.getElementById('guessInput').disabled = false;
+    document.getElementById('guessInput').style.display = '';
     
     // Auto-focus input so player can start typing immediately
     setTimeout(() => {
@@ -599,7 +600,7 @@ function handleTimeout() {
         endGame(false);
     } else {
         // Show result and next button if still alive (without revealing answer)
-        showResult('Time\'s up!', "incorrect");
+        showResult();
     }
 }
 
@@ -645,9 +646,9 @@ function checkGuess() {
             }
         });
     } else { // gameStyle 1
-        // Check each source - if required and not revealed
+        // Check each source - if not revealed
         song.sources.forEach((source, index) => {
-            if (source[0] && !gameState.sourceRevealed.includes(index)) {
+            if (!gameState.sourceRevealed.includes(index)) {
                 for (let i = 1; i < source.length; i++) {
                     const spelling = source[i];
                     const normalizedSpelling = normalize(spelling);
@@ -688,7 +689,7 @@ function checkGuess() {
             gameState.score += 50;
             const sourceRevealedAfter = gameState.sourceRevealed.length;
             gameState.sourceGuessed += (sourceRevealedAfter - sourceRevealedBefore);
-            const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.filter(s => s[0]).length;
+            const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
             fullyGuessed = allSourcesRevealed;
         }
     } else {
@@ -702,51 +703,15 @@ function checkGuess() {
             gameState.score += 100;
             gameState.songsGuessed++;
         }
-        const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.filter(s => s[0]).length;
+        const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
         fullyGuessed = allSourcesRevealed && gameState.songRevealed;
     }
     // Only stop countdown timer if fully guessed (but keep clip timer running)
     if (fullyGuessed) {
         clearInterval(gameState.guessTimer);
         gameState.canGuess = false;
-    }
-    
-    // Build result message
-    let resultMsg = '';
-    if (gameStyle === 3) {
-        // Song only
-        if (songCorrect) {
-            resultMsg = '✓ Song Correct!';
-        } else {
-            resultMsg = '✗ Incorrect';
-            if (!newCorrectGuess && gameState.lives !== 999) {
-                gameState.lives--;
-            }
-        }
-    } else if (gameStyle === 2) {
-        // Source only
-        if (sourceCorrect) {
-            resultMsg = '✓ Source Correct!';
-        } else {
-            resultMsg = '✗ Incorrect';
-            if (!newCorrectGuess && gameState.lives !== 999) {
-                gameState.lives--;
-            }
-        }
-    } else {
-        // Both
-        if (sourceCorrect && songCorrect) {
-            resultMsg = '✓ Source and Song Correct!';
-        } else if (sourceCorrect) {
-            resultMsg = '✓ Source Correct!';
-        } else if (songCorrect) {
-            resultMsg = '✓ Song Correct!';
-        } else {
-            resultMsg = '✗ Incorrect';
-            if (!newCorrectGuess && gameState.lives !== 999) {
-                gameState.lives--;
-            }
-        }
+        document.getElementById('guessInput').disabled = true;
+        document.getElementById('guessInput').style.display = 'none';
     }
     
     // Update UI first so lives count is correct
@@ -765,7 +730,7 @@ function checkGuess() {
     
     // Show result (only if not game over)
     if (sourceCorrect || songCorrect) {
-        showResult(resultMsg, 'correct');
+        showResult();
     } else {
         // Add shake animation to answer display
         const answerDisplay = document.querySelector('.answer-display');
@@ -777,7 +742,7 @@ function checkGuess() {
             // Remove the class after animation ends
             setTimeout(() => answerDisplay.classList.remove('shake'), 400);
         }
-        showResult(resultMsg, 'incorrect');
+        showResult();
     }
     
     // Clear input for next guess
@@ -823,6 +788,9 @@ function updateAnswerDisplay() {
     // Get game style
     const gameStyle = gameState.collection ? gameState.collection.gameStyle || 1 : 1;
     
+    // Compute if all sources are revealed
+    const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
+    
     // Hide parts based on game style
     if (gameStyle === 3) { // only song, hide source
         sourcePart.innerHTML = '';
@@ -843,27 +811,28 @@ function updateAnswerDisplay() {
         }
         
         // Add year if revealed or lifeline used
-        if ((gameState.yearRevealed || gameState.songRevealed) && song.year) {
+        if ((gameState.yearRevealed || (allSourcesRevealed && gameState.songRevealed)) && song.year) {
             songDisplay += ` <span class="revealed">(${song.year})</span>`;
         }
         
         songPart.innerHTML = songDisplay;
     } else if (gameStyle === 2) { // only source, hide song
         const sourceName = gameState.collection.sourceName || "Source";
-        const requiredSources = song.sources.filter(s => s[0]);
-        const sourceDisplay = requiredSources.map((source, requiredIndex) => {
-            const globalIndex = song.sources.indexOf(source);
-            if (gameState.sourceRevealed.includes(globalIndex)) {
-                return `<span class="revealed">${source[1]}</span>`;
+        const allSources = song.sources;
+        const sourceDisplay = allSources.map((source, index) => {
+            const isRequired = source[0];
+            if (gameState.sourceRevealed.includes(index)) {
+                return `<span class="revealed${isRequired ? '' : ' optional'}">${source[1]}</span>`;
             } else {
                 // Check if hints are active for this source
-                const hintLetters = gameState.hintLettersRevealed.source[requiredIndex];
+                const hintLetters = gameState.hintLettersRevealed.source[index];
                 if (hintLetters && hintLetters.length > 0) {
                     const hintText = buildHintDisplay(source[1], hintLetters);
-                    return `<span class="hint">${hintText}</span>`;
+                    return `<span class="hint${isRequired ? '' : ' optional'}">${hintText}</span>`;
                 } else {
-                    const label = requiredSources.length === 1 ? sourceName : `${sourceName} ${requiredIndex + 1}`;
-                    return `<span class="hidden">${label}</span>`;
+                    const requiredCount = allSources.filter(s => s[0]).length;
+                    const label = sourceName;
+                    return `<span class="hidden${isRequired ? '' : ' optional'}">${label}</span>`;
                 }
             }
         }).join(', ');
@@ -871,25 +840,26 @@ function updateAnswerDisplay() {
         songPart.innerHTML = '';
         if (separator) separator.style.display = 'none';
         // For gameStyle 2, show year with source since song is hidden
-        if ((gameState.yearRevealed || gameState.sourceRevealed.length === requiredSources.length) && song.year) {
+        if ((gameState.yearRevealed || allSourcesRevealed) && song.year) {
             sourcePart.innerHTML += ` <span class="revealed">(${song.year})</span>`;
         }
     } else { // gameStyle 1, show both
         const sourceName = gameState.collection.sourceName || "Source";
-        const requiredSources = song.sources.filter(s => s[0]);
-        const sourceDisplay = requiredSources.map((source, requiredIndex) => {
-            const globalIndex = song.sources.indexOf(source);
-            if (gameState.sourceRevealed.includes(globalIndex)) {
-                return `<span class="revealed">${source[1]}</span>`;
+        const allSources = song.sources;
+        const sourceDisplay = allSources.map((source, index) => {
+            const isRequired = source[0];
+            if (gameState.sourceRevealed.includes(index)) {
+                return `<span class="revealed${isRequired ? '' : ' optional'}">${source[1]}</span>`;
             } else {
                 // Check if hints are active for this source
-                const hintLetters = gameState.hintLettersRevealed.source[requiredIndex];
+                const hintLetters = gameState.hintLettersRevealed.source[index];
                 if (hintLetters && hintLetters.length > 0) {
                     const hintText = buildHintDisplay(source[1], hintLetters);
-                    return `<span class="hint">${hintText}</span>`;
+                    return `<span class="hint${isRequired ? '' : ' optional'}">${hintText}</span>`;
                 } else {
-                    const label = requiredSources.length === 1 ? sourceName : `${sourceName} ${requiredIndex + 1}`;
-                    return `<span class="hidden">${label}</span>`;
+                    const requiredCount = allSources.filter(s => s[0]).length;
+                    const label = sourceName;
+                    return `<span class="hidden${isRequired ? '' : ' optional'}">${label}</span>`;
                 }
             }
         }).join(', ');
@@ -912,7 +882,7 @@ function updateAnswerDisplay() {
         }
         
         // Add year if revealed or lifeline used
-        if ((gameState.yearRevealed || gameState.songRevealed) && song.year) {
+        if ((gameState.yearRevealed || (allSourcesRevealed && gameState.songRevealed)) && song.year) {
             songDisplay += ` <span class="revealed">(${song.year})</span>`;
         }
         
@@ -920,33 +890,26 @@ function updateAnswerDisplay() {
     }
 }
 
-function showResult(message, resultType) {
+function showResult() {
     // Animation is now handled in checkGuess before life deduction
     
     // Check if fully guessed
     const song = gameState.currentSong;
-    const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.filter(s => s[0]).length;
-    const fullyGuessed = allSourcesRevealed && gameState.songRevealed;
+    const requiredIndices = song.sources.map((s, i) => s[0] ? i : null).filter(i => i !== null);
+    const allRequiredRevealed = requiredIndices.every(i => gameState.sourceRevealed.includes(i));
+    const fullyGuessed = allRequiredRevealed && gameState.songRevealed;
     
     // Show next button and disable input if fully guessed or timeout (but not if game over)
     if ((fullyGuessed || !gameState.canGuess) && gameState.lives > 0) {
-        // Check if this is the last round
-        const isLastRound = gameState.currentSongIndex + 1 >= gameState.shuffledSongs.length;
+        // Always show next button when fully guessed
+        document.getElementById('nextButtonContainer').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('lifelineButtons').style.display = 'none';
         
-        if (isLastRound) {
-            // Last round - go directly to success screen
-            endGame(true);
-        } else {
-            // Not last round - show next button
-            document.getElementById('nextButtonContainer').style.display = 'block';
-            document.getElementById('actionButtons').style.display = 'none';
-            document.getElementById('guessInput').disabled = true;
-            
-            // Disable all lifeline buttons during next phase
-            document.querySelectorAll('.btn-lifeline').forEach(btn => {
-                btn.disabled = true;
-            });
-        }
+        // Disable all lifeline buttons during next phase
+        document.querySelectorAll('.btn-lifeline').forEach(btn => {
+            btn.disabled = true;
+        });
     }
 }
 
@@ -1037,6 +1000,7 @@ function endGame(completed) {
     
     // Hide game elements, show result screen
     document.getElementById('resultScreen').style.display = 'block';
+    document.getElementById('gameContent').style.display = 'none';
     document.getElementById('actionButtons').style.display = 'none';
     document.getElementById('nextButtonContainer').style.display = 'none';
     document.getElementById('answerDisplay').style.display = 'none';
@@ -1323,16 +1287,15 @@ function useHintLifeline() {
     // Reveal letters for each source
     if (gameStyle !== 3) {
         song.sources.forEach((source, globalIndex) => {
-            if (source[0] && !gameState.sourceRevealed.includes(globalIndex)) {
-                const requiredIndex = song.sources.slice(0, globalIndex).filter(s => s[0]).length;
-                if (!gameState.hintLettersRevealed.source[requiredIndex]) {
-                    gameState.hintLettersRevealed.source[requiredIndex] = [];
+            if (!gameState.sourceRevealed.includes(globalIndex)) {
+                if (!gameState.hintLettersRevealed.source[globalIndex]) {
+                    gameState.hintLettersRevealed.source[globalIndex] = [];
                 }
                 
                 const sourceName = source[1]; // Use first spelling for hints
                 const letters = sourceName.split('').filter(c => c !== ' ');
                 const letterIndices = letters.map((_, i) => i);
-                const unrevealed = letterIndices.filter(i => !gameState.hintLettersRevealed.source[requiredIndex].includes(i));
+                const unrevealed = letterIndices.filter(i => !gameState.hintLettersRevealed.source[globalIndex].includes(i));
                 
                 const lettersToReveal = Math.max(2, Math.floor(unrevealed.length * 0.3));
                 // Special rule: if calculated amount equals total unrevealed, reveal one less
@@ -1342,7 +1305,7 @@ function useHintLifeline() {
                 for (let i = 0; i < toReveal; i++) {
                     const randomIndex = Math.floor(Math.random() * unrevealed.length);
                     const letterIndex = unrevealed.splice(randomIndex, 1)[0];
-                    gameState.hintLettersRevealed.source[requiredIndex].push(letterIndex);
+                    gameState.hintLettersRevealed.source[globalIndex].push(letterIndex);
                 }
             }
         });
@@ -1423,6 +1386,15 @@ document.getElementById('nextBtn').addEventListener('click', nextRound);
 document.addEventListener('keydown', (e) => {
     const guessInput = document.getElementById('guessInput');
     const gameContent = document.getElementById('gameContent');
+    
+    // Handle Enter key for next round if next button is active
+    if (e.key === 'Enter' && guessInput.disabled) {
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn && nextBtn.style.display !== 'none') {
+            nextRound();
+            return;
+        }
+    }
     
     // Only handle if game is active and input is enabled
     if (gameContent.style.display !== 'none' && !guessInput.disabled) {
