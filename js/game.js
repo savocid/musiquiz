@@ -1101,7 +1101,6 @@ function endGame(completed) {
     const resultDifficulty = gameState.collection.difficulty || 'Medium';
     document.getElementById('resultDifficulty').textContent = resultDifficulty;
     document.getElementById('resultDifficulty').className = `difficulty-${resultDifficulty.toLowerCase().replace(' ', '-')}`;
-    document.getElementById('resultRounds').textContent = gameState.shuffledSongs.length;
     
     // Show random cover image if available
     const resultScreenCover = document.getElementById('resultScreenCover');

@@ -610,7 +610,7 @@ header h1 a, .btn-secondary a {
 
 #startScreen {
     background: rgba(255, 255, 255, 0.95);
-    padding: 3rem 2rem;
+    padding: 3rem 2rem 2rem;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     width: fit-content;
@@ -619,7 +619,7 @@ header h1 a, .btn-secondary a {
 
 #resultScreen {
     background: rgba(255, 255, 255, 0.95);
-    padding: 3rem 2rem;
+    padding: 3rem 2rem 1rem;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     width: fit-content;
@@ -1089,5 +1089,39 @@ header h1 a, .btn-secondary a {
     .collection-item {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* Start Screen Layout */
+@media (max-width: 768px) {
+    #startScreen > div:first-of-type {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        text-align: center !important;
+    }
+
+    #startScreen > div:first-of-type > div:first-child {
+        align-self: center;
+    }
+
+    #startScreen > div:first-of-type > div:last-child {
+        text-align: center !important;
+    }
+}
+
+/* Result Screen Layout */
+@media (max-width: 768px) {
+    #resultScreen > div:nth-of-type(3) {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        text-align: center !important;
+    }
+
+    #resultScreen > div:nth-of-type(3) > div:first-child {
+        align-self: center;
+    }
+
+    #resultScreen > div:nth-of-type(3) > div:last-child {
+        text-align: center !important;
     }
 }

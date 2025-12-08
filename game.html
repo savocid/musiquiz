@@ -25,17 +25,24 @@
             <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem;">Loading...</h2>
             <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;"></p>
             
-            <img id="startScreenCover" src="" alt="" style="max-width: 90%; max-height: 200px; object-fit: cover; border-radius: 8px; margin: 0 auto 1.5rem; display: none;">
-            
-            <div style="margin: 1rem auto; display: inline-block; text-align: left;">
-                <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><strong id="collectionDifficulty"></strong>
-                    <strong>Rounds:</strong><span id="roundsValue">10</span>
+            <!-- Game Setup Layout -->
+            <div style="display: flex; gap: 2rem; align-items: center; justify-content: center; margin: 1rem auto 2rem; max-width: 800px;">
+                <!-- Cover Image -->
+                <div style="flex-shrink: 0; width: 50%;">
+                    <img id="startScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: none;">
                 </div>
                 
-                <!-- Round Selection Slider -->
-                <div style="margin-top: 1rem; text-align: center;">
-                    <input type="range" id="roundsSlider" min="1" max="50" value="10" step="1" style="width: 100%; max-width: 300px;">
+                <!-- Game Controls -->
+                <div style="flex: 1; text-align: left; width: 50%;">
+                    <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem; margin-bottom: 1rem;">
+                        <strong>Difficulty:</strong><strong id="collectionDifficulty"></strong>
+                        <strong>Rounds:</strong><span id="roundsValue">10</span>
+                    </div>
+                    
+                    <!-- Round Selection Slider -->
+                    <div>
+                        <input type="range" id="roundsSlider" min="1" max="50" value="10" step="1" style="width: 100%; max-width: 300px;">
+                    </div>
                 </div>
             </div>
             <button id="startGameBtn" class="btn btn-success" style="font-size: 1.5rem; padding: 1.5rem 3rem; margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;">🎵 Start Game</button>
@@ -125,51 +132,46 @@
         </div>
         
         <!-- Result Screen -->
-        <div id="resultScreen" style="display: none; text-align: center;">
-            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem;">Example Music Quiz</h2>
-            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 0.5rem;">A sample collection to demonstrate the structure</p>
-            
-            <img id="resultScreenCover" src="" alt="" style="max-width: 90%; max-height: 200px; object-fit: cover; border-radius: 8px; margin: 0 auto 1rem; display: none;">
-            
-            <div style="margin: 0.5rem auto 1rem; display: inline-block; text-align: left;">
-                <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                    <strong>Difficulty:</strong><strong id="resultDifficulty">Medium</strong>
-                    <strong>Rounds:</strong><span id="resultRounds">3</span>
+        <div id="resultScreen" style="display: none;">
+            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem; text-align:center;">Example Music Quiz</h2>
+            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;">A sample collection to demonstrate the structure</p>
+
+            <!-- Image and Difficulty/Rounds Layout -->
+            <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px;">
+                <!-- Cover Image -->
+                <div style="flex-shrink: 0; width: 50%;">
+                    <img id="resultScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: none;">
+                </div>
+
+                <!-- Game Info / Result Details Grid -->
+                <div style="display: inline-block; width: 50%">
+					<strong id="resultStatus" style="display: flex;justify-content: center;margin-bottom: 0.5rem;font-size: 1.5rem;font-weight: bold;color: rgb(245, 101, 101);">Failure</strong>
+                    <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
+                        <strong>Difficulty:</strong><strong id="resultDifficulty">Medium</strong>
+						<strong>Mode:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
+                        <strong>Rounds:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">3</span></span>
+                        <strong id="sourcesLabel">Sources:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="sourcesGuessed">0</span>/<span id="totalSources">1</span></span>
+                        <strong>Songs:</strong><span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">1</span></span>
+                    </div>
                 </div>
             </div>
-            
-            <div id="resultStatus" style="font-size: 2rem;font-weight: bold;margin-top: 0.5rem;padding: 2rem 0;border-bottom: 2px solid rgb(221, 221, 221);color: rgb(245, 101, 101);">Failure</div><div style="margin: 2rem auto;">
-                
-                <div style="font-size: 1.1rem; line-height: 2; color: #555;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><strong>Mode:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
+
+            <!-- Additional Details -->
+            <div style="text-align: center; margin: 1rem auto; max-width: 800px;">
+          
+                <div style="margin: 2rem auto;border: 2px solid rgb(221, 221, 221);border-left: none;border-right: none;">
+                    <div id="resultHearts" style="padding-top: 1rem; display: block;">
+                        <div id="resultHeartsDisplay" style="font-size: 2rem;"><span style="">❤️</span><span style="">❤️</span><span style="">❤️</span></div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><strong>Rounds:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="roundsAchieved">0</span>/<span id="totalRounds">3</span></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><strong id="sourcesLabel">Sources</strong>:</span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="sourcesGuessed">0</span>/<span id="totalSources">1</span></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><strong>Songs:</strong></span>
-                        <span style="font-size: 1.3rem; color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">1</span></span>
+                    <div id="resultLifelines" style="padding-top: 1rem;display: block;padding-bottom: 1.5rem;">
+                        <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;"><span style="" title="Hint: Unused">💡</span><span style="" title="Year: Unused">📅</span><span style="" title="Skip: Unused">⏭️</span></div>
                     </div>
                 </div>
-                <div id="resultHearts" style="padding-top: 1rem; display: block;">
-                    <div id="resultHeartsDisplay" style="font-size: 2rem;"><span style="">❤️</span><span style="">❤️</span><span style="">❤️</span></div>
+
+                <div style="display: flex;gap: 1rem;justify-content: center;margin-top: 1.5rem;">
+                    <button class="btn btn-success" onclick="location.reload()">Play Again</button>
+                    <button class="btn btn-secondary" onclick="goHome()">Home</button>
                 </div>
-                <div id="resultLifelines" style="padding-top: 1rem;display: block;border-bottom: 2px solid rgb(221, 221, 221);padding-bottom: 1.5rem;">
-                    <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;"><span style="" title="Hint: Unused">💡</span><span style="" title="Year: Unused">📅</span><span style="" title="Skip: Unused">⏭️</span></div>
-                </div>
-                
-            </div>
-            
-            <div style="display: flex;gap: 1rem;justify-content: center;margin-top: 1.5rem;">
-                <button class="btn btn-success" onclick="location.reload()">Play Again</button>
-                <button class="btn btn-secondary" onclick="goHome()">Home</button>
             </div>
         </div>
     </div>
