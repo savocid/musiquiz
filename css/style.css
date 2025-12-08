@@ -880,6 +880,10 @@ header h1 a, .btn-secondary a {
     100% { transform: scale(0.8); opacity: 0; visibility: hidden; }
 }
 
+#gameContent .btn {
+	user-select: none;
+}
+
 /* Lifeline Buttons */
 .lifeline-buttons {
     display: flex;
@@ -1067,7 +1071,7 @@ header h1 a, .btn-secondary a {
 
 
 /* Responsive */
-@media (max-width: 1400px) {
+@media (max-width: 800px) {
     
     .controls-wrapper {
         text-align: center;
@@ -1098,7 +1102,8 @@ header h1 a, .btn-secondary a {
     
     .collection-item {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        text-align: center;
     }
 }
 
@@ -1134,4 +1139,9 @@ header h1 a, .btn-secondary a {
     #resultScreen > div:nth-of-type(3) > div:last-child {
         text-align: center !important;
     }
+}
+
+/* Disable pointer events on skip button temporarily */
+.skip-disabled {
+    pointer-events: none;
 }

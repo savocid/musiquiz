@@ -24,16 +24,34 @@ function normalize(str) {
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
     if (song.titles) {
-        return song.titles.some(title => normalize(title) === normalizedInput || normalizedInput.includes(normalize(title)));
-    } else {
+        return song.titles.some(title => {
+            if (Array.isArray(title) && title.length > 1) {
+                return title.slice(1).some(t => normalize(t) === normalizedInput || normalizedInput.includes(normalize(t)));
+            } else if (typeof title === 'string') {
+                return normalize(title) === normalizedInput || normalizedInput.includes(normalize(title));
+            }
+            return false;
+        });
+    } else if (song.title) {
         const normalizedTitle = normalize(song.title);
         return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
     }
+    return false;
 }
 
 // Helper function to get the primary title
 function getTitle(song) {
-    return song.titles ? song.titles[0] : song.title;
+    if (song.titles && song.titles.length > 0) {
+        const firstTitle = song.titles[0];
+        if (Array.isArray(firstTitle) && firstTitle.length > 1) {
+            return firstTitle[1];
+        } else if (typeof firstTitle === 'string') {
+            return firstTitle;
+        }
+    } else if (song.title) {
+        return song.title;
+    }
+    return '';
 }
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
@@ -1019,6 +1037,15 @@ async function useSkipLifeline() {
         gameState.lifelineUsedThisRound.skip = true;
     } else {
         gameState.lifelines.skip.remaining--;
+    }
+
+    // Temporarily disable skip button to prevent rapid skipping
+    const skipBtn = document.getElementById('skipLifeline');
+    if (skipBtn) {
+        skipBtn.classList.add('skip-disabled');
+        setTimeout(() => {
+            skipBtn.classList.remove('skip-disabled');
+        }, 500);
     }
     
     // Go directly to next round
