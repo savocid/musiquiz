@@ -136,9 +136,7 @@ function displayCollections() {
                 <p>${collection.description || 'No description'}</p>
                 <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length}</p>
             </div>
-            <button class="btn btn-success" onclick="startGame('${collection.id}')">
-                ▶ Start Game
-            </button>
+            <button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
         </div>
     `}).join('');
 
