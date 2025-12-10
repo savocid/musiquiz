@@ -87,7 +87,16 @@
 
                 <!-- Answer Display (hidden/revealed sources and song) -->
                 <div class="answer-display">
-                    <div class="answer-display-wrapper" id="answerDisplay">
+					<div class="album-container">
+						<div class="album-wrapper">
+							<img id="album-img" alt="Album Image" src />
+							<span id="album-alt">N/A</span>
+							<span class="album-qmark">?</span>
+						</div>
+					</div>
+
+
+                    <div class="answer-wrapper" id="answerDisplay">
                         <span class="source-part" id="sourcePart"><span>Source</span></span>
                         <span class="separator"> - </span>
                         <span class="song-part" id="songPart"><span>Song</span></span>
@@ -182,6 +191,7 @@
         <a href="submit">submit</a>
     </footer>
 
+	<script src="js/musicmetadata.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>
     <script>

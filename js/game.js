@@ -359,6 +359,9 @@ async function startRound() {
     gameState.totalSourcesSoFar += gameState.currentSong.sources.filter(s => s[0]).length;
     gameState.totalSongsSoFar += 1;
     
+	// Reset revealed status
+	document.getElementById('gameContent').dataset.revealed = false;
+
     // Clear input
     document.getElementById('guessInput').value = '';
     document.getElementById('guessInput').disabled = false;
@@ -375,6 +378,12 @@ async function startRound() {
     document.getElementById('repeatBtn').style.display = 'none';
     document.getElementById('progressBar').style.width = '0%';
     
+	// Cover Image
+	const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
+					gameState.currentSong.audioFile : 
+					gameState.baseUrl + '/' + gameState.currentSong.audioFile;
+	audio_to_img(audioUrl).then(src => {	document.getElementById("album-img").src = src; });
+
     // Update answer display (hidden)
     updateAnswerDisplay();
     
@@ -798,6 +807,7 @@ function checkGuess() {
         gameState.canGuess = false;
         document.getElementById('guessInput').disabled = true;
         document.getElementById('guessInput').style.display = 'none';
+		document.getElementById('gameContent').dataset.revealed = true;
     }
     
 
@@ -852,7 +862,7 @@ function updateAnswerDisplay() {
     const song = gameState.currentSong;
     const sourcePart = document.getElementById('sourcePart');
     const songPart = document.getElementById('songPart');
-    const separator = document.querySelector('.answer-display-wrapper .separator');
+    const separator = document.querySelector('.answer-wrapper .separator');
     
     // Helper function to build hint display
     const buildHintDisplay = (text, revealedIndices) => {
@@ -1562,3 +1572,35 @@ document.getElementById('timeLifeline').addEventListener('click', useTimeLifelin
 document.getElementById('hintLifeline').addEventListener('click', useHintLifeline);
 document.getElementById('yearLifeline').addEventListener('click', useYearLifeline);
 document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);
+
+
+function audio_to_img(url) {
+	return fetch(url)
+		.then(response => {
+			if (!response.ok) throw new Error('Network response was not ok');
+			return response.arrayBuffer();
+		})
+		.then(buffer => {
+			return new Promise((resolve, reject) => {
+				const blob = new Blob([buffer], {type: 'audio/mpeg'});
+				musicmetadata(blob, function(err, metadata) {
+					if (err) {
+						reject(err);
+						return;
+					}
+					if (metadata.picture && metadata.picture.length > 0) {
+						const pic = metadata.picture[0];
+						const base64String = btoa(String.fromCharCode.apply(null, pic.data));
+						const imgSrc = `data:${pic.format};base64,${base64String}`;
+						resolve(imgSrc);
+					} else {
+						resolve(null);
+					}
+				});
+			});
+		})
+		.catch(error => {
+			console.error('Error:', error);
+			return Promise.resolve(null);
+		});
+}

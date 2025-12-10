@@ -750,6 +750,65 @@ header h1 a, .btn-secondary a {
     font-size: 1.2rem;
 }
 
+/* Album Image */
+.album-container {
+    padding: 0 1rem;
+    background: transparent;
+    border-radius: 0;
+    width: 100%;
+}
+
+.album-wrapper {
+	border: 5px inset slategray;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: gainsboro;
+}
+
+.album-container #album-img {
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    z-index: 10;
+}
+
+.album-container #album-alt {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+    background: floralwhite;
+    z-index: 10;
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+    font-style: italic;
+	font-weight: bold;
+}
+.album-container .album-qmark {
+	position: absolute;
+    font-size: 4rem;
+    font-family: sans-serif;
+    color: rgba(0, 0, 0, 0.1);
+}
+
+
+#album-img[src=''],
+#album-img[src='null'],
+#album-img:not([src]),
+#album-img[src*='data'] ~ #album-alt { 
+	display: none; 
+}
+
+#gameContent:not([data-revealed="true"]) .album-container #album-alt,
+#gameContent:not([data-revealed="true"]) .album-container #album-img {
+	visibility: hidden;
+}
+
+
+
 /* Timer Display */
 .timer-container {
     width: 100%;
@@ -781,22 +840,26 @@ header h1 a, .btn-secondary a {
 
 /* Answer Display */
 .answer-display {
-    width: 100%;
+    width: 90%;
+	min-height: 150px;
     background: transparent;
-    padding: 0;
+    padding: 1rem 0;
     margin: 0;
 	pointer-events: none;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }
-.answer-display * {
+.answer-wrapper * {
 	text-transform: uppercase;
 	font-style: italic;
 }
 
-
-
-.answer-display-wrapper {
+.answer-wrapper {
+	width: 300%;
     font-size: 1.5rem;
-    padding: 4rem 1.5rem;
+    padding: 0 1rem;
     font-weight: 600;
     background: transparent;
     border-radius: 0;
