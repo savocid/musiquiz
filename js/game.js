@@ -87,10 +87,46 @@ let gameState = {
 
 // Game modes configuration
 const MODES = {
-    'trivial': { lives: 999, clipDuration: 20, timeout: 0 },
-    'default': { lives: 999, clipDuration: 20, timeout: 60 },
-    'intense': { lives: 3, clipDuration: 10, timeout: 20 },
-    'sudden-death': { lives: 1, clipDuration: 10, timeout: 0 }
+    'trivial': { 
+        lives: 999, 
+        clipDuration: 20, 
+        timeout: 0,
+        lifelines: {
+            hint: { total: 999 },
+            year: { total: 999 },
+            skip: { total: 999 } 
+        }
+    },
+    'default': { 
+        lives: 999, 
+        clipDuration: 20, 
+        timeout: 60,
+        lifelines: {
+            hint: { total: 1 }, 
+            year: { total: 1 }, 
+            skip: { total: 1 }  
+        }
+    },
+    'intense': { 
+        lives: 3, 
+        clipDuration: 10, 
+        timeout: 20,
+        lifelines: {
+            hint: { total: 1 }, 
+            year: { total: 1 }, 
+            skip: { total: 1 }  
+        }
+    },
+    'sudden-death': { 
+        lives: 1, 
+        clipDuration: 10, 
+        timeout: 0,
+        lifelines: {
+            hint: { total: 1 }, 
+            year: { total: 1 }, 
+            skip: { total: 1 }  
+        }
+    }
 };
 
 window.MODES = MODES;
@@ -111,15 +147,10 @@ window.changeMode = function(newMode) {
         gameState.lifelines.time = { remaining: 0, total: 0 };
     }
     
-    if (gameState.lives === 999) {
-        gameState.lifelines.hint = { remaining: 999, total: 999 };
-        gameState.lifelines.year = { remaining: 999, total: 999 };
-        gameState.lifelines.skip = { remaining: 999, total: 999 };
-    } else {
-        gameState.lifelines.hint = { remaining: 1, total: 1 };
-        gameState.lifelines.year = { remaining: 1, total: 1 };
-        gameState.lifelines.skip = { remaining: 1, total: 1 };
-    }
+    // Set lifelines from mode configuration
+    gameState.lifelines.hint = { remaining: gameState.settings.lifelines.hint.total, total: gameState.settings.lifelines.hint.total };
+    gameState.lifelines.year = { remaining: gameState.settings.lifelines.year.total, total: gameState.settings.lifelines.year.total };
+    gameState.lifelines.skip = { remaining: gameState.settings.lifelines.skip.total, total: gameState.settings.lifelines.skip.total };
     
     // Reset lifeline used this round
     gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };
@@ -273,15 +304,10 @@ async function loadGameData() {
             gameState.lifelines.time = { remaining: 0, total: 0 };
         }
         
-        if (gameState.lives === 999) {
-            gameState.lifelines.hint = { remaining: 999, total: 999 };
-            gameState.lifelines.year = { remaining: 999, total: 999 };
-            gameState.lifelines.skip = { remaining: 999, total: 999 };
-        } else {
-            gameState.lifelines.hint = { remaining: 1, total: 1 };
-            gameState.lifelines.year = { remaining: 1, total: 1 };
-            gameState.lifelines.skip = { remaining: 1, total: 1 };
-        }
+        // Set lifelines from mode configuration
+        gameState.lifelines.hint = { remaining: gameState.settings.lifelines.hint.total, total: gameState.settings.lifelines.hint.total };
+        gameState.lifelines.year = { remaining: gameState.settings.lifelines.year.total, total: gameState.settings.lifelines.year.total };
+        gameState.lifelines.skip = { remaining: gameState.settings.lifelines.skip.total, total: gameState.settings.lifelines.skip.total };
         
         // Disable lifelines based on collection settings
         if (gameState.collection.disabledLifelines && Array.isArray(gameState.collection.disabledLifelines)) {
@@ -449,6 +475,7 @@ async function startRound() {
     
 	// Reset revealed status
 	document.getElementById('gameContent').dataset.revealed = false;
+	document.getElementById('gameContent').dataset.correct = "";
 
 	// Reset Album Image
 	document.getElementById('album-img').src = "";
@@ -458,6 +485,10 @@ async function startRound() {
     document.getElementById('guessInput').disabled = false;
     document.getElementById('guessInput').style.display = '';
     
+	// Clear progressBar
+	document.getElementById('progressBar').style.setProperty('--initial_start', 0);
+	document.getElementById('progressBar').style.setProperty('--initial_end', 0);
+
     // Auto-focus input so player can start typing immediately
     setTimeout(() => {
         document.getElementById('guessInput').focus();
@@ -521,6 +552,9 @@ function playSong(restartCountdown = false) {
             startTime = parseFloat(song.startTime);
         }
     }
+    
+    // Store the start time for seeking calculations
+    gameState.currentStartTime = startTime;
     
     // Parse endTime (support both formats and null to ignore)
     let endTime = null;
@@ -697,7 +731,12 @@ function setupProgressBarInteraction() {
             const wasPlaying = !gameState.audio.paused;
             
             // Set audio to the clicked position
-            gameState.audio.currentTime = targetTime;
+            if (isRevealed) {
+                gameState.audio.currentTime = targetTime;
+            } else {
+                // For clip mode, targetTime is relative to clip start, so add the song start time
+                gameState.audio.currentTime = gameState.currentStartTime + targetTime;
+            }
             
             // Always resume playing after seeking
             gameState.audio.play().catch(err => console.error('Error playing audio after seek:', err));
@@ -835,6 +874,7 @@ function handleTimeout() {
     } else {
         // Disable input and show result when timed out but still have lives
         document.getElementById('guessInput').disabled = true;
+		document.getElementById('gameContent').dataset.correct = false;
         // Show result and next button if still alive (without revealing answer)
         showResult();
     }
@@ -953,6 +993,50 @@ function checkGuess() {
         document.getElementById('guessInput').disabled = true;
         document.getElementById('guessInput').style.display = 'none';
 		document.getElementById('gameContent').dataset.revealed = true;
+		document.getElementById('gameContent').dataset.correct = true;
+        
+        // Set CSS variables for original clip positions on progress bar
+        const progressBar = document.getElementById('progressBar');
+        const song = gameState.currentSong;
+        const duration = song.duration;
+        
+        // Parse startTime
+        let startTime = 0;
+        if (song.startTime !== null) {
+            if (typeof song.startTime === 'string' && song.startTime.includes(':')) {
+                const parts = song.startTime.split(':');
+                startTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } else {
+                startTime = parseFloat(song.startTime);
+            }
+        }
+        
+        // Parse endTime
+        let endTime = null;
+        if (song.endTime !== null && song.startTime !== null) {
+            if (typeof song.endTime === 'string' && song.endTime.includes(':')) {
+                const parts = song.endTime.split(':');
+                endTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } else {
+                endTime = parseFloat(song.endTime);
+            }
+        }
+        
+        // Calculate percentages based on original clip boundaries
+        let actualEndTime = startTime;
+        if (endTime !== null) {
+            actualEndTime = endTime;
+        } else {
+            // For songs without endTime, the clip ends at startTime + clipDuration
+            actualEndTime = startTime + gameState.clipDuration;
+        }
+        
+        const startPercent = (startTime / duration) * 100;
+        const endPercent = Math.min((actualEndTime / duration) * 100, 100);
+        
+        progressBar.style.setProperty('--initial_start', startPercent.toFixed(3) + '%');
+        progressBar.style.setProperty('--initial_end', endPercent.toFixed(3) + '%');
+        
         // Let the song play to the end and show full progress
         clearTimeout(gameState.clipTimer);
         stopProgressBar();
