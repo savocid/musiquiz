@@ -528,7 +528,9 @@ async function startRound() {
     
     // Update lifeline buttons
     updateLifelineButtons();
-    
+
+	console.log(gameState.currentSong)
+
     // Play audio (start countdown)
     playSong(true);
 }
@@ -916,6 +918,7 @@ function checkGuess() {
                         gameState.sourceRevealed.push(index);
                         sourceCorrect = true;
                         newCorrectGuess = true;
+						break;
                     }
                 }
             }
@@ -931,6 +934,7 @@ function checkGuess() {
                         gameState.sourceRevealed.push(index);
                         sourceCorrect = true;
                         newCorrectGuess = true;
+						break;
                     }
                 }
             }
@@ -1268,9 +1272,13 @@ function showResult() {
         const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
         requiredGuessed = allSourcesRevealed && (song.title[0] ? gameState.songRevealed : true);
     }
-    
+    console.log(`${requiredGuessed} - ${!gameState.canGuess} - ${gameState.lives}`);
+	console.log(`${gameState.sourceRevealed.length} - ${song.sources.length}`);
+	console.log(song);
+	console.log(gameState.sourceRevealed);
     // Show next button and disable input if required guessed or timeout (but not if game over)
     if ((requiredGuessed || !gameState.canGuess) && gameState.lives > 0) {
+		console.log(2)
         // Always show next button when required guessed
         document.getElementById('nextButtonContainer').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
