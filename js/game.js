@@ -393,7 +393,7 @@ async function startRound() {
 	document.getElementById('gameContent').dataset.revealed = false;
 
 	// Reset Album Image
-	document.getElementById('#album-img').src = "";
+	document.getElementById('album-img').src = "";
 
     // Clear input
     document.getElementById('guessInput').value = '';
@@ -1637,8 +1637,14 @@ function audio_to_img(url) {
 					}
 					if (metadata.picture && metadata.picture.length > 0) {
 						const pic = metadata.picture[0];
-						const base64String = btoa(String.fromCharCode.apply(null, pic.data));
-						const imgSrc = `data:${pic.format};base64,${base64String}`;
+						// Build binary string in chunks to avoid call stack overflow with large images
+						let binaryString = '';
+						const chunkSize = 8192; // Process in chunks
+						for (let i = 0; i < pic.data.length; i += chunkSize) {
+							const chunk = pic.data.slice(i, i + chunkSize);
+							binaryString += String.fromCharCode.apply(null, chunk);
+						}
+						const imgSrc = `data:${pic.format};base64,${btoa(binaryString)}`;
 						resolve(imgSrc);
 					} else {
 						resolve(null);
