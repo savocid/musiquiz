@@ -96,14 +96,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (newMode !== currentMode) {
                 if (isGamePage) {
-                    // Game page: change mode dynamically
-                    localStorage.setItem('selectedMode', newMode);
-                    if (window.changeMode) {
-                        window.changeMode(newMode);
+                    // Game page: confirm and reload with mode param
+                    if (confirm('Changing the game mode will reload the page. Continue?')) {
+                        localStorage.setItem('selectedMode', newMode);
+                        const collectionId = params.get('collection');
+                        if (collectionId) {
+                            params.set('mode', newMode);
+                            const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                            const url = isLocal ? `game.html?${params.toString()}` : `game?${params.toString()}`;
+                            window.location.href = url;
+                        } else {
+                            location.reload();
+                        }
                     }
-                    // Update active button
-                    modeButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
                 } else {
                     // Index page: just update mode without reload
                     localStorage.setItem('selectedMode', newMode);

@@ -21,6 +21,13 @@ function normalize_str(str) {
     return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').trim();
 }
 
+// Helper function to format seconds as MM:SS
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
     if (song.title && song.title.length > 1) {
@@ -394,6 +401,7 @@ async function startRound() {
             gameState.currentSong.audioFile : 
             gameState.baseUrl + '/' + gameState.currentSong.audioFile;
         const duration = await getAudioDuration(audioUrl);
+        gameState.currentSong.duration = duration;
         
         // Parse startTime
         let parsedStart = 0;
@@ -532,7 +540,10 @@ function playSong(restartCountdown = false) {
     if (endTime !== null && endTime > startTime) {
         effectiveClipDuration = Math.min(gameState.clipDuration, endTime - startTime);
     }
-    gameState.effectiveClipDuration = effectiveClipDuration;
+    if (endTime === null && gameState.currentSong.duration > 0) {
+        effectiveClipDuration = Math.min(effectiveClipDuration, gameState.currentSong.duration - startTime - 5);
+    }
+    gameState.effectiveClipDuration = Math.max(effectiveClipDuration, 1); // minimum 1 second to avoid division by zero
     let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/' + song.audioFile;
     gameState.audio = new Audio(audioUrl);
     gameState.audio.volume = getCurrentVolume();
@@ -605,11 +616,37 @@ function startProgressBar() {
         
         // Update countdown timer
         const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
-        progressTimer.textContent = remaining + 's';
+        progressTimer.textContent = formatTime(remaining);
         
         if (percent >= 100) {
             clearInterval(gameState.progressInterval);
-            progressTimer.textContent = '0s';
+            progressTimer.textContent = '0:00';
+        }
+    }, 50); // Update every 50ms for smooth animation
+}
+
+function startFullProgressBar() {
+    const progressBar = document.getElementById('progressBar');
+    const progressTimer = document.getElementById('progressTimer');
+    const duration = gameState.currentSong.duration;
+    
+    // Show timer, hide repeat button
+    progressTimer.style.display = 'block';
+    document.getElementById('repeatBtn').style.display = 'none';
+    
+    gameState.progressInterval = setInterval(() => {
+        if (!gameState.audio) return;
+        const currentTime = gameState.audio.currentTime;
+        const percent = Math.min((currentTime / duration) * 100, 100);
+        progressBar.style.width = percent + '%';
+        
+        // Update countdown timer (remaining time to end)
+        const remaining = Math.max(0, Math.ceil(duration - currentTime));
+        progressTimer.textContent = formatTime(remaining);
+        
+        if (percent >= 100) {
+            clearInterval(gameState.progressInterval);
+            progressTimer.textContent = '0:00';
         }
     }, 50); // Update every 50ms for smooth animation
 }
@@ -618,7 +655,7 @@ function stopProgressBar() {
     if (gameState.progressInterval) {
         clearInterval(gameState.progressInterval);
         document.getElementById('progressBar').style.width = '100%';
-        document.getElementById('progressTimer').textContent = '0s';
+        document.getElementById('progressTimer').textContent = '0:00';
     }
 }
 
@@ -640,76 +677,83 @@ function setupProgressBarInteraction() {
             const clickX = e.clientX - rect.left;
             const percentClicked = clickX / rect.width;
             
-            // Seek audio to that position based on clip duration
-            const targetTime = percentClicked * (gameState.effectiveClipDuration || gameState.clipDuration);
+            const isRevealed = document.getElementById('gameContent').dataset.revealed === 'true';
+            let targetTime;
+            let remainingDuration;
+            
+            if (isRevealed) {
+                // Seek within full song duration
+                targetTime = percentClicked * gameState.currentSong.duration;
+                remainingDuration = gameState.currentSong.duration - targetTime;
+            } else {
+                // Seek within clip duration
+                targetTime = percentClicked * (gameState.effectiveClipDuration || gameState.clipDuration);
+                remainingDuration = (gameState.effectiveClipDuration || gameState.clipDuration) - targetTime;
+            }
+            
             const song = gameState.currentSong;
             
             // Store whether audio was playing before seek
             const wasPlaying = !gameState.audio.paused;
             
-            // Parse startTime
-            let startTime = 0;
-            if (song.startTime !== null) {
-                if (typeof song.startTime === 'string' && song.startTime.includes(':')) {
-                    const parts = song.startTime.split(':');
-                    startTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-                } else {
-                    startTime = parseFloat(song.startTime);
-                }
-            }
-            
             // Set audio to the clicked position
-            gameState.audio.currentTime = startTime + targetTime;
+            gameState.audio.currentTime = targetTime;
             
             // Always resume playing after seeking
             gameState.audio.play().catch(err => console.error('Error playing audio after seek:', err));
             
             // Restart progress bar from new position
             clearInterval(gameState.progressInterval);
-            const remainingDuration = ((gameState.effectiveClipDuration || gameState.clipDuration) - targetTime) * 1000; // in ms
-            const seekStartTime = Date.now();
-            const progressBarEl = document.getElementById('progressBar');
-            const progressTimerEl = document.getElementById('progressTimer');
-            
-            // Set initial progress bar position
-            progressBarEl.style.width = (percentClicked * 100) + '%';
-            
-            // Restart progress bar animation from seek position
-            gameState.progressInterval = setInterval(() => {
-                const elapsed = Date.now() - seekStartTime;
-                const additionalPercent = (elapsed / remainingDuration) * (100 - (percentClicked * 100));
-                const totalPercent = Math.min((percentClicked * 100) + additionalPercent, 100);
-                progressBarEl.style.width = totalPercent + '%';
-                // Only update the progress timer (clip), not the guess timer
-                const remaining = Math.max(0, Math.ceil((remainingDuration - elapsed) / 1000));
-                progressTimerEl.textContent = remaining + 's';
-                if (totalPercent >= 100) {
-                    clearInterval(gameState.progressInterval);
-                    progressTimerEl.textContent = '0s';
-                }
-            }, 50);
-            
-            // Clear and restart the clip timer to maintain the total clip duration
-            clearTimeout(gameState.clipTimer);
-            const remainingTime = gameState.clipDuration - targetTime;
-            const thisRoundId = gameState.currentRoundId;
-            
-            gameState.clipTimer = setTimeout(() => {
-                // Only pause if we're still on the same round
-                if (gameState.currentRoundId === thisRoundId) {
-                    // Always pause audio and stop progress bar when clip duration is reached
-                    if (gameState.audio) {
-                        gameState.audio.pause();
-                    }
-                    stopProgressBar();
+            if (isRevealed) {
+                startFullProgressBar();
+            } else {
+                // For clip mode, restart progress bar with adjusted start time
+                clearTimeout(gameState.clipTimer);
+                
+                const progressBarEl = document.getElementById('progressBar');
+                const progressTimerEl = document.getElementById('progressTimer');
+                const duration = (gameState.effectiveClipDuration || gameState.clipDuration) * 1000; // in ms
+                const startTime = Date.now() - (targetTime * 1000); // Adjust so elapsed starts from targetTime
+                
+                // Show timer
+                progressTimerEl.style.display = 'block';
+                
+                gameState.progressInterval = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const percent = Math.min((elapsed / duration) * 100, 100);
+                    progressBarEl.style.width = percent + '%';
                     
-                    // Always show replay button after clip ends (unless game is over)
-                    if (gameState.lives > 0) {
-                        document.getElementById('repeatBtn').style.display = 'flex';
-                        document.getElementById('progressTimer').style.display = 'none';
+                    // Update countdown timer
+                    const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+                    progressTimerEl.textContent = formatTime(remaining);
+                    
+                    if (percent >= 100) {
+                        clearInterval(gameState.progressInterval);
+                        progressTimerEl.textContent = '0:00';
                     }
-                }
-            }, remainingTime * 1000);
+                }, 50);
+                
+                // Restart clip timer
+                const remainingTime = gameState.clipDuration - targetTime;
+                const thisRoundId = gameState.currentRoundId;
+                
+                gameState.clipTimer = setTimeout(() => {
+                    // Only pause if we're still on the same round
+                    if (gameState.currentRoundId === thisRoundId) {
+                        // Always pause audio and stop progress bar when clip duration is reached
+                        if (gameState.audio) {
+                            gameState.audio.pause();
+                        }
+                        stopProgressBar();
+                        
+                        // Always show replay button after clip ends (unless game is over)
+                        if (gameState.lives > 0) {
+                            document.getElementById('repeatBtn').style.display = 'flex';
+                            document.getElementById('progressTimer').style.display = 'none';
+                        }
+                    }
+                }, remainingTime * 1000);
+            }
         });
         
         progressContainer.dataset.hasListener = 'true';
@@ -909,6 +953,14 @@ function checkGuess() {
         document.getElementById('guessInput').disabled = true;
         document.getElementById('guessInput').style.display = 'none';
 		document.getElementById('gameContent').dataset.revealed = true;
+        // Let the song play to the end and show full progress
+        clearTimeout(gameState.clipTimer);
+        stopProgressBar();
+        startFullProgressBar();
+        // Resume playback if it was paused
+        if (gameState.audio && gameState.audio.paused) {
+            gameState.audio.play().catch(err => console.error('Error resuming audio after reveal:', err));
+        }
     }
     
 
@@ -1195,8 +1247,17 @@ function repeatSong() {
     // Reset progress bar
     document.getElementById('progressBar').style.width = '0%';
     
-    // Replay song (do not restart countdown)
-    playSong(false);
+    const isRevealed = document.getElementById('gameContent').dataset.revealed === 'true';
+    
+    if (isRevealed) {
+        // For revealed songs, replay from the beginning of the full song
+        gameState.audio.currentTime = 0;
+        gameState.audio.play().catch(err => console.error('Error playing audio after repeat:', err));
+        startFullProgressBar();
+    } else {
+        // For clip mode, replay the clip
+        playSong(false);
+    }
 }
 
 async function nextRound() {
