@@ -735,7 +735,7 @@ header h1 a, .btn-secondary a {
     background-size: 10px 10px;
     background-image: repeating-linear-gradient(45deg, var(--color1) calc(var(--gap2) * 1px), var(--color1) calc(var(--gap1) * 1px), var(--color2) calc(var(--gap2) * 1px), var(--color2) 50%);
 
-    border: calc(var(--gap1) * 1px) solid var(--color1);
+    border: 1px solid var(--color1);
     border-top: none;
     border-bottom: none;
     box-sizing: border-box;

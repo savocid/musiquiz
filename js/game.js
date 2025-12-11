@@ -970,6 +970,10 @@ function checkGuess() {
             const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
             requiredGuessed = allRequiredSourcesRevealed;
             allGuessed = allSourcesRevealed;
+            // Reveal song title as optional when all sources are revealed
+            if (allSourcesRevealed) {
+                gameState.songRevealed = true;
+            }
         }
     } else {
         // Both
@@ -1157,7 +1161,7 @@ function updateAnswerDisplay() {
         }
         
         songPart.innerHTML = songDisplay;
-    } else if (gameStyle === 2) { // only source, hide song
+    } else if (gameStyle === 2) { // only source, show song title as optional when all sources revealed
         const sourceName = gameState.collection.sourceName || "Source";
         const allSources = song.sources;
         const sourceDisplay = allSources.map((source, index) => {
@@ -1178,10 +1182,24 @@ function updateAnswerDisplay() {
             }
         }).join(', ');
         sourcePart.innerHTML = sourceDisplay;
-        songPart.innerHTML = '';
-        if (separator) separator.style.display = 'none';
-        // For gameStyle 2, show year with source since song is hidden
-        if ((gameState.yearRevealed || allSourcesRevealed) && song.year) {
+        
+        // Show song title as optional when all sources are revealed
+        if (allSourcesRevealed) {
+            const titleText = getTitle(song);
+            let songDisplay = `<span class="revealed optional">${titleText}</span>`;
+            // Add year after title when all sources are revealed
+            if ((gameState.yearRevealed || allSourcesRevealed) && song.year) {
+                songDisplay += ` <span class="revealed">(${song.year})</span>`;
+            }
+            songPart.innerHTML = songDisplay;
+            if (separator) separator.style.display = '';
+        } else {
+            songPart.innerHTML = '';
+            if (separator) separator.style.display = 'none';
+        }
+        
+        // For gameStyle 2, show year with source only when song is not revealed
+        if (gameState.yearRevealed && !allSourcesRevealed && song.year) {
             sourcePart.innerHTML += ` <span class="revealed">(${song.year})</span>`;
         }
     } else { // gameStyle 1, show both
