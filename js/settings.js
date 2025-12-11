@@ -13,27 +13,8 @@ const settingsPanelHTML = `
     <!-- Game Mode Section -->
     <div class="panel-section">
         <h4>Game Mode</h4>
-        <div class="mode-control">
-            <button class="mode-btn-compact" data-mode="trivial">
-                <strong>Trivial</strong>
-                <span>20s Listen • No Timeout</span>
-                <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
-            </button>
-            <button class="mode-btn-compact" data-mode="default">
-                <strong>Default<span class="emoji">❤️❤️❤️</span></strong>
-                <span>15s Listen • No Timeout</span>
-                <span><span class="emoji">💡 • 📅 • ⏭️</span></span>
-            </button>
-            <button class="mode-btn-compact" data-mode="intense">
-                <strong>Intense<span class="emoji">❤️❤️❤️</span></strong>
-                <span>10s Listen • 20s Timeout</span>
-                <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
-            </button>
-            <button class="mode-btn-compact" data-mode="sudden-death">
-                <strong>Sudden Death<span class="emoji">❤️</span></strong>
-                <span>5s Listen • 10s Timeout</span>
-                <span><span class="emoji">⏱️ • 💡 • 📅 • ⏭️</span></span>
-            </button>
+        <div class="mode-control" id="modeControl">
+            <!-- Mode buttons will be inserted here -->
         </div>
     </div>
     
@@ -60,6 +41,45 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.insertAdjacentHTML('afterbegin', settingsPanelHTML);
     }
     
+    // Generate mode buttons dynamically
+    const modeControl = document.getElementById('modeControl');
+    if (modeControl && window.MODES) {
+        const modes = window.MODES;
+        for (const [modeKey, modeData] of Object.entries(modes)) {
+            const button = document.createElement('button');
+            button.className = 'mode-btn-compact';
+            button.setAttribute('data-mode', modeKey);
+            
+            // Title
+            const title = modeKey.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            const strong = document.createElement('strong');
+            strong.textContent = title;
+            
+            // Hearts
+            if (modeData.lives !== 999) {
+                const hearts = '❤️'.repeat(modeData.lives);
+                strong.innerHTML += `<span class="emoji">${hearts}</span>`;
+            }
+            
+            // Listen time and timeout
+            const listenSpan = document.createElement('span');
+            listenSpan.textContent = `${modeData.clipDuration}s Listen • ${modeData.timeout > 0 ? modeData.timeout + 's Timeout' : 'No Timeout'}`;
+            
+            // Lifelines
+            const lifelinesSpan = document.createElement('span');
+            let lifelines = [];
+            if (modeData.timeout > 0) lifelines.push('⏱️');
+            lifelines.push('💡', '📅', '⏭️');
+            lifelinesSpan.innerHTML = `<span class="emoji">${lifelines.join(' • ')}</span>`;
+            
+            button.appendChild(strong);
+            button.appendChild(listenSpan);
+            button.appendChild(lifelinesSpan);
+            
+            modeControl.appendChild(button);
+        }
+    }
+    
     // Attach mode button listeners based on page
     const params = new URLSearchParams(window.location.search);
     const isGamePage = params.get('collection') !== null;
@@ -76,19 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (newMode !== currentMode) {
                 if (isGamePage) {
-                    // Game page: confirm and reload with mode param
-                    if (confirm('Changing the game mode will reload the page. Continue?')) {
-                        localStorage.setItem('selectedMode', newMode);
-                        const collectionId = params.get('collection');
-                        if (collectionId) {
-                            params.set('mode', newMode);
-                            const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                            const url = isLocal ? `game.html?${params.toString()}` : `game?${params.toString()}`;
-                            window.location.href = url;
-                        } else {
-                            location.reload();
-                        }
+                    // Game page: change mode dynamically
+                    localStorage.setItem('selectedMode', newMode);
+                    if (window.changeMode) {
+                        window.changeMode(newMode);
                     }
+                    // Update active button
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
                 } else {
                     // Index page: just update mode without reload
                     localStorage.setItem('selectedMode', newMode);

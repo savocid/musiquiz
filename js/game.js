@@ -18,7 +18,7 @@ function getAudioDuration(audioUrl) {
 
 // Helper function to normalize strings for comparison
 function normalize_str(str) {
-    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').trim();
 }
 
 // Helper function to check if guess matches any title
@@ -78,8 +78,78 @@ let gameState = {
     yearRevealed: false  // Track if year has been revealed
 };
 
+// Game modes configuration
+const MODES = {
+    'trivial': { lives: 999, clipDuration: 20, timeout: 0 },
+    'default': { lives: 999, clipDuration: 20, timeout: 60 },
+    'intense': { lives: 3, clipDuration: 10, timeout: 20 },
+    'sudden-death': { lives: 1, clipDuration: 10, timeout: 0 }
+};
+
+window.MODES = MODES;
+
+// Function to change mode dynamically
+window.changeMode = function(newMode) {
+    const oldTimeout = gameState.hasTimeout;
+    gameState.settings = { ...MODES[newMode], mode: newMode, collectionId: gameState.collection.id || gameState.collectionId };
+    gameState.lives = gameState.settings.lives;
+    gameState.clipDuration = gameState.settings.clipDuration;
+    gameState.timeout = gameState.settings.timeout;
+    gameState.hasTimeout = gameState.timeout > 0;
+    
+    // Update lifelines
+    if (gameState.timeout > 0) {
+        gameState.lifelines.time = { remaining: 1, total: 1 };
+    } else {
+        gameState.lifelines.time = { remaining: 0, total: 0 };
+    }
+    
+    if (gameState.lives === 999) {
+        gameState.lifelines.hint = { remaining: 999, total: 999 };
+        gameState.lifelines.year = { remaining: 999, total: 999 };
+        gameState.lifelines.skip = { remaining: 999, total: 999 };
+    } else {
+        gameState.lifelines.hint = { remaining: 1, total: 1 };
+        gameState.lifelines.year = { remaining: 1, total: 1 };
+        gameState.lifelines.skip = { remaining: 1, total: 1 };
+    }
+    
+    // Reset lifeline used this round
+    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };
+    
+    updateLifelineButtons();
+    
+    // Handle timeout changes
+    if (gameState.hasTimeout && !oldTimeout) {
+        // Started having timeout, start timer if guessing
+        if (gameState.canGuess && !gameState.guessTimer) {
+            startCountdown();
+        }
+    } else if (!gameState.hasTimeout && oldTimeout) {
+        // Stopped having timeout, clear timer
+        if (gameState.guessTimer) {
+            clearInterval(gameState.guessTimer);
+            gameState.guessTimer = null;
+            document.getElementById('timer').textContent = '';
+        }
+    }
+    
+    // Update URL
+    const params = new URLSearchParams(window.location.search);
+    params.set('mode', newMode);
+    window.history.replaceState(null, '', '?' + params.toString());
+    
+    // Apply theme
+    if (window.applyModeTheme) {
+        window.applyModeTheme(newMode, true);
+    }
+};
+
 // Initialize game
 document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('collection')) return; // Only run on game pages
+    
     // Clear data button
     const clearDataBtn = document.getElementById('clearDataBtn');
     if (clearDataBtn) {
@@ -93,12 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadGameData() {
-    const MODES = {
-        'trivial': { lives: 999, clipDuration: 20, timeout: 0 },
-        'default': { lives: 3, clipDuration: 15, timeout: 0 },
-        'intense': { lives: 3, clipDuration: 10, timeout: 20 },
-        'sudden-death': { lives: 1, clipDuration: 5, timeout: 10 }
-    };
+    // MODES is now defined globally
 
     
     // Get URL parameters
@@ -188,39 +253,24 @@ async function loadGameData() {
         gameState.baseUrl = 'https://' + collectionsUrl;
         
         // Always use current MODES definition (ensures fresh settings)
-        gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };
-        
-        gameState.lives = gameState.settings.lives;
+        gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };		gameState.lives = gameState.settings.lives;
         gameState.totalLives = gameState.settings.lives;
         gameState.clipDuration = gameState.settings.clipDuration;
         gameState.timeout = gameState.settings.timeout;
         gameState.hasTimeout = gameState.timeout > 0;
         
         // Initialize lifelines based on mode
-        if (gameState.lives === 999) {
-            // Trivial Mode: Hint (infinite), Year (infinite), Skip (infinite)
-            gameState.lifelines.hint = { remaining: 999, total: 999 };
+        if (gameState.timeout > 0) {
+            gameState.lifelines.time = { remaining: 1, total: 1 };
+        } else {
             gameState.lifelines.time = { remaining: 0, total: 0 };
+        }
+        
+        if (gameState.lives === 999) {
+            gameState.lifelines.hint = { remaining: 999, total: 999 };
             gameState.lifelines.year = { remaining: 999, total: 999 };
             gameState.lifelines.skip = { remaining: 999, total: 999 };
-        } else if (gameState.lives === 3) {
-            // Check timeout to differentiate Default from Intense
-            if (gameState.timeout > 0) {
-                // Intense Mode: Time (1x), Hint (1x), Year (1x), Skip (1x)
-                gameState.lifelines.time = { remaining: 1, total: 1 };
-                gameState.lifelines.hint = { remaining: 1, total: 1 };
-                gameState.lifelines.year = { remaining: 1, total: 1 };
-                gameState.lifelines.skip = { remaining: 1, total: 1 };
-            } else {
-                // Default Mode: Hint (1x), Year (1x), Skip (1x)
-                gameState.lifelines.hint = { remaining: 1, total: 1 };
-                gameState.lifelines.time = { remaining: 0, total: 0 };
-                gameState.lifelines.year = { remaining: 1, total: 1 };
-                gameState.lifelines.skip = { remaining: 1, total: 1 };
-            }
-        } else if (gameState.lives === 1) {
-            // Sudden Death: Timer (1x), Hint (1x), Year (1x), Skip (1x)
-            gameState.lifelines.time = { remaining: 1, total: 1 };
+        } else {
             gameState.lifelines.hint = { remaining: 1, total: 1 };
             gameState.lifelines.year = { remaining: 1, total: 1 };
             gameState.lifelines.skip = { remaining: 1, total: 1 };
@@ -1561,64 +1611,66 @@ function useYearLifeline() {
 }
 
 // Event listeners
-document.getElementById('submitGuess').addEventListener('click', checkGuess);
+if (new URLSearchParams(window.location.search).get('collection')) {
+    document.getElementById('submitGuess').addEventListener('click', checkGuess);
 
-document.getElementById('guessInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        checkGuess();
-    }
-});
-
-document.getElementById('giveUpBtn').addEventListener('click', giveUp);
-document.getElementById('nextBtn').addEventListener('click', nextRound);
-
-// Global keydown listener to capture typing anywhere on the page during gameplay
-document.addEventListener('keydown', (e) => {
-    const guessInput = document.getElementById('guessInput');
-    const gameContent = document.getElementById('gameContent');
-    
-    // Handle Enter key for next round if next button is active
-    if (e.key === 'Enter' && guessInput.disabled) {
-        const nextButtonContainer = document.getElementById('nextButtonContainer');
-        if (nextButtonContainer && nextButtonContainer.style.display !== 'none') {
-            nextRound();
-            return;
+    document.getElementById('guessInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            checkGuess();
         }
-    }
-    
-    // Only handle if game is active and input is enabled
-    if (gameContent.style.display !== 'none' && !guessInput.disabled) {
-        // Ignore if modifier keys are pressed (Ctrl, Alt, Meta)
-        if (e.ctrlKey || e.altKey || e.metaKey) {
-            return;
-        }
+    });
+
+    document.getElementById('giveUpBtn').addEventListener('click', giveUp);
+    document.getElementById('nextBtn').addEventListener('click', nextRound);
+
+    // Global keydown listener to capture typing anywhere on the page during gameplay
+    document.addEventListener('keydown', (e) => {
+        const guessInput = document.getElementById('guessInput');
+        const gameContent = document.getElementById('gameContent');
         
-        // Ignore special keys that shouldn't trigger input focus
-        const ignoredKeys = ['Tab', 'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
-        if (ignoredKeys.includes(e.key)) {
-            return;
-        }
-        
-        // If input is not focused and user types a printable character
-        if (document.activeElement !== guessInput) {
-            // Check if it's a printable character (letters, numbers, space, etc.)
-            if (e.key.length === 1) {
-                guessInput.focus();
-                // The character will be automatically added by the browser's default behavior
-            } else if (e.key === 'Backspace' || e.key === 'Delete') {
-                // Also focus on backspace/delete
-                guessInput.focus();
+        // Handle Enter key for next round if next button is active
+        if (e.key === 'Enter' && guessInput.disabled) {
+            const nextButtonContainer = document.getElementById('nextButtonContainer');
+            if (nextButtonContainer && nextButtonContainer.style.display !== 'none') {
+                nextRound();
+                return;
             }
         }
-    }
-});
-document.getElementById('repeatBtn').addEventListener('click', repeatSong);
+        
+        // Only handle if game is active and input is enabled
+        if (gameContent.style.display !== 'none' && !guessInput.disabled) {
+            // Ignore if modifier keys are pressed (Ctrl, Alt, Meta)
+            if (e.ctrlKey || e.altKey || e.metaKey) {
+                return;
+            }
+            
+            // Ignore special keys that shouldn't trigger input focus
+            const ignoredKeys = ['Tab', 'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
+            if (ignoredKeys.includes(e.key)) {
+                return;
+            }
+            
+            // If input is not focused and user types a printable character
+            if (document.activeElement !== guessInput) {
+                // Check if it's a printable character (letters, numbers, space, etc.)
+                if (e.key.length === 1) {
+                    guessInput.focus();
+                    // The character will be automatically added by the browser's default behavior
+                } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                    // Also focus on backspace/delete
+                    guessInput.focus();
+                }
+            }
+        }
+    });
+    document.getElementById('repeatBtn').addEventListener('click', repeatSong);
 
-// Lifeline event listeners
-document.getElementById('timeLifeline').addEventListener('click', useTimeLifeline);
-document.getElementById('hintLifeline').addEventListener('click', useHintLifeline);
-document.getElementById('yearLifeline').addEventListener('click', useYearLifeline);
-document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);
+    // Lifeline event listeners
+    document.getElementById('timeLifeline').addEventListener('click', useTimeLifeline);
+    document.getElementById('hintLifeline').addEventListener('click', useHintLifeline);
+    document.getElementById('yearLifeline').addEventListener('click', useYearLifeline);
+    document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);
+}
 
 
 function audio_to_img(url) {
