@@ -392,6 +392,9 @@ async function startRound() {
 	// Reset revealed status
 	document.getElementById('gameContent').dataset.revealed = false;
 
+	// Reset Album Image
+	document.getElementById('#album-img').src = "";
+
     // Clear input
     document.getElementById('guessInput').value = '';
     document.getElementById('guessInput').disabled = false;
