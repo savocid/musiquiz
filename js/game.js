@@ -18,7 +18,7 @@ function getAudioDuration(audioUrl) {
 
 // Helper function to normalize strings for comparison
 function normalize_str(str) {
-    return str.toLowerCase().trim().replace(/^the\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
 }
 
 // Helper function to check if guess matches any title
@@ -338,21 +338,51 @@ async function startRound() {
     gameState.yearRevealed = false;  // Reset year reveal
     gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };  // Reset per-round usage
     
-    // Generate random startTime if not specified
-    if (gameState.currentSong.startTime === null) {
-        try {
-            const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
-                gameState.currentSong.audioFile : 
-                gameState.baseUrl + '/' + gameState.currentSong.audioFile;
-            const duration = await getAudioDuration(audioUrl);
-            
-            // Generate random start time: startTime + clipDuration + 5s <= duration
-            const maxStartTime = Math.max(0, duration - gameState.clipDuration - 5);
-            gameState.currentSong.startTime = Math.random() * maxStartTime;
-        } catch (error) {
-            console.error('Failed to get audio duration, using 0:', error);
-            gameState.currentSong.startTime = 0;
+    // Generate random startTime based on startTime and endTime
+    try {
+        const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
+            gameState.currentSong.audioFile : 
+            gameState.baseUrl + '/' + gameState.currentSong.audioFile;
+        const duration = await getAudioDuration(audioUrl);
+        
+        // Parse startTime
+        let parsedStart = 0;
+        if (gameState.currentSong.startTime !== null) {
+            if (typeof gameState.currentSong.startTime === 'string' && gameState.currentSong.startTime.includes(':')) {
+                const parts = gameState.currentSong.startTime.split(':');
+                parsedStart = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } else {
+                parsedStart = parseFloat(gameState.currentSong.startTime);
+            }
         }
+        
+        // Parse endTime
+        let parsedEnd = null;
+        if (gameState.currentSong.endTime !== null) {
+            if (typeof gameState.currentSong.endTime === 'string' && gameState.currentSong.endTime.includes(':')) {
+                const parts = gameState.currentSong.endTime.split(':');
+                parsedEnd = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } else {
+                parsedEnd = parseFloat(gameState.currentSong.endTime);
+            }
+        }
+        
+        // Determine effective start and end
+        const effectiveStart = parsedStart;
+        const effectiveEnd = parsedEnd !== null ? parsedEnd : duration - 5; // padding 5s
+        
+        // Check if there's enough room for randomization
+        if (effectiveStart + gameState.clipDuration + 5 >= effectiveEnd) {
+            // Not enough room, use fixed start
+            gameState.currentSong.startTime = effectiveStart;
+        } else {
+            // Randomize between effectiveStart and effectiveEnd - clipDuration
+            const maxStart = effectiveEnd - gameState.clipDuration;
+            gameState.currentSong.startTime = effectiveStart + Math.random() * (maxStart - effectiveStart);
+        }
+    } catch (error) {
+        console.error('Failed to get audio duration, using 0:', error);
+        gameState.currentSong.startTime = 0;
     }
     
     // Update total sources/songs counters
@@ -431,7 +461,25 @@ function playSong(restartCountdown = false) {
         }
     }
     
-    // Create and configure audio
+    // Parse endTime (support both formats and null to ignore)
+    let endTime = null;
+    if (song.endTime !== null && song.startTime !== null) {
+        if (typeof song.endTime === 'string' && song.endTime.includes(':')) {
+            // Format: "1:30" or "0:45"
+            const parts = song.endTime.split(':');
+            endTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        } else {
+            // Format: number in seconds
+            endTime = parseFloat(song.endTime);
+        }
+    }
+    
+    // Calculate effective clip duration
+    let effectiveClipDuration = gameState.clipDuration;
+    if (endTime !== null && endTime > startTime) {
+        effectiveClipDuration = Math.min(gameState.clipDuration, endTime - startTime);
+    }
+    gameState.effectiveClipDuration = effectiveClipDuration;
     let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/' + song.audioFile;
     gameState.audio = new Audio(audioUrl);
     gameState.audio.volume = getCurrentVolume();
@@ -453,7 +501,7 @@ function playSong(restartCountdown = false) {
     // Store reference to current round for timer validation
     const thisRoundId = roundId;
     
-    // Set up clip timer to stop audio after clipDuration
+    // Set up clip timer to stop audio after effectiveClipDuration
     gameState.clipTimer = setTimeout(() => {
         // Only pause if we're still on the same round
         if (gameState.currentRoundId === thisRoundId) {
@@ -469,7 +517,7 @@ function playSong(restartCountdown = false) {
                 document.getElementById('progressTimer').style.display = 'none';
             }
         }
-    }, gameState.clipDuration * 1000);
+    }, effectiveClipDuration * 1000);
     
     // Set up audio end listener with round validation
     gameState.audio.addEventListener('ended', () => {
@@ -491,7 +539,7 @@ function playSong(restartCountdown = false) {
 function startProgressBar() {
     const progressBar = document.getElementById('progressBar');
     const progressTimer = document.getElementById('progressTimer');
-    const duration = gameState.clipDuration * 1000; // in ms
+    const duration = (gameState.effectiveClipDuration || gameState.clipDuration) * 1000; // in ms
     const startTime = Date.now();
     
     // Show timer
@@ -540,7 +588,7 @@ function setupProgressBarInteraction() {
             const percentClicked = clickX / rect.width;
             
             // Seek audio to that position based on clip duration
-            const targetTime = percentClicked * gameState.clipDuration;
+            const targetTime = percentClicked * (gameState.effectiveClipDuration || gameState.clipDuration);
             const song = gameState.currentSong;
             
             // Store whether audio was playing before seek
@@ -565,7 +613,7 @@ function setupProgressBarInteraction() {
             
             // Restart progress bar from new position
             clearInterval(gameState.progressInterval);
-            const remainingDuration = (gameState.clipDuration - targetTime) * 1000; // in ms
+            const remainingDuration = ((gameState.effectiveClipDuration || gameState.clipDuration) - targetTime) * 1000; // in ms
             const seekStartTime = Date.now();
             const progressBarEl = document.getElementById('progressBar');
             const progressTimerEl = document.getElementById('progressTimer');
