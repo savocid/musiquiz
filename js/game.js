@@ -1262,23 +1262,19 @@ function showResult() {
     // Check if required guessed
     const song = gameState.currentSong;
     const gameStyle = gameState.collection ? gameState.collection.gameStyle || 1 : 1;
+    const allRequiredSourcesRevealed = song.sources.every((source, index) => !source[0] || gameState.sourceRevealed.includes(index));
     let requiredGuessed = false;
     
     if (gameStyle === 3) {
         requiredGuessed = song.title[0] ? gameState.songRevealed : true;
     } else if (gameStyle === 2) {
-        requiredGuessed = gameState.sourceRevealed.length === song.sources.length;
+        requiredGuessed = allRequiredSourcesRevealed;
     } else {
-        const allSourcesRevealed = gameState.sourceRevealed.length === song.sources.length;
-        requiredGuessed = allSourcesRevealed && (song.title[0] ? gameState.songRevealed : true);
+        requiredGuessed = allRequiredSourcesRevealed && (song.title[0] ? gameState.songRevealed : true);
     }
-    console.log(`${requiredGuessed} - ${!gameState.canGuess} - ${gameState.lives}`);
-	console.log(`${gameState.sourceRevealed.length} - ${song.sources.length}`);
-	console.log(song);
-	console.log(gameState.sourceRevealed);
+
     // Show next button and disable input if required guessed or timeout (but not if game over)
     if ((requiredGuessed || !gameState.canGuess) && gameState.lives > 0) {
-		console.log(2)
         // Always show next button when required guessed
         document.getElementById('nextButtonContainer').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
