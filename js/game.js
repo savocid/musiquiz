@@ -300,7 +300,7 @@ async function loadGameData() {
         }
         
         // Set base URL for audio files
-        gameState.baseUrl = 'https://' + collectionsUrl;
+        gameState.baseUrl = 'https://' + collectionsUrl + '/audio';
         
         // Always use current MODES definition (ensures fresh settings)
         gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };		gameState.lives = gameState.settings.lives;
