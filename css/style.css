@@ -1005,7 +1005,7 @@ header h1 a, .btn-secondary a {
     background: transparent;
 }
 
-
+#gameContent[data-correct="false"] #lifelineButtons,
 #gameContent[data-revealed="true"] #lifelineButtons {
 	display:none !important;
 }
