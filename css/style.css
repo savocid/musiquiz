@@ -1007,7 +1007,7 @@ header h1 a, .btn-secondary a {
 
 .btn-lifeline {
     padding: 0.6rem 1.2rem;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
     background: rgba(255, 193, 7, 0.9);
     color: #333;
     border: 2px solid rgba(255, 193, 7, 1);

@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Lifelines
             const lifelinesSpan = document.createElement('span');
             let lifelines = [];
-            if (modeData.timeout > 0) lifelines.push('⏱️');
             
             // Add lifelines based on availability
             if (modeData.lifelines) {
@@ -78,12 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (modeData.lifelines.year.total > 0) {
                     lifelines.push('📅');
                 }
+                if (modeData.lifelines.expand.total > 0) {
+                    lifelines.push('↔️');
+                }
                 if (modeData.lifelines.skip.total > 0) {
                     lifelines.push('⏭️');
                 }
+                if (modeData.timeout > 0) {
+                    lifelines.push('⏱️');
+                }
             } else {
                 // Fallback for old mode format
-                lifelines.push('💡', '📅', '⏭️');
+                lifelines.push('💡', '📅', '↔️', '⏭️');
             }
             
             lifelinesSpan.innerHTML = `<span class="emoji">${lifelines.join(' • ')}</span>`;

@@ -1,14 +1,14 @@
 // Helper function to get audio duration
 function getAudioDuration(audioUrl) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const audio = new Audio();
         
         audio.addEventListener('loadedmetadata', () => {
             resolve(audio.duration);
         });
         
-        audio.addEventListener('error', () => {
-            resolve(0); // Resolve with 0 on error
+        audio.addEventListener('error', (error) => {
+            reject(error);
         });
         
         audio.src = audioUrl;
@@ -73,14 +73,18 @@ let gameState = {
     clipDuration: 10,
     timeout: 0,
     canGuess: true,
+    isExpanded: false,  // Track if expand lifeline has been used this round
+    originalStartTime: 0,  // Store original clip start time
+    originalEndTime: null,  // Store original clip end time
     // Lifelines
     lifelines: {
         time: { remaining: 0, total: 0 },
         hint: { remaining: 0, total: 0 },
         year: { remaining: 0, total: 0 },
-        skip: { remaining: 0, total: 0 }
+        skip: { remaining: 0, total: 0 },
+        expand: { remaining: 0, total: 0 }
     },
-    lifelineUsedThisRound: { time: false, hint: false, year: false, skip: false },  // Track per-round usage
+    lifelineUsedThisRound: { time: false, hint: false, year: false, skip: false, expand: false },  // Track per-round usage
     hintLettersRevealed: { source: [], song: [] },  // Track revealed letter positions
     yearRevealed: false  // Track if year has been revealed
 };
@@ -93,8 +97,9 @@ const MODES = {
         timeout: 0,
         lifelines: {
             hint: { total: 999 },
+            expand: { total: 999 },
             year: { total: 999 },
-            skip: { total: 999 } 
+            skip: { total: 999 },
         }
     },
     'default': { 
@@ -102,9 +107,10 @@ const MODES = {
         clipDuration: 20, 
         timeout: 60,
         lifelines: {
-            hint: { total: 1 }, 
+            hint: { total: 1 },
+            expand: { total: 1 },
             year: { total: 1 }, 
-            skip: { total: 1 }  
+            skip: { total: 1 },
         }
     },
     'intense': { 
@@ -113,8 +119,9 @@ const MODES = {
         timeout: 20,
         lifelines: {
             hint: { total: 1 }, 
+            expand: { total: 1 },
             year: { total: 1 }, 
-            skip: { total: 1 }  
+            skip: { total: 1 },
         }
     },
     'sudden-death': { 
@@ -122,14 +129,13 @@ const MODES = {
         clipDuration: 10, 
         timeout: 0,
         lifelines: {
-            hint: { total: 1 }, 
+            hint: { total: 1 },
+            expand: { total: 1 },
             year: { total: 1 }, 
-            skip: { total: 1 }  
+            skip: { total: 1 },
         }
     }
 };
-
-// ↔️
 
 window.MODES = MODES;
 
@@ -153,9 +159,10 @@ window.changeMode = function(newMode) {
     gameState.lifelines.hint = { remaining: gameState.settings.lifelines.hint.total, total: gameState.settings.lifelines.hint.total };
     gameState.lifelines.year = { remaining: gameState.settings.lifelines.year.total, total: gameState.settings.lifelines.year.total };
     gameState.lifelines.skip = { remaining: gameState.settings.lifelines.skip.total, total: gameState.settings.lifelines.skip.total };
+    gameState.lifelines.expand = { remaining: gameState.settings.lifelines.expand.total, total: gameState.settings.lifelines.expand.total };
     
     // Reset lifeline used this round
-    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };
+    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false, expand: false };
     
     updateLifelineButtons();
     
@@ -321,6 +328,7 @@ async function loadGameData() {
         gameState.lifelines.hint = { remaining: gameState.settings.lifelines.hint.total, total: gameState.settings.lifelines.hint.total };
         gameState.lifelines.year = { remaining: gameState.settings.lifelines.year.total, total: gameState.settings.lifelines.year.total };
         gameState.lifelines.skip = { remaining: gameState.settings.lifelines.skip.total, total: gameState.settings.lifelines.skip.total };
+        gameState.lifelines.expand = { remaining: gameState.settings.lifelines.expand.total, total: gameState.settings.lifelines.expand.total };
         
         // Disable lifelines based on collection settings
         if (gameState.collection.disabledLifelines && Array.isArray(gameState.collection.disabledLifelines)) {
@@ -432,13 +440,14 @@ async function startRound() {
     gameState.canGuess = true;
     gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };  // Reset hint state
     gameState.yearRevealed = false;  // Reset year reveal
-    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false };  // Reset per-round usage
+    gameState.isExpanded = false;  // Reset expand state
+    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false, expand: false };  // Reset per-round usage
     
     // Generate random startTime based on startTime and endTime
     try {
         const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
             gameState.currentSong.audioFile : 
-            gameState.baseUrl + '/' + gameState.currentSong.audioFile;
+            gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
         const duration = await getAudioDuration(audioUrl);
         gameState.currentSong.duration = duration;
         
@@ -481,6 +490,10 @@ async function startRound() {
         console.error('Failed to get audio duration, using 0:', error);
         gameState.currentSong.startTime = 0;
     }
+    
+    // Store original clip boundaries for CSS highlighting when guessed correctly
+    gameState.originalStartTime = gameState.currentSong.startTime;
+    gameState.originalEndTime = gameState.currentSong.endTime;
     
     // Update total sources/songs counters
     gameState.totalSourcesSoFar += gameState.currentSong.sources.filter(s => s[0]).length;
@@ -542,7 +555,7 @@ async function startRound() {
     // Update lifeline buttons
     updateLifelineButtons();
 
-	console.log(gameState.currentSong)
+	console.log(gameState.currentSong.audioFile)
 
     // Play audio (start countdown)
     playSong(true);
@@ -727,10 +740,11 @@ function setupProgressBarInteraction() {
             const percentClicked = clickX / rect.width;
             
             const isRevealed = document.getElementById('gameContent').dataset.revealed === 'true';
+            const isExpanded = gameState.isExpanded;
             let targetTime;
             let remainingDuration;
             
-            if (isRevealed) {
+            if (isRevealed || isExpanded) {
                 // Seek within full song duration
                 targetTime = percentClicked * gameState.currentSong.duration;
                 remainingDuration = gameState.currentSong.duration - targetTime;
@@ -746,7 +760,7 @@ function setupProgressBarInteraction() {
             const wasPlaying = !gameState.audio.paused;
             
             // Set audio to the clicked position
-            if (isRevealed) {
+            if (isRevealed || isExpanded) {
                 gameState.audio.currentTime = targetTime;
             } else {
                 // For clip mode, targetTime is relative to clip start, so add the song start time
@@ -758,7 +772,7 @@ function setupProgressBarInteraction() {
             
             // Restart progress bar from new position
             clearInterval(gameState.progressInterval);
-            if (isRevealed) {
+            if (isRevealed || isExpanded) {
                 startFullProgressBar();
             } else {
                 // For clip mode, restart progress bar with adjusted start time
@@ -1021,27 +1035,9 @@ function checkGuess() {
         const song = gameState.currentSong;
         const duration = song.duration;
         
-        // Parse startTime
-        let startTime = 0;
-        if (song.startTime !== null) {
-            if (typeof song.startTime === 'string' && song.startTime.includes(':')) {
-                const parts = song.startTime.split(':');
-                startTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            } else {
-                startTime = parseFloat(song.startTime);
-            }
-        }
-        
-        // Parse endTime
-        let endTime = null;
-        if (song.endTime !== null && song.startTime !== null) {
-            if (typeof song.endTime === 'string' && song.endTime.includes(':')) {
-                const parts = song.endTime.split(':');
-                endTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            } else {
-                endTime = parseFloat(song.endTime);
-            }
-        }
+        // Use stored original clip boundaries instead of current (potentially modified) values
+        const startTime = gameState.originalStartTime;
+        const endTime = gameState.originalEndTime;
         
         // Calculate percentages based on original clip boundaries
         let actualEndTime = startTime;
@@ -1351,6 +1347,49 @@ async function useSkipLifeline() {
     await startRound();
 }
 
+function useExpandLifeline() {
+    const isInfinite = gameState.lifelines.expand.total === 999;
+    const canUse = isInfinite ? !gameState.lifelineUsedThisRound.expand : gameState.lifelines.expand.remaining > 0;
+    
+    if (!canUse || !gameState.canGuess) return;
+    
+    // Set start and end to full song
+    gameState.currentSong.startTime = 0;
+    gameState.currentSong.endTime = gameState.currentSong.duration;
+    gameState.isExpanded = true;  // Mark as expanded
+    
+    // Check if audio was playing before we pause it
+    const wasPlaying = gameState.audio && !gameState.audio.paused;
+    
+    // Stop current playback
+    if (gameState.audio) {
+        gameState.audio.pause();
+    }
+    clearTimeout(gameState.clipTimer);
+    clearInterval(gameState.progressInterval);
+    
+    // If clip had ended (was paused), start from beginning of full song
+    // Otherwise, continue from current position
+    if (!wasPlaying) {
+        gameState.audio.currentTime = 0;
+    }
+    // If was playing, currentTime remains as is
+    
+    gameState.audio.play().catch(err => console.error('Audio play failed:', err));
+    
+    // Start full progress bar
+    startFullProgressBar();
+    
+    // Mark as used this round or deduct if limited
+    if (isInfinite) {
+        gameState.lifelineUsedThisRound.expand = true;
+    } else {
+        gameState.lifelines.expand.remaining--;
+    }
+    
+    updateLifelineButtons();
+}
+
 function repeatSong() {
     // Hide repeat button and show timer
     document.getElementById('repeatBtn').style.display = 'none';
@@ -1367,9 +1406,10 @@ function repeatSong() {
     document.getElementById('progressBar').style.width = '0%';
     
     const isRevealed = document.getElementById('gameContent').dataset.revealed === 'true';
+    const isExpanded = gameState.isExpanded;
     
-    if (isRevealed) {
-        // For revealed songs, replay from the beginning of the full song
+    if (isRevealed || isExpanded) {
+        // For revealed or expanded songs, replay from the beginning of the full song
         gameState.audio.currentTime = 0;
         gameState.audio.play().catch(err => console.error('Error playing audio after repeat:', err));
         startFullProgressBar();
@@ -1398,6 +1438,9 @@ async function nextRound() {
 }
 
 function endGame(completed) {
+	const params = new URLSearchParams(window.location.search);
+    const collectionId = params.get('collection');
+
     // Stop everything
     if (gameState.audio) {
         gameState.audio.pause();
@@ -1435,13 +1478,13 @@ function endGame(completed) {
     const resultDifficulty = gameState.collection.difficulty || 'Medium';
     document.getElementById('resultDifficulty').textContent = resultDifficulty;
     document.getElementById('resultDifficulty').className = `difficulty-${resultDifficulty.toLowerCase().replace(' ', '-')}`;
-    
+
     // Show random cover image if available
     const resultScreenCover = document.getElementById('resultScreenCover');
     if (gameState.collection.covers && gameState.collection.covers.length > 0) {
         const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
         // Resolve cover path relative to collections base URL
-        const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/' + randomCover.replace('./', '');
+        const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + collectionId + '/' + randomCover.replace('./', '');
         resultScreenCover.src = coverUrl;
         resultScreenCover.alt = `${gameState.collection.title} cover`;
         resultScreenCover.style.display = 'block';
@@ -1510,7 +1553,7 @@ function endGame(completed) {
     const lifelineContainer = document.getElementById('resultLifelines');
     const lifelineDisplay = document.getElementById('resultLifelinesDisplay');
     const hasLifelines = gameState.lifelines.time.total > 0 || gameState.lifelines.hint.total > 0 || 
-                         gameState.lifelines.year.total > 0 || gameState.lifelines.skip.total > 0;
+                         gameState.lifelines.year.total > 0 || gameState.lifelines.skip.total > 0 || gameState.lifelines.expand.total > 0;
     
     if (hasLifelines) {
         lifelineContainer.style.display = 'block';
@@ -1546,6 +1589,14 @@ function endGame(completed) {
                          false : gameState.lifelines.skip.remaining < gameState.lifelines.skip.total;
             const style = used ? 'filter: grayscale(100%); opacity: 0.5;' : '';
             lifelinesHTML += `<span style="${style}" title="Skip: ${used ? 'Used' : 'Unused'}">⏭️</span>`;
+        }
+        
+        // Expand lifeline
+        if (gameState.lifelines.expand.total > 0) {
+            const used = gameState.lifelines.expand.total === 999 ? 
+                         false : gameState.lifelines.expand.remaining < gameState.lifelines.expand.total;
+            const style = used ? 'filter: grayscale(100%); opacity: 0.5;' : '';
+            lifelinesHTML += `<span style="${style}" title="Expand: ${used ? 'Used' : 'Unused'}">↔️</span>`;
         }
         
         lifelineDisplay.innerHTML = lifelinesHTML;
@@ -1610,7 +1661,7 @@ function updateLifelineButtons() {
     const yearCount = document.getElementById('yearCount');
     
     // Show container if any lifelines are available
-    const hasLifelines = gameState.lifelines.time.total > 0 || gameState.lifelines.hint.total > 0 || gameState.lifelines.year.total > 0;
+    const hasLifelines = gameState.lifelines.time.total > 0 || gameState.lifelines.hint.total > 0 || gameState.lifelines.year.total > 0 || gameState.lifelines.skip.total > 0 || gameState.lifelines.expand.total > 0;
     lifelineContainer.style.display = hasLifelines ? 'flex' : 'none';
     
     // Time lifeline
@@ -1657,6 +1708,24 @@ function updateLifelineButtons() {
         skipBtn.disabled = !canUse || !gameState.canGuess;
     } else {
         skipBtn.style.display = 'none';
+    }
+    
+    // Expand lifeline
+    const expandBtn = document.getElementById('expandLifeline');
+    const expandCount = document.getElementById('expandCount');
+    if (gameState.lifelines.expand.total > 0) {
+        expandBtn.style.display = 'inline-block';
+        const isInfinite = gameState.lifelines.expand.total === 999;
+        const canUse = isInfinite ? !gameState.lifelineUsedThisRound.expand : gameState.lifelines.expand.remaining > 0;
+        
+        // Check if song is already playing full duration
+        const song = gameState.currentSong;
+        const isAlreadyFull = song.startTime === 0 && (song.endTime === null || song.endTime >= song.duration);
+        
+        expandCount.textContent = isInfinite ? '∞' : gameState.lifelines.expand.remaining;
+        expandBtn.disabled = !canUse || !gameState.canGuess || isAlreadyFull || gameState.isExpanded;
+    } else {
+        expandBtn.style.display = 'none';
     }
 }
 
@@ -1850,6 +1919,7 @@ if (new URLSearchParams(window.location.search).get('collection')) {
     document.getElementById('hintLifeline').addEventListener('click', useHintLifeline);
     document.getElementById('yearLifeline').addEventListener('click', useYearLifeline);
     document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);
+    document.getElementById('expandLifeline').addEventListener('click', useExpandLifeline);
 }
 
 
