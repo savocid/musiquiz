@@ -142,8 +142,8 @@ function displayCollections() {
         let coverImage = '';
         if (collection.covers && collection.covers.length > 0) {
             const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
-            // Resolve cover path relative to collections base URL
-            const coverUrl = randomCover.startsWith('http') ? randomCover : 'https://' + collectionsUrl + '/' + randomCover.replace('./', '');
+            // Resolve cover path relative to collection directory
+            const coverUrl = randomCover.startsWith('http') ? randomCover : 'https://' + collectionsUrl + '/collections/' + collection.id + '/' + randomCover.replace('./', '');
             coverImage = `<img src="${coverUrl}" alt="${collection.title} cover" class="collection-cover" loading="lazy">`;
         }
         

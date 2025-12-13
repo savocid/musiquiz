@@ -129,6 +129,8 @@ const MODES = {
     }
 };
 
+// ↔️
+
 window.MODES = MODES;
 
 // Function to change mode dynamically
@@ -339,8 +341,8 @@ async function loadGameData() {
         const startScreenCover = document.getElementById('startScreenCover');
         if (gameState.collection.covers && gameState.collection.covers.length > 0) {
             const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
-            // Resolve cover path relative to collections base URL
-            const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/' + randomCover.replace('./', '');
+            // Resolve cover path relative to collection directory
+            const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + collectionId + '/' + randomCover.replace('./', '');
             startScreenCover.src = coverUrl;
             startScreenCover.alt = `${gameState.collection.title} cover`;
             startScreenCover.style.display = 'block';
