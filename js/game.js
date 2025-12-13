@@ -555,7 +555,8 @@ async function startRound() {
     // Update lifeline buttons
     updateLifelineButtons();
 
-	console.log(gameState.currentSong.audioFile)
+	console.log(gameState.currentSong.sources.map(source => source[1]))
+	console.log(gameState.currentSong.title.filter((title, i) => i !== 0))
 
     // Play audio (start countdown)
     playSong(true);
