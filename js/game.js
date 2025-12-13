@@ -1288,15 +1288,9 @@ function showResult() {
         // Always show next button when required guessed
         document.getElementById('nextButtonContainer').style.display = 'block';
         document.getElementById('actionButtons').style.display = 'none';
-        document.getElementById('lifelineButtons').style.display = 'none';
         
         // Stop the countdown timer when next button appears
         clearInterval(gameState.guessTimer);
-
-        // Disable all lifeline buttons during next phase
-        document.querySelectorAll('.btn-lifeline').forEach(btn => {
-            btn.disabled = true;
-        });
     }
 }
 
@@ -1368,13 +1362,6 @@ function useExpandLifeline() {
     }
     clearTimeout(gameState.clipTimer);
     clearInterval(gameState.progressInterval);
-    
-    // If clip had ended (was paused), start from beginning of full song
-    // Otherwise, continue from current position
-    if (!wasPlaying) {
-        gameState.audio.currentTime = 0;
-    }
-    // If was playing, currentTime remains as is
     
     gameState.audio.play().catch(err => console.error('Audio play failed:', err));
     

@@ -1005,6 +1005,11 @@ header h1 a, .btn-secondary a {
     background: transparent;
 }
 
+
+#gameContent[data-revealed="true"] #lifelineButtons {
+	display:none !important;
+}
+
 .btn-lifeline {
     padding: 0.6rem 1.2rem;
     font-size: 0.75rem;
