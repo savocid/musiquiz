@@ -1,14 +1,14 @@
 // Helper function to get audio duration
 function getAudioDuration(audioUrl) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const audio = new Audio();
         
         audio.addEventListener('loadedmetadata', () => {
             resolve(audio.duration);
         });
         
-        audio.addEventListener('error', (error) => {
-            reject(error);
+        audio.addEventListener('error', () => {
+            resolve(0); // Resolve with 0 on error
         });
         
         audio.src = audioUrl;
@@ -300,7 +300,8 @@ async function loadGameData() {
         }
         
         // Set base URL for audio files
-        gameState.baseUrl = 'https://' + collectionsUrl + '/audio';
+        collectionsUrl = collectionsUrl.replace(/\/$/, ''); // Remove trailing slash
+        gameState.baseUrl = 'https://' + collectionsUrl;
         
         // Always use current MODES definition (ensures fresh settings)
         gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };		gameState.lives = gameState.settings.lives;
@@ -515,7 +516,7 @@ async function startRound() {
 	// Cover Image
 	const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
 					gameState.currentSong.audioFile : 
-					gameState.baseUrl + '/' + gameState.currentSong.audioFile;
+					gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
 	audio_to_img(audioUrl).then(src => {	document.getElementById("album-img").src = src; });
 
     // Update answer display (hidden)
@@ -592,7 +593,7 @@ function playSong(restartCountdown = false) {
         effectiveClipDuration = Math.min(effectiveClipDuration, gameState.currentSong.duration - startTime - 5);
     }
     gameState.effectiveClipDuration = Math.max(effectiveClipDuration, 1); // minimum 1 second to avoid division by zero
-    let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/' + song.audioFile;
+    let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/audio/' + song.audioFile;
     gameState.audio = new Audio(audioUrl);
     gameState.audio.volume = getCurrentVolume();
     gameState.audio.currentTime = startTime;
