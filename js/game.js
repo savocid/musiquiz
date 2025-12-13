@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadGameData() {
     // MODES is now defined globally
 
-    
+
     // Get URL parameters
     const params = new URLSearchParams(window.location.search);
     const collectionId = params.get('collection');
@@ -216,30 +216,40 @@ async function loadGameData() {
         showCollectionError();
         return;
     }
-    
+
     try {
-        // Fetch collection data
-        let dataUrl = collectionsUrl;
-        if (dataUrl.endsWith('/')) {
-            dataUrl += 'data.json';
-        } else if (!dataUrl.endsWith('/data.json')) {
-            dataUrl += '/data.json';
-        }
-        const response = await fetch('https://' + dataUrl);
-        if (!response.ok) {
-            console.error('Failed to fetch data.json:', response.status, response.statusText);
+        // Fetch collection data from individual collection directory
+        const collectionDataUrl = `${collectionsUrl}/collections/${collectionId}/data.json`;
+        const collectionResponse = await fetch('https://' + collectionDataUrl);
+        if (!collectionResponse.ok) {
+            console.error('Failed to fetch collection data.json:', collectionResponse.status, collectionResponse.statusText);
             showCollectionError();
             return;
         }
-        const data = await response.json();
-        gameState.collection = data.collections.find(c => c.id === collectionId);
-        
-        if (!gameState.collection) {
-            console.error('Collection not found:', collectionId);
+        const collectionData = await collectionResponse.json();
+
+        // Fetch songs data
+        const songsDataUrl = `${collectionsUrl}/audio/songs.json`;
+        const songsResponse = await fetch('https://' + songsDataUrl);
+        if (!songsResponse.ok) {
+            console.error('Failed to fetch songs.json:', songsResponse.status, songsResponse.statusText);
             showCollectionError();
             return;
         }
-        
+        const songsData = await songsResponse.json();
+
+        // Resolve song references to actual song objects
+        collectionData.songs = collectionData.songs.map(songKey => {
+            const song = songsData[songKey];
+            if (!song) {
+                console.warn('Song not found:', songKey);
+                return null;
+            }
+            return song;
+        }).filter(song => song !== null);
+
+        gameState.collection = collectionData;
+
         // Set the source label based on collection's sourceName
         const gameStyle = gameState.collection.gameStyle || 1;
         document.getElementById('sourceLabel').textContent = gameState.collection.sourceName+"s" || "Sources";

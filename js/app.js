@@ -78,16 +78,35 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
         if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
         return;
     }
-    let dataUrl = fullUrl;
-    if (dataUrl.endsWith('/')) {
-        dataUrl += 'data.json';
-    } else if (!dataUrl.endsWith('/data.json')) {
-        dataUrl += '/data.json';
-    }
+
     try {
-        const response = await fetch(dataUrl);
-        const data = await response.json();
-        allCollections = data.collections || [];
+        // First fetch the collections index
+        const indexUrl = fullUrl + '/collections/index.json';
+        const indexResponse = await fetch(indexUrl);
+        if (!indexResponse.ok) {
+            throw new Error(`Failed to fetch collections index: ${indexResponse.status}`);
+        }
+        const collectionIds = await indexResponse.json();
+
+        // Fetch all collection data files
+        const collectionPromises = collectionIds.map(async (collectionId) => {
+            const collectionUrl = `${fullUrl}/collections/${collectionId}/data.json`;
+            try {
+                const response = await fetch(collectionUrl);
+                if (!response.ok) {
+                    console.warn(`Failed to fetch collection ${collectionId}: ${response.status}`);
+                    return null;
+                }
+                return await response.json();
+            } catch (error) {
+                console.warn(`Error fetching collection ${collectionId}:`, error);
+                return null;
+            }
+        });
+
+        const collections = await Promise.all(collectionPromises);
+        allCollections = collections.filter(collection => collection !== null);
+
         allCollections.sort((a, b) => {
             return a.title.localeCompare(b.title, undefined, { numeric: true });
         });
