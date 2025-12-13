@@ -49,7 +49,7 @@ const collectionsUrlSubmit = document.getElementById('collectionsUrlSubmit');
 
 // Function to clean URL
 function cleanUrl(url) {
-    return url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+    return url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
 }
 
 // Clean input on blur

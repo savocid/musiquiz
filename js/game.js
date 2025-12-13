@@ -248,7 +248,7 @@ async function loadGameData() {
                 return null;
             }
             return song;
-        }).filter(song => song !== null);
+        }).filter(song => song !== null && song.audioFile);
 
         gameState.collection = collectionData;
 
