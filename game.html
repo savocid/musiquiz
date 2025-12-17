@@ -70,13 +70,12 @@
 
             <!-- Gameplay Wrapper -->
             <div class="gameplay-wrapper">
-                <!-- Progress Bar for Song Playback -->
-                <div class="progress-container">
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar" id="progressBar"></div>
-                        <span class="progress-timer" id="progressTimer">0s</span>
-                        <button class="btn-repeat" id="repeatBtn" style="display: none;">🔄</button>
-                    </div>
+                <!-- Audio Player -->
+                <div class="audioPlayer-container">
+					<div id="progressBar"></div>
+					<div id="audioPlayer"></div>
+					<div id="progressTimer"></div>
+					<button class="btn-repeat" id="repeatBtn" style="display: none;">🔄</button>
                 </div>
 
                 <!-- Timer (only shown in timeout modes) -->
@@ -195,6 +194,8 @@
         <a href="submit">submit</a>
     </footer>
 
+	<script src="js/lib/wavesurfer.js-7.12.1-custom.1/dist/wavesurfer.min.js"></script>
+	<script src="js/player.js"></script>
 	<script src="js/musicmetadata.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>

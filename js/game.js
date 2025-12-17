@@ -2,31 +2,25 @@
 function getAudioDuration(audioUrl) {
     return new Promise((resolve, reject) => {
         const audio = new Audio();
-        
         audio.addEventListener('loadedmetadata', () => {
             resolve(audio.duration);
         });
-        
         audio.addEventListener('error', (error) => {
             reject(error);
         });
-        
         audio.src = audioUrl;
         audio.load();
     });
-}
 
 // Helper function to normalize strings for comparison
 function normalize_str(str) {
     return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').trim();
-}
 
 // Helper function to format seconds as MM:SS
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
 // Helper function to check if guess matches any title
 function matchesTitle(song, normalizedInput) {
@@ -37,7 +31,6 @@ function matchesTitle(song, normalizedInput) {
         return normalizedInput === normalizedTitle || normalizedInput.includes(normalizedTitle);
     }
     return false;
-}
 
 // Helper function to get the primary title
 function getTitle(song) {
@@ -47,7 +40,6 @@ function getTitle(song) {
         return song.title;
     }
     return '';
-}
 
 let gameState = {
     collection: null,
@@ -392,7 +384,6 @@ async function loadGameData() {
         console.error('Failed to load collection:', error);
         showCollectionError();
     }
-}
 
 function showCollectionError() {
     document.getElementById('collectionTitle').style.display = 'none';
@@ -400,7 +391,6 @@ function showCollectionError() {
     document.querySelector('#startScreen > div').style.display = 'none'; // Hide the difficulty and rounds selection
     document.getElementById('startGameBtn').style.display = 'none';
     document.getElementById('errorMessage').style.display = 'block';
-}
 
 async function initializeGame() {
     // Get number of rounds from slider
@@ -421,7 +411,7 @@ async function initializeGame() {
     
     // Start first round
     await startRound();
-}
+
 
 async function startRound() {
     if (gameState.currentSongIndex >= gameState.shuffledSongs.length) {
@@ -560,7 +550,6 @@ async function startRound() {
 
     // Play audio (start countdown)
     playSong(true);
-}
 
 function playSong(restartCountdown = false) {
     const song = gameState.currentSong;
@@ -598,7 +587,7 @@ function playSong(restartCountdown = false) {
         }
     }
     
-    // Calculate effective clip duration
+    // Calculate effective clip duration (if needed for game logic)
     let effectiveClipDuration = gameState.clipDuration;
     if (endTime !== null && endTime > startTime) {
         effectiveClipDuration = Math.min(gameState.clipDuration, endTime - startTime);
@@ -606,228 +595,33 @@ function playSong(restartCountdown = false) {
     if (endTime === null && gameState.currentSong.duration > 0) {
         effectiveClipDuration = Math.min(effectiveClipDuration, gameState.currentSong.duration - startTime - 5);
     }
-    gameState.effectiveClipDuration = Math.max(effectiveClipDuration, 1); // minimum 1 second to avoid division by zero
-    let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/audio/' + song.audioFile;
-    gameState.audio = new Audio(audioUrl);
-    gameState.audio.volume = getCurrentVolume();
-    gameState.audio.currentTime = startTime;
+    gameState.effectiveClipDuration = Math.max(effectiveClipDuration, 1);
 
     // Start countdown only if requested (new round)
     if (restartCountdown && gameState.hasTimeout && gameState.canGuess) {
         startCountdown();
     }
-    
-    // Play audio
-    gameState.audio.play().catch(err => {
-        console.error('Audio play failed:', err);
-    });
-    
-    // Start progress bar
-    startProgressBar();
-    
-    // Store reference to current round for timer validation
-    const thisRoundId = roundId;
-    
-    // Set up clip timer to stop audio after effectiveClipDuration
-    gameState.clipTimer = setTimeout(() => {
-        // Only pause if we're still on the same round
-        if (gameState.currentRoundId === thisRoundId) {
-            // Always pause audio and stop progress bar when clip duration is reached
-            if (gameState.audio) {
-                gameState.audio.pause();
-            }
-            stopProgressBar();
-            
-            // Always show replay button after clip ends (unless game is over)
-            if (gameState.lives > 0) {
-                document.getElementById('repeatBtn').style.display = 'flex';
-                document.getElementById('progressTimer').style.display = 'none';
-            }
-        }
-    }, effectiveClipDuration * 1000);
-    
-    // Set up audio end listener with round validation
-    gameState.audio.addEventListener('ended', () => {
-        // Only stop if we're still on the same round
-        if (gameState.currentRoundId === thisRoundId) {
-            stopProgressBar();
-            // Show replay button when audio naturally ends (unless game is over)
-            if (gameState.lives > 0) {
-                document.getElementById('repeatBtn').style.display = 'flex';
-                document.getElementById('progressTimer').style.display = 'none';
-            }
-        }
-    });
-    
-    // Make progress bar interactive
-    setupProgressBarInteraction();
-}
 
-function startProgressBar() {
-    const progressBar = document.getElementById('progressBar');
-    const progressTimer = document.getElementById('progressTimer');
-    const duration = (gameState.effectiveClipDuration || gameState.clipDuration) * 1000; // in ms
-    const startTime = Date.now();
-    
-    // Show timer
-    progressTimer.style.display = 'block';
-    
-    gameState.progressInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const percent = Math.min((elapsed / duration) * 100, 100);
-        progressBar.style.width = percent + '%';
-        
-        // Update countdown timer
-        const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
-        progressTimer.textContent = formatTime(remaining);
-        
-        if (percent >= 100) {
-            clearInterval(gameState.progressInterval);
-            progressTimer.textContent = '0:00';
+    // Use WaveSurfer for playback
+    if (window.setPlayerSong) {
+        let audioUrl = song.audioFile.startsWith('http') ? song.audioFile : gameState.baseUrl + '/audio/' + song.audioFile;
+        window.setPlayerSong(audioUrl, startTime, endTime);
+        // Seek to startTime if needed (WaveSurfer API)
+        if (window.wavesurfer && typeof startTime === 'number' && startTime > 0) {
+            window.wavesurfer.once('ready', () => {
+                const duration = window.wavesurfer.getDuration();
+                if (isFinite(duration) && duration > 0 && isFinite(startTime)) {
+                    window.wavesurfer.seekTo(startTime / duration);
+                }
+            });
         }
-    }, 50); // Update every 50ms for smooth animation
-}
-
-function startFullProgressBar() {
-    const progressBar = document.getElementById('progressBar');
-    const progressTimer = document.getElementById('progressTimer');
-    const duration = gameState.currentSong.duration;
-    
-    // Show timer, hide repeat button
-    progressTimer.style.display = 'block';
-    document.getElementById('repeatBtn').style.display = 'none';
-    
-    gameState.progressInterval = setInterval(() => {
-        if (!gameState.audio) return;
-        const currentTime = gameState.audio.currentTime;
-        const percent = Math.min((currentTime / duration) * 100, 100);
-        progressBar.style.width = percent + '%';
-        
-        // Update countdown timer (remaining time to end)
-        const remaining = Math.max(0, Math.ceil(duration - currentTime));
-        progressTimer.textContent = formatTime(remaining);
-        
-        if (percent >= 100) {
-            clearInterval(gameState.progressInterval);
-            progressTimer.textContent = '0:00';
+        // Play
+        if (window.wavesurfer) {
+            window.wavesurfer.play();
         }
-    }, 50); // Update every 50ms for smooth animation
-}
-
-function stopProgressBar() {
-    if (gameState.progressInterval) {
-        clearInterval(gameState.progressInterval);
-        document.getElementById('progressBar').style.width = '100%';
-        document.getElementById('progressTimer').textContent = '0:00';
     }
-}
 
-function setupProgressBarInteraction() {
-    const progressContainer = document.querySelector('.progress-container');
-    
-    // Remove old listener by setting a flag
-    if (!progressContainer.dataset.hasListener) {
-        progressContainer.addEventListener('click', (e) => {
-            if (!gameState.audio) return;
-            
-            // Don't seek if clicking the repeat button
-            if (e.target.id === 'repeatBtn' || e.target.closest('#repeatBtn')) {
-                return;
-            }
-            
-            // Calculate click position as percentage
-            const rect = progressContainer.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const percentClicked = clickX / rect.width;
-            
-            const isRevealed = document.getElementById('gameContent').dataset.revealed === 'true';
-            const isExpanded = gameState.isExpanded;
-            let targetTime;
-            let remainingDuration;
-            
-            if (isRevealed || isExpanded) {
-                // Seek within full song duration
-                targetTime = percentClicked * gameState.currentSong.duration;
-                remainingDuration = gameState.currentSong.duration - targetTime;
-            } else {
-                // Seek within clip duration
-                targetTime = percentClicked * (gameState.effectiveClipDuration || gameState.clipDuration);
-                remainingDuration = (gameState.effectiveClipDuration || gameState.clipDuration) - targetTime;
-            }
-            
-            const song = gameState.currentSong;
-            
-            // Store whether audio was playing before seek
-            const wasPlaying = !gameState.audio.paused;
-            
-            // Set audio to the clicked position
-            if (isRevealed || isExpanded) {
-                gameState.audio.currentTime = targetTime;
-            } else {
-                // For clip mode, targetTime is relative to clip start, so add the song start time
-                gameState.audio.currentTime = gameState.currentStartTime + targetTime;
-            }
-            
-            // Always resume playing after seeking
-            gameState.audio.play().catch(err => console.error('Error playing audio after seek:', err));
-            
-            // Restart progress bar from new position
-            clearInterval(gameState.progressInterval);
-            if (isRevealed || isExpanded) {
-                startFullProgressBar();
-            } else {
-                // For clip mode, restart progress bar with adjusted start time
-                clearTimeout(gameState.clipTimer);
-                
-                const progressBarEl = document.getElementById('progressBar');
-                const progressTimerEl = document.getElementById('progressTimer');
-                const duration = (gameState.effectiveClipDuration || gameState.clipDuration) * 1000; // in ms
-                const startTime = Date.now() - (targetTime * 1000); // Adjust so elapsed starts from targetTime
-                
-                // Show timer
-                progressTimerEl.style.display = 'block';
-                
-                gameState.progressInterval = setInterval(() => {
-                    const elapsed = Date.now() - startTime;
-                    const percent = Math.min((elapsed / duration) * 100, 100);
-                    progressBarEl.style.width = percent + '%';
-                    
-                    // Update countdown timer
-                    const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
-                    progressTimerEl.textContent = formatTime(remaining);
-                    
-                    if (percent >= 100) {
-                        clearInterval(gameState.progressInterval);
-                        progressTimerEl.textContent = '0:00';
-                    }
-                }, 50);
-                
-                // Restart clip timer
-                const remainingTime = gameState.clipDuration - targetTime;
-                const thisRoundId = gameState.currentRoundId;
-                
-                gameState.clipTimer = setTimeout(() => {
-                    // Only pause if we're still on the same round
-                    if (gameState.currentRoundId === thisRoundId) {
-                        // Always pause audio and stop progress bar when clip duration is reached
-                        if (gameState.audio) {
-                            gameState.audio.pause();
-                        }
-                        stopProgressBar();
-                        
-                        // Always show replay button after clip ends (unless game is over)
-                        if (gameState.lives > 0) {
-                            document.getElementById('repeatBtn').style.display = 'flex';
-                            document.getElementById('progressTimer').style.display = 'none';
-                        }
-                    }
-                }, remainingTime * 1000);
-            }
-        });
-        
-        progressContainer.dataset.hasListener = 'true';
-    }
-}
+
 
 function startCountdown() {
     // Always clear any existing guess timer before starting a new one
@@ -848,7 +642,6 @@ function startCountdown() {
             handleTimeout();
         }
     }, 1000);
-}
 
 function updateTimerColor(timeLeft, totalTime) {
     const timerElement = document.getElementById('timer');
@@ -873,7 +666,6 @@ function updateTimerColor(timeLeft, totalTime) {
     }
     
     timerElement.style.color = `rgb(${r}, ${g}, ${b})`;
-}
 
 function handleTimeout() {
     gameState.canGuess = false;
@@ -908,7 +700,6 @@ function handleTimeout() {
         // Show result and next button if still alive (without revealing answer)
         showResult();
     }
-}
 
 function checkGuess() {
     if (!gameState.canGuess) return;
@@ -1111,7 +902,6 @@ function checkGuess() {
             input.focus();
         }
     }, 100);
-}
 
 function updateAnswerDisplay() {
     const song = gameState.currentSong;
@@ -1264,7 +1054,6 @@ function updateAnswerDisplay() {
         
         songPart.innerHTML = songDisplay;
     }
-}
 
 function showResult() {
     // Animation is now handled in checkGuess before life deduction
@@ -1292,7 +1081,6 @@ function showResult() {
         // Stop the countdown timer when next button appears
         clearInterval(gameState.guessTimer);
     }
-}
 
 function giveUp() {
     // Stop audio and timers
@@ -1305,7 +1093,6 @@ function giveUp() {
     
     // Go directly to end screen (failure)
     endGame(false);
-}
 
 async function useSkipLifeline() {
     const isInfinite = gameState.lifelines.skip.total === 999;
@@ -1340,7 +1127,6 @@ async function useSkipLifeline() {
     // Go directly to next round
     gameState.currentSongIndex++;
     await startRound();
-}
 
 function useExpandLifeline() {
     const isInfinite = gameState.lifelines.expand.total === 999;
@@ -1376,7 +1162,6 @@ function useExpandLifeline() {
     }
     
     updateLifelineButtons();
-}
 
 function repeatSong() {
     // Hide repeat button and show timer
@@ -1405,7 +1190,6 @@ function repeatSong() {
         // For clip mode, replay the clip
         playSong(false);
     }
-}
 
 async function nextRound() {
     // Stop audio and all timers
@@ -1423,7 +1207,6 @@ async function nextRound() {
     
     // Re-enable lifeline buttons for new round (they'll be updated based on availability)
     updateLifelineButtons();
-}
 
 function endGame(completed) {
 	const params = new URLSearchParams(window.location.search);
@@ -1591,7 +1374,6 @@ function endGame(completed) {
     } else {
         lifelineContainer.style.display = 'none';
     }
-}
 
 function updateUI() {
     // Update score display with source/song stats
@@ -1636,7 +1418,6 @@ function updateUI() {
     
     document.getElementById('round').textContent = gameState.currentSongIndex + 1;
     document.getElementById('total').textContent = gameState.shuffledSongs.length;
-}
 
 // Lifeline Functions
 function updateLifelineButtons() {
@@ -1715,7 +1496,6 @@ function updateLifelineButtons() {
     } else {
         expandBtn.style.display = 'none';
     }
-}
 
 function useTimeLifeline() {
     const isInfinite = gameState.lifelines.time.total === 999;
@@ -1750,7 +1530,6 @@ function useTimeLifeline() {
     }
     
     updateLifelineButtons();
-}
 
 function useHintLifeline() {
     const isInfinite = gameState.lifelines.hint.total === 999;
@@ -1820,7 +1599,6 @@ function useHintLifeline() {
     // Update display with hints
     updateAnswerDisplay();
     updateLifelineButtons();
-}
 
 function useYearLifeline() {
     const isInfinite = gameState.lifelines.year.total === 999;
@@ -1843,9 +1621,8 @@ function useYearLifeline() {
     }
     
     // Update display to show year
-    updateAnswerDisplay();
-    updateLifelineButtons();
-}
+	updateAnswerDisplay();
+	updateLifelineButtons();
 
 // Event listeners
 if (new URLSearchParams(window.location.search).get('collection')) {
@@ -1908,7 +1685,6 @@ if (new URLSearchParams(window.location.search).get('collection')) {
     document.getElementById('yearLifeline').addEventListener('click', useYearLifeline);
     document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);
     document.getElementById('expandLifeline').addEventListener('click', useExpandLifeline);
-}
 
 
 function audio_to_img(url) {
@@ -1917,33 +1693,32 @@ function audio_to_img(url) {
 			if (!response.ok) throw new Error('Network response was not ok');
 			return response.arrayBuffer();
 		})
-		.then(buffer => {
-			return new Promise((resolve, reject) => {
-				const blob = new Blob([buffer], {type: 'audio/mpeg'});
-				musicmetadata(blob, function(err, metadata) {
-					if (err) {
-						reject(err);
-						return;
-					}
-					if (metadata.picture && metadata.picture.length > 0) {
-						const pic = metadata.picture[0];
-						// Build binary string in chunks to avoid call stack overflow with large images
-						let binaryString = '';
-						const chunkSize = 8192; // Process in chunks
-						for (let i = 0; i < pic.data.length; i += chunkSize) {
-							const chunk = pic.data.slice(i, i + chunkSize);
-							binaryString += String.fromCharCode.apply(null, chunk);
-						}
-						const imgSrc = `data:${pic.format};base64,${btoa(binaryString)}`;
-						resolve(imgSrc);
-					} else {
-						resolve(null);
-					}
-				});
-			});
-		})
-		.catch(error => {
-			console.error('Error:', error);
-			return Promise.resolve(null);
-		});
-}
+        .then(buffer => {
+            return new Promise((resolve, reject) => {
+                const blob = new Blob([buffer], {type: 'audio/mpeg'});
+                musicmetadata(blob, function(err, metadata) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    if (metadata.picture && metadata.picture.length > 0) {
+                        const pic = metadata.picture[0];
+                        // Build binary string in chunks to avoid call stack overflow with large images
+                        let binaryString = '';
+                        const chunkSize = 8192; // Process in chunks
+                        for (let i = 0; i < pic.data.length; i += chunkSize) {
+                            const chunk = pic.data.slice(i, i + chunkSize);
+                            binaryString += String.fromCharCode.apply(null, chunk);
+                        }
+                        const imgSrc = `data:${pic.format};base64,${btoa(binaryString)}`;
+                        resolve(imgSrc);
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            return Promise.resolve(null);
+        });
