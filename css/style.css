@@ -1,5 +1,5 @@
 /* Shake animation for answer display */
-.answer-display.shake {
+#answerDisplay.shake {
     animation: shake 0.7s cubic-bezier(.36,.07,.19,.97) both;
 }
 
@@ -51,20 +51,20 @@ body:not(.mode-animating) {
     transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Mode-specific themes */
-body.mode-trivial {
+/* Mode-specific themes (use data-mode attribute) */
+body[data-mode="trivial"] {
     background: linear-gradient(90deg, #48bb78 0%, #2f855a 100%);
 }
 
-body.mode-default {
+body[data-mode="default"] {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
-body.mode-intense {
+body[data-mode="intense"] {
     background: linear-gradient(90deg, #ff9800 0%, #d84315 100%);
 }
 
-body.mode-sudden-death {
+body[data-mode="sudden-death"] {
     background: linear-gradient(90deg, #4a1a1a 0%, #6b2020 100%);
 }
 
@@ -355,7 +355,7 @@ body.mode-animating[data-new-mode="sudden-death"]::before {
 
 .container {
     max-width: 100%;
-    margin: 0 auto;
+    margin: 0 auto 1rem;
     position: relative;
     z-index: 2;
     width: 100%;
@@ -630,6 +630,7 @@ header h5 {
     width: fit-content;
     margin: 0 auto;
 }
+
 #resultScreen *:has(> * > #resultDifficulty),
 #startScreen *:has(> * > #collectionDifficulty),
 #resultScreen *:has(> #resultScreenCover):has(img:not([src=''])),
@@ -639,6 +640,11 @@ header h5 {
 
 #resultScreen:has(#resultScreenCover[src='']) *:has(> * > #resultDifficulty) {
 	width: 100%;
+}
+
+#startScreenCover[src=''],
+#resultScreenCover[src=''] {
+    display: none !important;
 }
 
 #gameContent {
@@ -694,11 +700,7 @@ header h5 {
 .audioPlayer-container {
 	width: 100%;
 	background: rgba(50, 50, 80, 1);
-	overflow: hidden;
-	border-radius: 3px;
-    position: absolute;
-    z-index: -1;
-    height: 100%;
+    position: relative;
 }
 #audioPlayer {
 	width: 100%;
@@ -717,39 +719,45 @@ header h5 {
 	display: block;
 	position: absolute;
 	width: calc(var(--progress) * 100%);
-	height: 100%;
 	background: #667eea;
+	height: 100%;
 }
 
 
-/*
-.progress-bar::after {
-    content: "";
+
+#audioPlayer::after {
+	content: "";
     display: block;
     position: absolute;
     top: 0;
     left: calc(var(--initial_start));
     width: calc(var(--initial_end) - var(--initial_start));
     height: 100%;
-
-
-	--color1: lavender;
-	--color2: rgba(0, 0, 0, 0);
-	--gap1: 2;
-	--gap2: 0;
-	background-color: var(--color2);
-    opacity: 0.5;
-    background-size: 10px 10px;
-    background-image: repeating-linear-gradient(45deg, var(--color1) calc(var(--gap2) * 1px), var(--color1) calc(var(--gap1) * 1px), var(--color2) calc(var(--gap2) * 1px), var(--color2) 50%);
-
-    border: 1px solid var(--color1);
+    --color1: tomato;
+    --color2: rgba(0, 0, 0, 0);
+    --border: var(--color1);
+    --val1: 2;
+    --val2: 0;
+    --val3: 10;
+    background-color: var(--color2);
+    opacity: 0.8;
+    background-size: calc(var(--val3) * 1px) calc(var(--val3) * 1px);
+    background-image: repeating-linear-gradient(45deg, var(--color1) calc(var(--val2) * 1px), var(--color1) calc(var(--val1) * 1px), var(--color2) calc(var(--val2) * 1px), var(--color2) 50%);
+    border: 2px solid var(--border);
     border-top: none;
     border-bottom: none;
     box-sizing: border-box;
+    z-index: 10;
+    pointer-events: none;
 }
-*/
 
-#progress-timer {
+#audioPlayer[data-hidden="true"]::after {
+    display: none;
+}
+
+
+
+#progressTimer {
     position: absolute;
     right: 10px;
     top: 50%;
@@ -766,7 +774,9 @@ header h5 {
     align-items: center;
     justify-content: flex-end;
     position: absolute;
-    right: 0px;
+	top: 0;
+    right: 0;
+	z-index: 100;
 	height:100%;
 	width:100%;
     background: none;
@@ -778,6 +788,7 @@ header h5 {
     transition: all 0.1s;
 	text-shadow: 1px 1px 1px black;
 	font-size: 1rem;
+	display: none !important;
 }
 
 .btn-repeat:hover {
@@ -846,25 +857,23 @@ header h5 {
 
 
 /* Timer Display */
-.timer-container {
+.timer-wrapper {
     width: 100%;
     background: transparent;
-    padding: 0 3rem;
+    padding: 0.5rem 3rem;
     margin: 0;
-	pointer-events: none;
 }
 
-.timer {
-    font-size: 5rem;
-    color: white;
+#timer {
+    font-size: 3rem;
+    color: rgba(220,220,255,1);
     font-weight: bold;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-    padding: 1rem 1.5rem;
+    text-shadow: 2px 2px 2px rgba(0,0,0,0.3);
     background: transparent;
     backdrop-filter: none;
 }
 
-.timer.warning {
+#timer.warning {
     color: #ff6b6b;
     animation: pulse 1s infinite;
 }
@@ -874,26 +883,29 @@ header h5 {
     50% { opacity: 0.5; }
 }
 
-/* Answer Display */
-.answer-display {
-    width: 90%;
+/* Metadata */
+.metadata-container {
+    width: 100%;
 	min-height: 150px;
     background: transparent;
     padding: 1rem 0;
     margin: 0;
-	pointer-events: none;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     flex-direction: row;
     flex-wrap: nowrap;
+    border-top: 3px solid rgba(0, 0, 0, 0.3);
 }
 .answer-wrapper * {
 	text-transform: uppercase;
 	font-style: italic;
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 }
+.answer-wrapper.hidden * {
+	opacity:0;
+}
 
-.answer-wrapper {
+.timerAnswer-container {
 	width: 300%;
     font-size: 1.5rem;
     padding: 0.1rem 1rem;
@@ -901,9 +913,14 @@ header h5 {
     background: transparent;
     border-radius: 0;
     backdrop-filter: none;
-	color: hsl(0,0%,70%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
 }
+
 .answer-wrapper {
+	color: hsl(0,0%,70%);
     background: darkslateblue;
     border-radius: 10px;
     padding: 3px 0;
@@ -920,30 +937,29 @@ header h5 {
 }
 
 #gameContent[data-revealed='true'] .answer-wrapper {
-    pointer-events: auto;
     user-select: text;
 }
 
-.answer-display .hidden {
+#answerDisplay .hidden {
     color: hsl(0,0%,70%);
     font-style: italic;
     opacity: 0.7;
 }
 
-.answer-display .hint {
+#answerDisplay .hint {
     color: hsl(0,0%,70%);
     font-style: italic;
     letter-spacing: 0.08em;
     word-spacing: 0.5em;
 }
 
-.answer-display .hint .revealed {
+#answerDisplay .hint .revealed {
     color: hsl(0,0%,80%);
     font-weight: bold;
     font-style: normal;
 }
 
-.answer-display .revealed {
+#answerDisplay .revealed {
     color: #4ade80;
     font-weight: bold;
 	text-transform: none;
@@ -951,7 +967,7 @@ header h5 {
 	text-shadow: 1px 1px rgba(0, 0, 0, 0.3);
 }
 
-.answer-display .optional {
+#answerDisplay .optional {
 	opacity: 0.3;
 	text-shadow: 1px 1px rgba(0, 0, 0, 1);
 }
@@ -970,7 +986,7 @@ header h5 {
     border: none;
     border-radius: 0;
     text-align: center;
-    background: transparent;
+    background: lightslategray;
     backdrop-filter: none;
     color: white;
     outline: none;
@@ -1036,6 +1052,9 @@ header h5 {
     box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
+.btn-lifeline[hidden] {
+	display: none;
+}
 
 .btn-lifeline:hover:not(:disabled) {
     background: rgba(255, 193, 7, 1);
@@ -1080,7 +1099,6 @@ header h5 {
     margin: 0 auto;
     position: relative;
     z-index: 10;
-	min-height: 75vh;
 }
 
 .collections-list h2 {
@@ -1274,3 +1292,75 @@ header h5 {
 .skip-disabled {
     pointer-events: none;
 }
+
+
+
+/* 
+// STATE.start: 0
+// STATE.game: 1
+// STATE.next: 2
+// STATE.end: 3
+*/ 
+
+
+/* STATE.start: 0 */
+body:not([data-state="0"]) {
+	#startScreen {
+		display: none;
+	}
+}
+
+body:not([data-state="1"]) {
+	#actionButtons {
+		display: none !important;
+	}
+}
+body:not([data-state="2"]) {
+	#nextButtonContainer {
+		display: none !important;
+	}
+}
+
+body:not([data-state="3"]) {
+	#resultScreen { 
+		display: none !important;
+	}
+}
+
+body:not([data-state="1"]):not([data-state="2"]) {
+	#gameContent,
+	#guessInput,
+	#answerDisplay,
+	#lifelineButtons,
+	.progress-container,
+	.game-info,
+	#nextButtonContainer,
+	#timerDisplay {
+		display: none !important;
+	}
+}
+
+body[data-has-timeout="false"] {
+	#timerDisplay {
+		display: none !important;
+	}
+}
+
+
+/* Start screen error state: hide controls and show error message */
+#startScreen[data-error=""],
+#startScreen:not([data-error]) {
+	#errorMessage {
+		display: none !important;
+	}
+}
+
+#startScreen[data-error]:not([data-error=""]) {
+	#collectionTitle,
+	#collectionDescription,
+	#startScreen > div,
+	#startGameBtn {
+		display: none !important;
+	}
+}
+

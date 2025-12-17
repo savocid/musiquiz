@@ -43,8 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Generate mode buttons dynamically
     const modeControl = document.getElementById('modeControl');
-    if (modeControl && window.MODES) {
-        const modes = window.MODES;
+    if (modeControl && MODES) {
+        const modes = MODES;
         for (const [modeKey, modeData] of Object.entries(modes)) {
             const button = document.createElement('button');
             button.className = 'mode-btn-compact';
@@ -145,7 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Apply current mode styling (without animation)
     const savedMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
-    document.body.classList.add(`mode-${savedMode}`);
+    // Use data-mode attribute so JS can base visibility on it (not classes)
+    document.body.dataset.mode = savedMode;
+    // reflect whether this mode uses a timeout (controls timer preview visibility)
+    document.body.dataset.hasTimeout = (MODES[savedMode] && MODES[savedMode].timeout > 0) ? 'true' : 'false';
     
     updateCSSVariables(savedMode)
     
@@ -170,8 +173,10 @@ window.applyModeTheme = function(mode, animate = false, callback) {
         
         // Apply new theme after animation completes
         setTimeout(() => {
-            document.body.classList.remove('mode-trivial', 'mode-default', 'mode-intense', 'mode-sudden-death');
-            document.body.classList.add(`mode-${mode}`);
+            // Use data attribute for current mode
+            document.body.dataset.mode = mode;
+            // reflect whether this mode uses a timeout (controls timer preview visibility)
+            document.body.dataset.hasTimeout = (MODES[mode] && MODES[mode].timeout > 0) ? 'true' : 'false';
             
             // Remove animation class
             document.body.classList.remove('mode-animating');
@@ -179,8 +184,8 @@ window.applyModeTheme = function(mode, animate = false, callback) {
         }, 1000);
     } else {
         // Just switch modes without animation
-        document.body.classList.remove('mode-trivial', 'mode-default', 'mode-intense', 'mode-sudden-death');
-        document.body.classList.add(`mode-${mode}`);
+        document.body.dataset.mode = mode;
+        document.body.dataset.hasTimeout = (MODES[mode] && MODES[mode].timeout > 0) ? 'true' : 'false';
     }
 };
 

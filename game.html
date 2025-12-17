@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/cleanUrls.js"></script>
 </head>
-<body class="preload">
+<body class="preload" data-state="0">
     <div class="container">
         <div class="controls-wrapper">
             <!-- Header -->
             <header>
                 <h1><a href="/">MusiQuiz</a></h1>
-				<h5 style="display:none">An Excuse to Listen to Great Soundtracks</h5>
+				<h5>An Excuse to Listen to Great Soundtracks</h5>
             </header>
         </div>
         
@@ -30,7 +30,7 @@
             <div style="display: flex; gap: 2rem; align-items: center; justify-content: center; margin: 1rem auto 2rem; max-width: 800px;">
                 <!-- Cover Image -->
                 <div style="flex-shrink: 0;">
-                    <img id="startScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2); display: none;">
+                    <img id="startScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
                 </div>
                 
                 <!-- Game Controls -->
@@ -49,14 +49,14 @@
             <button id="startGameBtn" class="btn btn-success" style="font-size: 1.5rem; padding: 1.5rem 3rem; margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;">Start Game</button>
             
             <!-- Error Message -->
-            <div id="errorMessage" style="display: none; margin-top: 2rem;">
+            <div id="errorMessage" style="margin-top: 2rem;">
                 <h2 style="color: #f56565; margin-bottom: 1rem;">Collection not found.</h2>
                 <button class="btn btn-secondary"><a href="/">Return to Home</a></button>
             </div>
         </div>
         
         <!-- Game Content (hidden initially) -->
-        <div id="gameContent" class="game-container" style="display: none;">
+        <div id="gameContent" class="game-container">
             <h2 id="gameCollectionTitle" style="color: var(--primary-color); text-align: center; margin-top: 2rem;"></h2>
             <!-- Game Info Header -->
             <div class="game-info">
@@ -68,25 +68,14 @@
                 <div>Round: <span id="round">1</span> / <span id="total">3</span></div>
             </div>
 
-            <!-- Gameplay Wrapper -->
-            <div class="gameplay-wrapper">
-                <!-- Audio Player -->
-                <div class="audioPlayer-container">
-					<div id="progressBar"></div>
-					<div id="audioPlayer"></div>
-					<div id="progressTimer"></div>
-					<button class="btn-repeat" id="repeatBtn" style="display: none;">🔄</button>
-                </div>
+     
+    
 
                 <!-- Timer (only shown in timeout modes) -->
-                <div class="timer-container" id="timerDisplay" style="display: none;">
-                    <div class="timer">
-                        <span id="timer">5</span>
-                    </div>
-                </div>
+        
 
                 <!-- Answer Display (hidden/revealed sources and song) -->
-                <div class="answer-display">
+                <div class="metadata-container">
 					<div class="album-container">
 						<div class="album-wrapper">
 							<img id="album-img" alt="Album Image" src />
@@ -96,34 +85,48 @@
 					</div>
 
 
-                    <div class="answer-wrapper" id="answerDisplay">
-                        <span class="source-part" id="sourcePart"><span>Source</span></span>
-                        <span class="separator"> - </span>
-                        <span class="song-part" id="songPart"><span>Song</span></span>
+                    <div class="timerAnswer-container" style="color:transparent;">
+						<div class="timer-wrapper" id="timerDisplay">
+							<span id="timer">5</span>
+						</div>
+                
+						<div class="answer-wrapper hidden" id="answerDisplay">
+							<span class="source-part" id="sourcePart"><span>Source</span></span>
+							<span class="separator"> - </span>
+							<span class="song-part" id="songPart"><span>Song</span></span>
+						</div>
                     </div>
+                </div>
+
+          		<!-- Audio Player -->
+                <div class="audioPlayer-container">
+					<div id="progressBar"></div>
+					<div id="audioPlayer"></div>
+					<div id="progressTimer"></div>
+					<button class="btn-repeat" id="repeatBtn">🔄</button>
                 </div>
 
                 <!-- Guess Input (always visible) -->
                 <div class="guess-input">
                     <input type="text" id="guessInput" placeholder="Type source and/or song name..." autocomplete="off" style="outline:none;">
                 </div>
-            </div>
+       
 
             <!-- Lifeline Buttons -->
-            <div class="lifeline-buttons" id="lifelineButtons" style="display: none;">
-                <button class="btn btn-lifeline" id="hintLifeline" style="display: none;" title="Reveals some letters in the source and song names">
+            <div class="lifeline-buttons" id="lifelineButtons">
+                <button class="btn btn-lifeline" id="hintLifeline" title="Reveals some letters in the source and song names">
                     💡 Hint (<span id="hintCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="yearLifeline" style="display: none;" title="Shows the release year of the song">
+                <button class="btn btn-lifeline" id="yearLifeline" title="Shows the release year of the song">
                     📅 Year (<span id="yearCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="expandLifeline" style="display: none;" title="Expands the song to its full duration">
+                <button class="btn btn-lifeline" id="expandLifeline" title="Expands the song to its full duration">
                     ↔️ Expand (<span id="expandCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="skipLifeline" style="display: none;" title="Skips the current song">
+                <button class="btn btn-lifeline" id="skipLifeline" title="Skips the current song">
                     ⏭️ Skip (<span id="skipCount">0</span>)
                 </button>
-                <button class="btn btn-lifeline" id="timeLifeline" style="display: none;" title="Adds 10 seconds to the countdown timer">
+                <button class="btn btn-lifeline" id="timeLifeline" title="Adds 10 seconds to the countdown timer">
                     ⏱️ +10s (<span id="timeCount">0</span>)
                 </button>
             </div>
@@ -135,16 +138,16 @@
             </div>
 
             <!-- Result Message -->
-            <div class="result" id="resultMessage" style="display: none;"></div>
+            <div class="result" id="resultMessage"></div>
 
             <!-- Next Button (shown after answer) -->
-            <div id="nextButtonContainer" style="display: none;">
+            <div id="nextButtonContainer">
                 <button class="btn btn-success" id="nextBtn">Next Song</button>
-            </div>
+            </div> 
         </div>
         
         <!-- Result Screen -->
-        <div id="resultScreen" style="display: none;">
+        <div id="resultScreen">
             <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem; text-align:center;">Example Music Quiz</h2>
             <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;">A sample collection to demonstrate the structure</p>
 
@@ -152,7 +155,7 @@
             <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px;">
                 <!-- Cover Image -->
                 <div style="flex-shrink: 0;">
-                    <img id="resultScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2); display: none;">
+                    <img id="resultScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
                 </div>
 
                 <!-- Game Info / Result Details Grid -->
