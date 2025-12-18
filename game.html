@@ -68,12 +68,14 @@
                 <div>Round: <span id="round">1</span> / <span id="total">3</span></div>
             </div>
 
-     
+  				<!-- Audio Player -->
+                <div class="audioPlayer-container">
+					<div id="progressBar"></div>
+					<div id="audioPlayer"></div>
+					<div id="progressTimer"></div>
+					<button class="btn-repeat" id="repeatBtn">🔄</button>
+                </div>
     
-
-                <!-- Timer (only shown in timeout modes) -->
-        
-
                 <!-- Answer Display (hidden/revealed sources and song) -->
                 <div class="metadata-container">
 					<div class="album-container">
@@ -96,14 +98,6 @@
 							<span class="song-part" id="songPart"><span>Song</span></span>
 						</div>
                     </div>
-                </div>
-
-          		<!-- Audio Player -->
-                <div class="audioPlayer-container">
-					<div id="progressBar"></div>
-					<div id="audioPlayer"></div>
-					<div id="progressTimer"></div>
-					<button class="btn-repeat" id="repeatBtn">🔄</button>
                 </div>
 
                 <!-- Guess Input (always visible) -->

@@ -758,15 +758,18 @@ header h5 {
 
 
 #progressTimer {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
+	position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    font-size: 1rem;
+    color: darkturquoise;
     font-weight: 600;
     pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 0px black;
+    z-index: 100;
+    pointer-events: none;
+    filter: drop-shadow(2px 0px 0px black);
+    letter-spacing: 1.5px;
 }
 
 .btn-repeat {
@@ -849,10 +852,7 @@ header h5 {
 	display: none; 
 }
 
-#gameContent:not([data-revealed="true"]) .album-container #album-alt,
-#gameContent:not([data-revealed="true"]) .album-container #album-img {
-	visibility: hidden;
-}
+
 
 
 
@@ -921,23 +921,7 @@ header h5 {
 
 .answer-wrapper {
 	color: hsl(0,0%,70%);
-    background: darkslateblue;
-    border-radius: 10px;
     padding: 3px 0;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-}
-
-#gameContent[data-revealed='true'] .answer-wrapper,
-#gameContent[data-correct='true'] .answer-wrapper {
-    background: forestgreen;
-}
-
-#gameContent[data-correct='false'] .answer-wrapper {
-    background: maroon;
-}
-
-#gameContent[data-revealed='true'] .answer-wrapper {
-    user-select: text;
 }
 
 #answerDisplay .hidden {
@@ -1000,10 +984,7 @@ header h5 {
     color: transparent;
 }
 
-/* I updated this, dont change */
-.guess-input input:disabled {
-    display: none;
-}
+
 
 /* Heartbeat animation for incorrect guess */
 #lives .heart.heartbeat {
@@ -1032,11 +1013,6 @@ header h5 {
     width: 100%;
     padding: 0.75rem 2rem 0;
     background: transparent;
-}
-
-#gameContent[data-correct="false"] #lifelineButtons,
-#gameContent[data-revealed="true"] #lifelineButtons {
-	display:none !important;
 }
 
 .btn-lifeline {
@@ -1310,17 +1286,31 @@ body:not([data-state="0"]) {
 	}
 }
 
+/* STATE.game: 1 */
 body:not([data-state="1"]) {
 	#actionButtons {
 		display: none !important;
 	}
-}
-body:not([data-state="2"]) {
-	#nextButtonContainer {
-		display: none !important;
+
+	#lifelineButtons,
+	#guessInput {
+		visibility: hidden;
 	}
 }
 
+/* STATE.next: 2 */
+body:not([data-state="2"]) {
+	#nextButtonContainer,
+	#audioPlayer::after {
+		display: none !important;
+	}
+	.album-container #album-alt,
+	.album-container #album-img {
+		visibility: hidden !important;
+	}
+}
+
+/* STATE.end: 3 */
 body:not([data-state="3"]) {
 	#resultScreen { 
 		display: none !important;
@@ -1329,9 +1319,7 @@ body:not([data-state="3"]) {
 
 body:not([data-state="1"]):not([data-state="2"]) {
 	#gameContent,
-	#guessInput,
 	#answerDisplay,
-	#lifelineButtons,
 	.progress-container,
 	.game-info,
 	#nextButtonContainer,
@@ -1339,13 +1327,6 @@ body:not([data-state="1"]):not([data-state="2"]) {
 		display: none !important;
 	}
 }
-
-body[data-has-timeout="false"] {
-	#timerDisplay {
-		display: none !important;
-	}
-}
-
 
 /* Start screen error state: hide controls and show error message */
 #startScreen[data-error=""],

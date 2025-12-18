@@ -1,3 +1,7 @@
+// ********* //
+// Variables //
+// ********* //
+
 const STATE = {
   start: 0,
   game: 1,
@@ -11,29 +15,26 @@ let gameState = {
     baseUrl: '',
     currentSongIndex: 0,
     score: 0,
-    sourceGuessed: 0,  // Total sources guessed correctly
-    songsGuessed: 0,    // Total songs guessed correctly
-    totalSourcesSoFar: 0,  // Total sources encountered so far
-    totalSongsSoFar: 0,    // Total songs encountered so far
+    sourceGuessed: 0,
+    songsGuessed: 0,
+    totalSourcesSoFar: 0,
+    totalSongsSoFar: 0,
     lives: 3,
-    totalLives: 3,  // Track total lives to keep hearts in DOM
+    totalLives: 3,
     shuffledSongs: [],
     clipTimer: null,
     guessTimer: null,
     progressInterval: null,
     currentSong: null,
-    sourceRevealed: [],  // Track which sources have been guessed
-    songRevealed: false,   // Track if song has been guessed
+    sourceRevealed: [],
+    songRevealed: false,
     hasTimeout: false,
     clipDuration: 10,
     timeout: 0,
     canGuess: true,
-    isExpanded: false,  // Track if expand lifeline has been used this round
-    originalStartTime: 0,  // Store original clip start time
-    originalEndTime: null,  // Store original clip end time
+    isExpanded: false,
 	success: false,
 	rounds: 0,
-    // Lifelines
     lifelines: {
         time: { remaining: 0, total: 0 },
         hint: { remaining: 0, total: 0 },
@@ -41,14 +42,12 @@ let gameState = {
         skip: { remaining: 0, total: 0 },
         expand: { remaining: 0, total: 0 }
     },
-    lifelineUsedThisRound: { time: false, hint: false, year: false, skip: false, expand: false },  // Track per-round usage
-    hintLettersRevealed: { source: [], song: [] },  // Track revealed letter positions
-    yearRevealed: false,  // Track if year has been revealed
+    lifelineUsedThisRound: { time: false, hint: false, year: false, skip: false, expand: false },
+    hintLettersRevealed: { source: [], song: [] },
+    yearRevealed: false,
 	state: STATE.start,
 };
 
-
-// Game modes configuration
 const MODES = {
     'trivial': { 
         lives: 999, 
@@ -95,6 +94,7 @@ const MODES = {
         }
     }
 };
+
 let wavesurfer = WaveSurfer.create({
 	container: '#audioPlayer',
 	waveColor: '#f0f0f0',
@@ -112,76 +112,18 @@ let wavesurfer = WaveSurfer.create({
 	autoplay: true,
 });
 
-function initAudio() {
-	// Attach progress update events
-    wavesurfer.on('timeupdate', updateProgressBar);
-    wavesurfer.on('ready', updateProgressBar);
-    wavesurfer.on('interaction', updateProgressBar);
-  
-	const volume = (localStorage.getItem('musicQuizVolume') || 50) / 100;
-	wavesurfer.setVolume(volume);
-
-	document.getElementById('repeatBtn').addEventListener('click', repeatSong);
-
-}
-
-function repeatSong() {
-	if (!wavesurfer || !gameState.currentSong) return;
-
-    const startTime = gameState.currentSong.startTime || 0;
-	const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
-
-	wavesurfer.play(startTime, endTime);
-}
-
-function updateProgressBar() {
-    if (!wavesurfer || !gameState.currentSong) return;
-
-    const startTime = gameState.currentSong.startTime || 0;
-	const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
-
-	const waveTime = wavesurfer.getCurrentTime();
-    const segDuration = endTime - startTime;
-    const segTime = Math.max(0, waveTime - startTime);
-    const progress = Math.max(0, Math.min(1, segTime / segDuration));
-
-
-	document.getElementById('progressBar').style.setProperty('--progress', progress);
-}
-
-function updateAudio() {
-    if (!gameState.currentSong) return;
-
-    const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? gameState.currentSong.audioFile : gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
-
-    wavesurfer.load(audioUrl);
-	console.log(audioUrl);
-	
-	wavesurfer.once('ready', () => {
-		const startTime = gameState.currentSong.startTime || 0;
-		const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
-
-		wavesurfer.options.startTime = startTime;
-		wavesurfer.options.endTime = endTime;
-		wavesurfer.getRenderer().reRender();
-
-		wavesurfer.play(0)
-
-		console.log(wavesurfer.options.startTime);
-		console.log(wavesurfer.options.endTime);
-	});
-}
-
-
+const params = new URLSearchParams(window.location.search);
+const paramsCollectionId = params.get('collection');
+const paramsCollectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || '';
+const paramsMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
 
 
 // ************** //
-// Initialization //
+// EventListeners //
 // ************** //
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.get('collection')) return;
+    if (!paramsCollectionId) return;
     
     // Clear data button
     document.getElementById('clearDataBtn').addEventListener('click', () => {
@@ -203,6 +145,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    document.addEventListener('keydown', (e) => {
+        // Handle Enter key for next round if next button is active
+        if (e.key === 'Enter' && gameState.state == STATE.next) {
+			nextRound();
+			return;
+        }
+
+		const guessInput = document.getElementById('guessInput');
+		// Only handle if game is active and input is enabled
+		if (gameState.state == STATE.game) {
+			// Ignore if modifier keys are pressed (Ctrl, Alt, Meta)
+			if (e.ctrlKey || e.altKey || e.metaKey) {
+				return;
+			}
+			
+			// Ignore special keys that shouldn't trigger input focus
+			const ignoredKeys = ['Tab', 'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
+			if (ignoredKeys.includes(e.key)) {
+				return;
+			}
+			
+			// If input is not focused and user types a printable character
+			if (document.activeElement !== guessInput) {
+				// Check if it's a printable character (letters, numbers, space, etc.)
+				if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+					guessInput.focus();
+				}
+			}
+		}
+	});
+
+	document.getElementById('repeatBtn').addEventListener('click', repeatSong);
 	document.getElementById('giveUpBtn').addEventListener('click', giveUp);
     document.getElementById('nextBtn').addEventListener('click', nextRound);
 
@@ -213,50 +187,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('skipLifeline').addEventListener('click', useSkipLifeline);
     document.getElementById('expandLifeline').addEventListener('click', useExpandLifeline);
     
+	// Slider
+	const roundsSlider = document.getElementById('roundsSlider');
+	const maxDigits = roundsSlider.max.toString().length;
+	const padNumber = (num) => num.toString().padStart(maxDigits, '0');
+	roundsSlider.addEventListener('input', () => {
+		roundsValue.textContent = padNumber(roundsSlider.value);
+		gameState.rounds = roundsSlider.value;
+	});
+	
+	// Add start button listener
+	document.getElementById('startGameBtn').addEventListener('click', () => {
+		startGame();
+	});
+
     // Ensure body state matches initial gameState
     changeState(gameState.state);
-
-    // Ensure certain elements are in their default visibility states
-    const repeatBtn = document.getElementById('repeatBtn');
-    if (repeatBtn) repeatBtn.hidden = true;
-    const progressTimer = document.getElementById('progressTimer');
-    if (progressTimer) progressTimer.hidden = false; // default shown during playback
-    // timer display visibility will be managed per-round based on mode (hasTimeout) via data attributes and startRound()
-
 
     await loadGameData();
 });
 
+
+// ************** //
+// Initialization //
+// ************** //
+
 async function loadGameData() {
 
     // Get URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const collectionId = params.get('collection');
-	let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || '';
 
-    if (!collectionId) {
+    if (!paramsCollectionId) {
         console.error('No collection ID in URL');
-        showCollectionError();
+		document.getElementById('startScreen').dataset.error = 'collection';
         return;
     }
 
 	try {
         // Fetch collection data from individual collection directory
-        const collectionDataUrl = `${collectionsUrl}/collections/${collectionId}/data.json`;
+        const collectionDataUrl = `${paramsCollectionsUrl}/collections/${paramsCollectionId}/data.json`;
         const collectionResponse = await fetch('https://' + collectionDataUrl);
         if (!collectionResponse.ok) {
             console.error('Failed to fetch collection data.json:', collectionResponse.status, collectionResponse.statusText);
-            showCollectionError();
+			document.getElementById('startScreen').dataset.error = 'collection';
             return;
         }
         const collectionData = await collectionResponse.json();
 
         // Fetch songs data
-        const songsDataUrl = `${collectionsUrl}/audio/songs.json`;
+        const songsDataUrl = `${paramsCollectionsUrl}/audio/songs.json`;
         const songsResponse = await fetch('https://' + songsDataUrl);
         if (!songsResponse.ok) {
             console.error('Failed to fetch songs.json:', songsResponse.status, songsResponse.statusText);
-            showCollectionError();
+			document.getElementById('startScreen').dataset.error = 'collection';
             return;
         }
         const songsData = await songsResponse.json();
@@ -277,10 +259,9 @@ async function loadGameData() {
 
     } catch (error) {
         console.error('Failed to load collection:', error);
-        showCollectionError();
+		document.getElementById('startScreen').dataset.error = 'collection';
     }
 }
-
 
 function setupGame() {
 	// Set the source label based on collection's sourceName
@@ -329,18 +310,12 @@ function setupGame() {
 		const songsStatsDiv = document.querySelector('.stats > div:nth-child(3)');
 		if (songsStatsDiv) songsStatsDiv.hidden = true;
 	}
-	
-	const params = new URLSearchParams(window.location.search);
-    const mode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
-	const collectionId = params.get('collection');
-	let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || '';
 
 	// Set base URL for audio files
-	collectionsUrl = collectionsUrl.replace(/\/$/, ''); // Remove trailing slash
-	gameState.baseUrl = 'https://' + collectionsUrl;
+	gameState.baseUrl = 'https://' + paramsCollectionsUrl.replace(/\/$/, ''); // Remove trailing slash
 
 	// Always use current MODES definition (ensures fresh settings)
-	gameState.settings = { ...MODES[mode], mode: mode, collectionId: collectionId };		gameState.lives = gameState.settings.lives;
+	gameState.settings = { ...MODES[paramsMode], mode: paramsMode, collectionId: paramsCollectionId };		gameState.lives = gameState.settings.lives;
 	gameState.totalLives = gameState.settings.lives;
 	gameState.clipDuration = gameState.settings.clipDuration;
 	gameState.timeout = gameState.settings.timeout;
@@ -380,7 +355,7 @@ function setupGame() {
 	if (gameState.collection.covers && gameState.collection.covers.length > 0) {
 		const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
 		// Resolve cover path relative to collection directory
-		const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + collectionId + '/' + randomCover.replace('./', '');
+		const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + paramsCollectionId + '/' + randomCover.replace('./', '');
 		startScreenCover.src = coverUrl;
 		startScreenCover.alt = `${gameState.collection.title} cover`;
 	} else {
@@ -404,55 +379,37 @@ function setupGame() {
 	roundsSlider.value = totalSongs >= 10 ? 10 : Math.ceil(totalSongs * 0.5);
 	roundsValue.textContent = padNumber(roundsSlider.value);
 	gameState.rounds = roundsSlider.value;
-	
-	// Update display when slider changes
-	roundsSlider.addEventListener('input', () => {
-		roundsValue.textContent = padNumber(roundsSlider.value);
-		gameState.rounds = roundsSlider.value;
-	});
-	
-	// Add start button listener
-	document.getElementById('startGameBtn').addEventListener('click', () => {
-		initGame();
-	});
-}
 
-function showCollectionError() {
-    // Mark the start screen as having a collection error; CSS will hide the normal controls
-    const startScreen = document.getElementById('startScreen');
-    startScreen.dataset.error = 'collection';
-}
+	// Attach progress update events
+  	wavesurfer.on('timeupdate', updateProgressBar);
+    wavesurfer.on('ready', updateProgressBar);
+    wavesurfer.on('interaction', updateProgressBar);
+  
+	const volume = (localStorage.getItem('musicQuizVolume') || 50) / 100;
+	wavesurfer.setVolume(volume);
 
-function initGame() {
-	// switch to game state (CSS will show/hide screens)
-	changeState(STATE.game);
 	document.getElementById('gameCollectionTitle').textContent = gameState.collection.title;
+}
+
+
+// *********** //
+// Round Logic //
+// *********** //
+
+async function startGame() {
+
+	changeState(STATE.game);
 
     const numRounds = parseInt(gameState.rounds);
     const shuffled = [...gameState.collection.songs].sort(() => Math.random() - 0.5);
     gameState.shuffledSongs = shuffled.slice(0, numRounds);
 
-    updateUI();
-
-	startGame();
-}
-
-async function startGame() {
-
-
-	await startRound();
-
+	
+	await initRound();
 	initAudio();
-	updateAudio();
-
-	console.log(gameState)
-	console.log(wavesurfer)
-
 }
 
-
-
-async function startRound() {
+async function initRound() {
 
  	if (gameState.currentSongIndex >= gameState.shuffledSongs.length) {
     	// All rounds complete - check if game over or win
@@ -461,21 +418,9 @@ async function startRound() {
         return;
     }
 
-	changeState(STATE.game)
-    
-    // Reset round state
-    // Always clear and null guess timer for new round
     clearInterval(gameState.guessTimer);
-    gameState.guessTimer = null;
-    gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
-    gameState.sourceRevealed = [];
-    gameState.songRevealed = false;
-    gameState.canGuess = true;
-    gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };  // Reset hint state
-    gameState.yearRevealed = false;  // Reset year reveal
-    gameState.isExpanded = false;  // Reset expand state
-    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false, expand: false };  // Reset per-round usage
-    
+	updateRoundStates();
+
     // Generate random startTime based on startTime and endTime
     try {
 		const audioUrl = gameState.currentSong.audioFile.startsWith('http')
@@ -517,239 +462,42 @@ async function startRound() {
         console.error('Failed to get audio duration, using 0:', error);
         gameState.currentSong.startTime = 0;
     }
+
+
+}
+
+function updateRoundStates() {
+	gameState.guessTimer = null;
+    gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
+    gameState.sourceRevealed = [];
+    gameState.songRevealed = false;
+    gameState.canGuess = true;
+    gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };
+    gameState.yearRevealed = false;
+    gameState.isExpanded = false;
+    gameState.lifelineUsedThisRound = { time: false, hint: false, year: false, skip: false, expand: false };
+}
+
+function startRound() {
+
+	changeState(STATE.game)
     
-    // Store original clip boundaries for CSS highlighting when guessed correctly
-    gameState.originalStartTime = gameState.currentSong.startTime;
-    gameState.originalEndTime = gameState.currentSong.endTime;
-    
-    // Update total sources/songs counters
-    gameState.totalSourcesSoFar += gameState.currentSong.sources.filter(s => s[0]).length;
+	gameState.totalSourcesSoFar += gameState.currentSong.sources.filter(s => s[0]).length;
     gameState.totalSongsSoFar += 1;
-    
-	// Reset revealed status
-	document.getElementById('gameContent').dataset.revealed = false;
-	document.getElementById('gameContent').dataset.correct = "";
 
-	// Reset Album Image
-	document.getElementById('album-img').src = "";
-
-    // Clear input
-    document.getElementById('guessInput').value = '';
-    document.getElementById('guessInput').disabled = false;
-
-	// Clear audioPlayer
-	document.getElementById('audioPlayer').style.setProperty('--initial_start', 0);
-	document.getElementById('audioPlayer').style.setProperty('--initial_end', 0);
-	document.getElementById('audioPlayer').dataset.hidden = "true";
-
-    // Auto-focus input so player can start typing immediately
-    setTimeout(() => {
-        document.getElementById('guessInput').focus();
-    }, 100);
-    
-    // Reset UI elements' visibility (CSS state controls screens, elements like repeat/timer handled locally)
-    const repeatBtn = document.getElementById('repeatBtn');
-    if (repeatBtn) repeatBtn.hidden = true;
-    const progressTimer = document.getElementById('progressTimer');
-    if (progressTimer) progressTimer.hidden = false;
-    document.getElementById('progressBar').style.setProperty('--progress', 0);
-    
-	// Cover Image
-	const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
-					gameState.currentSong.audioFile : 
-					gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
-	extractAudioCover(audioUrl).then(src => {	document.getElementById("album-img").src = src; });
-
-    // Update answer display (hidden)
     updateAnswerDisplay();
-    
-    // Update UI (score, lives, round number)
     updateUI();
-    
-    // Update give up button text and visibility
-    const giveUpBtn = document.getElementById('giveUpBtn');
-    if (giveUpBtn) {
-        giveUpBtn.hidden = false;
-        giveUpBtn.textContent = 'Give Up';
-    }
-    
-    // Let CSS know whether we have a timeout (show/hide via CSS)
-    document.body.dataset.hasTimeout = gameState.hasTimeout ? 'true' : 'false';
-
-    // Also ensure the timer display element's hidden attribute matches the mode
-    const timerDisplay = document.getElementById('timerDisplay');
-    if (timerDisplay) timerDisplay.hidden = !gameState.hasTimeout;
-
-    
-    // Update lifeline buttons
     updateLifelineButtons();
+
+	startCountdown();
 
 	console.log(gameState.currentSong.sources.map(source => source[1]))
 	console.log(gameState.currentSong.title.filter((title, i) => i !== 0))
-
-	// Mark this round as active
-    const roundId = Date.now() + Math.random(); // Unique ID for this playback
-    gameState.currentRoundId = roundId;
-    
-	const startTime = gameState.currentSong.startTime || 0;
-	const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
-
-    // Calculate effective clip duration
-    let effectiveClipDuration = gameState.clipDuration;
-    if (endTime !== null && endTime > startTime) {
-        effectiveClipDuration = Math.min(gameState.clipDuration, endTime - startTime);
-    }
-    if (endTime === null && gameState.currentSong.duration > 0) {
-        effectiveClipDuration = Math.min(effectiveClipDuration, gameState.currentSong.duration - startTime - 5);
-    }
-    gameState.effectiveClipDuration = Math.max(effectiveClipDuration, 1); // minimum 1 second to avoid division by zero
-
-    // Start countdown only if requested (new round)
-    if (gameState.hasTimeout && gameState.canGuess) {
-        startCountdown();
-    }
-    
-    // Store reference to current round for timer validation
-    const thisRoundId = roundId;
-    
-    // Set up clip timer to stop audio after effectiveClipDuration
-    gameState.clipTimer = setTimeout(() => {
-        // Only pause if we're still on the same round
-        if (gameState.currentRoundId === thisRoundId) {
-            //! PAUSE AUDIO
-            
-            // Always show replay button after clip ends (unless game is over)
-            if (gameState.lives > 0) {
-                const repeatBtn = document.getElementById('repeatBtn');
-                if (repeatBtn) repeatBtn.hidden = false;
-                const progressTimer = document.getElementById('progressTimer');
-                if (progressTimer) progressTimer.hidden = true;
-            }
-        }
-    }, effectiveClipDuration * 1000);
 }
-
-function playSong() {
-	wavesurfer.play();
-}
-
-function stopSong() {
-	wavesurfer.stop();
-}
-
-function playFullSong() {
-
-	gameState.currentSong.startTime = 0;
-	gameState.currentSong.endTime = gameState.currentSong.duration;
-
-	wavesurfer.options.startTime = gameState.currentSong.startTime;
-	wavesurfer.options.endTime = gameState.currentSong.endTime;
-
-	// waveform rendering is handled in updateAudio when the audio player is revealed
-	if (gameState.state == STATE.next) {
-		const startPercent = (gameState.currentSong.originalStartTime / gameState.currentSong.duration) * 100;
-		const endPercent = Math.min((gameState.currentSong.originalEndTime / gameState.currentSong.duration) * 100, 100);
-
-		const audioPlayer = document.getElementById("audioPlayer")
-		audioPlayer.style.setProperty('--initial_start', startPercent.toFixed(3) + '%');
-		audioPlayer.style.setProperty('--initial_end', endPercent.toFixed(3) + '%');
-		audioPlayer.dataset.hidden = "false";
-	}
-
-	updateUI();
-	updateProgressBar();
-}
-
-
-function startCountdown() {
-    // Always clear any existing guess timer before starting a new one
-    clearInterval(gameState.guessTimer);
-    let timeLeft = gameState.timeout;
-    const timerElement = document.getElementById('timer');
-    timerElement.textContent = timeLeft;
-    // Update color based on time remaining
-    updateTimerColor(timeLeft, gameState.timeout);
-    gameState.guessTimer = setInterval(() => {
-        timeLeft--;
-        timerElement.textContent = timeLeft;
-        // Update color as time decreases
-        updateTimerColor(timeLeft, gameState.timeout);
-        if (timeLeft <= 0) {
-            clearInterval(gameState.guessTimer);
-            // Time's up - mark as incorrect
-            handleTimeout();
-        }
-    }, 1000);
-}
-
-function updateTimerColor(timeLeft, totalTime) {
-    const timerElement = document.getElementById('timer');
-    const percentage = timeLeft / totalTime;
-    
-    // Interpolate from green (100%) to red (0%)
-    // Green: rgb(72, 187, 120) -> Yellow: rgb(255, 193, 7) -> Red: rgb(244, 67, 54)
-    let r, g, b;
-    
-    if (percentage > 0.5) {
-        // Green to Yellow (100% to 50%)
-        const t = (1 - percentage) * 2; // 0 to 1
-        r = Math.round(72 + (255 - 72) * t);
-        g = Math.round(187 + (193 - 187) * t);
-        b = Math.round(120 + (7 - 120) * t);
-    } else {
-        // Yellow to Red (50% to 0%)
-        const t = (0.5 - percentage) * 2; // 0 to 1
-        r = Math.round(255 + (244 - 255) * t);
-        g = Math.round(193 + (67 - 193) * t);
-        b = Math.round(7 + (54 - 7) * t);
-    }
-    
-    timerElement.style.color = `rgb(${r}, ${g}, ${b})`;
-}
-
-
-function handleTimeout() {
-    gameState.canGuess = false;
-    
-    // Deduct life
-    if (gameState.lives !== 999) {
-        gameState.lives--;
-    }
-    
-    // Don't reveal answers on timeout (only reveal on correct guess or hints)
-    // Keep the answer hidden so player can try again next round
-    
-    // Update UI first so lives count is correct
-    updateUI();
-    
-    // Check game over
-    if (gameState.lives <= 0) {
-        // On game over, reveal the answer
-        gameState.sourceRevealed = gameState.currentSong.sources.map((s, i) => s[0] ? i : null).filter(i => i !== null);
-        gameState.songRevealed = true;
-        updateAnswerDisplay();
-        
-        // Action buttons will be hidden by endGame() when state moves to END
-        document.getElementById('guessInput').disabled = true;
-        // Go directly to game over immediately
-		gameState.success = false;
-        endGame();
-    } else {
-        // Disable input and show result when timed out but still have lives
-        document.getElementById('guessInput').disabled = true;
-		document.getElementById('gameContent').dataset.correct = false;
-        // Show result and next button if still alive (without revealing answer)
-        showResult();
-    }
-}
-
 
 function endGame() {
 
 	changeState(STATE.end)
-
-	const params = new URLSearchParams(window.location.search);
-    const collectionId = params.get('collection');
 
     // Stop everything
 	stopSong();
@@ -760,12 +508,8 @@ function endGame() {
     
     // State has been set to END via changeState(STATE.end) so CSS shows/hides screens and controls accordingly
     // Hide element-specific controls
-    const repeatBtn = document.getElementById('repeatBtn');
-    if (repeatBtn) repeatBtn.hidden = true;
     const timerDisplay = document.getElementById('timerDisplay');
     if (timerDisplay) timerDisplay.hidden = true;
-    const progressTimer = document.getElementById('progressTimer');
-    if (progressTimer) progressTimer.hidden = true;
     document.getElementById('lifelineButtons').hidden = true;
     
     // Update result screen based on success/failure
@@ -786,7 +530,7 @@ function endGame() {
     if (gameState.collection.covers && gameState.collection.covers.length > 0) {
         const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
         // Resolve cover path relative to collections base URL
-        const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + collectionId + '/' + randomCover.replace('./', '');
+        const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + paramsCollectionId + '/' + randomCover.replace('./', '');
         resultScreenCover.src = coverUrl;
         resultScreenCover.alt = `${gameState.collection.title} cover`;
     } else {
@@ -906,6 +650,7 @@ function endGame() {
     }
 
 }
+
 async function nextRound() {
 
 	changeState(STATE.game)
@@ -918,16 +663,18 @@ async function nextRound() {
     clearTimeout(gameState.clipTimer);
     clearInterval(gameState.guessTimer);
     
-    await startRound();
-	console.log("hi")
-	wavesurfer.stop();
-	updateAudio();
-    updateUI();
-
-    // Re-enable lifeline buttons for new round (they'll be updated based on availability)
-    updateLifelineButtons();
+	await initRound();
+    initAudio();
 }
 
+function giveUp() {
+
+    clearTimeout(gameState.clipTimer);
+    clearInterval(gameState.guessTimer);
+    
+	gameState.success = false;
+    endGame();
+}
 
 function checkGuess() {
     if (!gameState.canGuess) return;
@@ -1046,9 +793,6 @@ function checkGuess() {
         clearInterval(gameState.guessTimer);
         gameState.canGuess = false;
         document.getElementById('guessInput').disabled = true;
-        document.getElementById('guessInput').hidden = true;
-		document.getElementById('gameContent').dataset.revealed = true;
-		document.getElementById('gameContent').dataset.correct = true;
 
         // Let the song play to the end and show full progress
         clearTimeout(gameState.clipTimer);
@@ -1108,27 +852,6 @@ function checkGuess() {
     }, 100);
 }
 
-function changeState(state) {
-	if (!state && state !== 0) return;
-
-	gameState.state = state;
-	document.body.dataset.state = state;
-
-	// waveform rendering is handled in updateAudio when the audio player is loaded and shown.
-}
-
-// Helper for setting boolean body flags used by CSS selectors
-
-function giveUp() {
-
-    clearTimeout(gameState.clipTimer);
-    clearInterval(gameState.guessTimer);
-    
-	gameState.success = false;
-    endGame();
-}
-
-
 function showResult() {
     // Animation is now handled in checkGuess before life deduction
     
@@ -1156,6 +879,141 @@ function showResult() {
     }
 }
 
+function changeState(state) {
+	gameState.state = state;
+	document.body.dataset.state = state;
+}
+
+
+// ************** //
+// Play Functions //
+// ************** //
+
+function playSong() {
+	wavesurfer.play();
+}
+
+function pauseSong() {
+	wavesurfer.pause();
+}
+
+function stopSong() {
+	wavesurfer.stop();
+}
+
+function repeatSong() {
+	if (!wavesurfer || !gameState.currentSong) return;
+
+    const startTime = gameState.currentSong.startTime || 0;
+	const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
+
+	wavesurfer.play(startTime, endTime);
+}
+
+function playFullSong() {
+
+	gameState.currentSong.startTime = 0;
+	gameState.currentSong.endTime = gameState.currentSong.duration;
+
+	wavesurfer.options.startTime = gameState.currentSong.startTime;
+	wavesurfer.options.endTime = gameState.currentSong.endTime;
+
+	updateUI();
+	updateProgressBar();
+}
+
+
+// *********** //
+// Timer Logic //
+// *********** //
+
+function startCountdown() {
+    
+    if (!gameState.hasTimeout || gameState.state != STATE.game) { return; }
+
+    // Always clear any existing guess timer before starting a new one
+    clearInterval(gameState.guessTimer);
+    let timeLeft = gameState.timeout;
+    const timerElement = document.getElementById('timer');
+    timerElement.textContent = timeLeft;
+    // Update color based on time remaining
+    updateTimerColor(timeLeft, gameState.timeout);
+    gameState.guessTimer = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+        // Update color as time decreases
+        updateTimerColor(timeLeft, gameState.timeout);
+        if (timeLeft <= 0) {
+            clearInterval(gameState.guessTimer);
+            // Time's up - mark as incorrect
+            handleTimeout();
+        }
+    }, 1000);
+}
+
+function updateTimerColor(timeLeft, totalTime) {
+    const timerElement = document.getElementById('timer');
+    const percentage = timeLeft / totalTime;
+    
+    // Interpolate from green (100%) to red (0%)
+    // Green: rgb(72, 187, 120) -> Yellow: rgb(255, 193, 7) -> Red: rgb(244, 67, 54)
+    let r, g, b;
+    
+    if (percentage > 0.5) {
+        // Green to Yellow (100% to 50%)
+        const t = (1 - percentage) * 2; // 0 to 1
+        r = Math.round(72 + (255 - 72) * t);
+        g = Math.round(187 + (193 - 187) * t);
+        b = Math.round(120 + (7 - 120) * t);
+    } else {
+        // Yellow to Red (50% to 0%)
+        const t = (0.5 - percentage) * 2; // 0 to 1
+        r = Math.round(255 + (244 - 255) * t);
+        g = Math.round(193 + (67 - 193) * t);
+        b = Math.round(7 + (54 - 7) * t);
+    }
+    
+    timerElement.style.color = `rgb(${r}, ${g}, ${b})`;
+}
+
+function handleTimeout() {
+    gameState.canGuess = false;
+    
+    // Deduct life
+    if (gameState.lives !== 999) {
+        gameState.lives--;
+    }
+    
+    // Don't reveal answers on timeout (only reveal on correct guess or hints)
+    // Keep the answer hidden so player can try again next round
+    
+    // Update UI first so lives count is correct
+    updateUI();
+    
+    // Check game over
+    if (gameState.lives <= 0) {
+        // On game over, reveal the answer
+        gameState.sourceRevealed = gameState.currentSong.sources.map((s, i) => s[0] ? i : null).filter(i => i !== null);
+        gameState.songRevealed = true;
+        updateAnswerDisplay();
+        
+        // Action buttons will be hidden by endGame() when state moves to END
+        document.getElementById('guessInput').disabled = true;
+        // Go directly to game over immediately
+		gameState.success = false;
+        endGame();
+    } else {
+        // Disable input and show result when timed out but still have lives
+        document.getElementById('guessInput').disabled = true;
+        // Show result and next button if still alive (without revealing answer)
+        showResult();
+    }
+}
+
+
+// ******* //
+// Updates //
+// ******* //
 
 function updateAnswerDisplay() {
     const song = gameState.currentSong;
@@ -1317,6 +1175,9 @@ function updateUI() {
     document.getElementById('sourceScore').textContent = `${gameState.sourceGuessed}`;
     document.getElementById('songScore').textContent = `${gameState.songsGuessed}`;
     
+	// Hide/show timerDisplay
+	document.getElementById("timerDisplay").hidden = !gameState.hasTimeout;
+
     // Update lives display with hearts
     const livesElement = document.getElementById('lives');
     const livesContainer = livesElement.parentElement;
@@ -1353,11 +1214,64 @@ function updateUI() {
         });
     }
     
+	// Clear input
+    document.getElementById('guessInput').value = '';
+    document.getElementById('guessInput').disabled = gameState.state != STATE.game;
+
+	// Original Start/End Time Display
+	const startPercent = (gameState.currentSong.originalStartTime / gameState.currentSong.duration) * 100;
+	const endPercent = Math.min((gameState.currentSong.originalEndTime / gameState.currentSong.duration) * 100, 100);
+	const audioPlayer = document.getElementById("audioPlayer")
+	audioPlayer.style.setProperty('--initial_start', startPercent.toFixed(3) + '%');
+	audioPlayer.style.setProperty('--initial_end', endPercent.toFixed(3) + '%');
+
+	// Album Image
+	document.getElementById('album-img').src = "";
+	const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
+					gameState.currentSong.audioFile : 
+					gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
+	extractAudioCover(audioUrl).then(src => {	document.getElementById("album-img").src = src; });
+
     document.getElementById('round').textContent = gameState.currentSongIndex + 1;
     document.getElementById('total').textContent = gameState.shuffledSongs.length;
 }
 
+function updateProgressBar() {
+    if (!wavesurfer || !gameState.currentSong) return;
 
+    const startTime = gameState.currentSong.startTime || 0;
+	const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
+
+	const waveTime = wavesurfer.getCurrentTime();
+    const segDuration = endTime - startTime;
+    const segTime = Math.max(0, waveTime - startTime);
+	const segRemaining = segDuration > 0 ? Math.max(0, Math.min(segDuration, Math.ceil(endTime - waveTime))) : 0;
+    const progress = Math.max(0, Math.min(1, segTime / segDuration));
+
+	document.getElementById('progressBar').style.setProperty('--progress', progress);
+	document.getElementById('progressTimer').textContent = formatTime(segRemaining);
+}
+
+function initAudio() {
+    if (!gameState.currentSong) return;
+	if (wavesurfer && wavesurfer.isPlaying()) { wavesurfer.stop(); }
+
+    const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? gameState.currentSong.audioFile : gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
+
+    wavesurfer.load(audioUrl);
+	
+	wavesurfer.once('ready', () => {
+		const startTime = gameState.currentSong.startTime || 0;
+		const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
+
+		wavesurfer.options.startTime = startTime;
+		wavesurfer.options.endTime = endTime;
+		wavesurfer.getRenderer().reRender();
+		wavesurfer.play(0)
+
+		startRound();
+	});
+}
 
 
 // ********* //
@@ -1638,13 +1552,10 @@ function useExpandLifeline() {
     updateLifelineButtons();
 }
 
+
 // **************** //
 // Helper Functions //
 // **************** //
-
-
-
-
 
 function extractTime(str) {
 	if (!str) { return str; }
