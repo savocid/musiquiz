@@ -600,10 +600,10 @@ function updateGame() {
 
 	// Album Image
 	document.getElementById('album-img').src = "";
-	extractAudioCover(gameState.currentSong.audioFile).then(src => {	document.getElementById("album-img").src = src; });
+	extractAudioCover(gameState.currentSong.audioFile).then(src => { document.getElementById("album-img").src = src; });
 
-    document.getElementById('round').textContent = gameState.currentSongIndex + 1;
-    document.getElementById('total').textContent = gameState.shuffledSongs.length;
+    document.getElementById('currentRound').textContent = gameState.currentSongIndex + 1;
+    document.getElementById('totalRounds').textContent = gameState.shuffledSongs.length;
 
 	audio.getRenderer().reRender();
 }
@@ -1253,6 +1253,7 @@ function handleTimeout() {
         // Go directly to game over immediately
         endGame();
     } else {
+		updateState(STATE.next);
         // Disable input and show result when timed out but still have lives
         document.getElementById('guessInput').disabled = true;
         // Show result and next button if still alive (without revealing answer)
