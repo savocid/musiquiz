@@ -25,6 +25,11 @@ const gameState_default = {
     shuffledSongs: [],
 	currentSong: null,
     currentSongIndex: 0,
+	revealed: {
+		sources: [],
+		songs: [],
+		year: false,
+	},
 	result: {
 		score: 0,
 		sources: 0,
@@ -32,16 +37,6 @@ const gameState_default = {
 		songs: 0,
 		totalSongs: 0,
 	},
-
-	revealed: {
-		sources: [],
-		songs: [],
-		year: false,
-	},
-
-
-
-    baseUrl: '',
 
 
 
@@ -51,11 +46,6 @@ const gameState_default = {
     yearRevealed: false,
 	hintLettersRevealed: { source: [], song: [] },
     canGuess: true,
-
-
-
-	
-	
 };
 
 let gameState;
@@ -151,16 +141,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 	});
 
 	document.getElementById('submitGuess').addEventListener('click', checkGuess);
- 	document.getElementById('guessInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            checkGuess();
-        }
-    });
 
     document.addEventListener('keydown', (e) => {
         // Handle Enter key for next round if next button is active
         if (e.key === 'Enter' && gameState.state == STATE.next) {
 			nextRound();
+			return;
+        }
+
+		if (e.key === 'Enter') {
+            checkGuess();
 			return;
         }
 
@@ -201,9 +191,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
 	// Slider
 	const roundsSlider = document.getElementById('roundsSlider');
-	const maxDigits = roundsSlider.max.toString().length;
-	const padNumber = (num) => num.toString().padStart(maxDigits, '0');
 	roundsSlider.addEventListener('input', () => {
+		const maxDigits = roundsSlider.max.toString().length;
+		const padNumber = (num) => num.toString().padStart(maxDigits, '0');
 		roundsValue.textContent = padNumber(roundsSlider.value);
 		gameState.rounds = roundsSlider.value;
 	});
@@ -263,6 +253,9 @@ async function loadGameData() {
         }).filter(song => song !== null && song.audioFile);
 
         gameState.collection = collectionData;
+		gameState.collection.songs = gameState.collection.songs.map(song => ({ ...song, audioFile: `https://${paramsCollectionsUrl}/audio/${song.audioFile}` }));
+
+
 
 		updateStart();
 
@@ -303,10 +296,7 @@ async function initRound() {
 
     // Generate random startTime based on startTime and endTime
     try {
-		const audioUrl = gameState.currentSong.audioFile.startsWith('http')
-			? gameState.currentSong.audioFile
-			: gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
-		const duration = await getAudioDuration(audioUrl);
+		const duration = await getAudioDuration(gameState.currentSong.audioFile);
 		gameState.currentSong.duration = duration;
 
 		const endPadding = 5;
@@ -349,9 +339,7 @@ async function initRound() {
 async function initAudio() {
 	if (audio && audio.isPlaying()) { audio.stop(); }
 
-    const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? gameState.currentSong.audioFile : gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
-
-    audio.load(audioUrl);
+    audio.load(gameState.currentSong.audioFile);
 	
 	audio.once('ready', () => {
 		const startTime = gameState.currentSong.startTime || 0;
@@ -473,9 +461,6 @@ function updateStart() {
 		if (songsStatsDiv) songsStatsDiv.hidden = true;
 	}
 
-	// Set base URL for audio files
-	gameState.baseUrl = 'https://' + paramsCollectionsUrl.replace(/\/$/, ''); // Remove trailing slash
-
 	// Always use current MODES definition (ensures fresh settings)
 	gameState.settings = { ...MODES[paramsMode], mode: paramsMode, collectionId: paramsCollectionId };
 	gameState.settings.totalLives = gameState.settings.lives;
@@ -515,7 +500,7 @@ function updateStart() {
 	if (gameState.collection.covers && gameState.collection.covers.length > 0) {
 		const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
 		// Resolve cover path relative to collection directory
-		const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + paramsCollectionId + '/' + randomCover.replace('./', '');
+		const coverUrl = 'https://' + paramsCollectionsUrl + '/collections/' + paramsCollectionId + '/' + randomCover.replace('./', '');
 		startScreenCover.src = coverUrl;
 		startScreenCover.alt = `${gameState.collection.title} cover`;
 	} else {
@@ -608,10 +593,7 @@ function updateGame() {
 
 	// Album Image
 	document.getElementById('album-img').src = "";
-	const audioUrl = gameState.currentSong.audioFile.startsWith('http') ? 
-					gameState.currentSong.audioFile : 
-					gameState.baseUrl + '/audio/' + gameState.currentSong.audioFile;
-	extractAudioCover(audioUrl).then(src => {	document.getElementById("album-img").src = src; });
+	extractAudioCover(gameState.currentSong.audioFile).then(src => {	document.getElementById("album-img").src = src; });
 
     document.getElementById('round').textContent = gameState.currentSongIndex + 1;
     document.getElementById('total').textContent = gameState.shuffledSongs.length;
@@ -633,7 +615,7 @@ function updateResult() {
     if (gameState.collection.covers && gameState.collection.covers.length > 0) {
         const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
         // Resolve cover path relative to collections base URL
-        const coverUrl = randomCover.startsWith('http') ? randomCover : gameState.baseUrl + '/collections/' + paramsCollectionId + '/' + randomCover.replace('./', '');
+        const coverUrl = 'https://' + paramsCollectionsUrl + '/collections/' + paramsCollectionId + '/' + randomCover.replace('./', '');
         resultScreenCover.src = coverUrl;
         resultScreenCover.alt = `${gameState.collection.title} cover`;
     } else {
