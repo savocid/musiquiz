@@ -147,9 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
     // Use data-mode attribute so JS can base visibility on it (not classes)
     document.body.dataset.mode = savedMode;
-    // reflect whether this mode uses a timeout (controls timer preview visibility)
-    document.body.dataset.hasTimeout = (MODES[savedMode] && MODES[savedMode].timeout > 0) ? 'true' : 'false';
-    
+
     updateCSSVariables(savedMode)
     
     // Highlight active mode button
@@ -176,8 +174,6 @@ window.applyModeTheme = function(mode, animate = false, callback) {
             // Use data attribute for current mode
             document.body.dataset.mode = mode;
             // reflect whether this mode uses a timeout (controls timer preview visibility)
-            document.body.dataset.hasTimeout = (MODES[mode] && MODES[mode].timeout > 0) ? 'true' : 'false';
-            
             // Remove animation class
             document.body.classList.remove('mode-animating');
             if (callback) callback();
@@ -185,7 +181,6 @@ window.applyModeTheme = function(mode, animate = false, callback) {
     } else {
         // Just switch modes without animation
         document.body.dataset.mode = mode;
-        document.body.dataset.hasTimeout = (MODES[mode] && MODES[mode].timeout > 0) ? 'true' : 'false';
     }
 };
 
