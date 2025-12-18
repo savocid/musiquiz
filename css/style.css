@@ -601,6 +601,35 @@ header h5 {
 .btn-back {
     margin-bottom: 1rem;
 }
+.btn.loading {
+	transition:none;
+    color: transparent;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.loading:before {
+	--border: rgba(50,50,50,1);
+    --color1: var(--primary-color);
+    position: absolute;
+    content: '';
+    height: 50%;
+    aspect-ratio: 1 / 1;
+    animation: spin 3s linear infinite;
+    border-radius: 50%;
+    border: 4px dashed var(--border);
+    /*background: radial-gradient(var(--color1) 60%, transparent 65%);*/
+	background: transparent;
+	opacity: 0.5;
+}
+
+@keyframes spin { 
+  100% { 
+    transform: rotateZ(360deg); 
+  }
+}
 
 /* Game Styles */
 .game-container {

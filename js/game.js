@@ -200,6 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	
 	// Add start button listener
 	document.getElementById('startGameBtn').addEventListener('click', () => {
+		document.getElementById('startGameBtn').classList.add("loading");
 		startGame();
 	});
 
@@ -273,8 +274,6 @@ async function loadGameData() {
 
 async function startGame() {
 
-	changeState(STATE.game);
-
     const numRounds = parseInt(gameState.rounds);
     const shuffled = [...gameState.collection.songs].sort(() => Math.random() - 0.5);
     gameState.shuffledSongs = shuffled.slice(0, numRounds);
@@ -291,7 +290,7 @@ async function initRound() {
         return;
     }
 
-    clearInterval(gameState.timeout);
+    stopTimeout();
 	updateRoundStates();
 
     // Generate random startTime based on startTime and endTime
@@ -350,14 +349,16 @@ async function initAudio() {
 		audio.getRenderer().reRender();
 		audio.play(0)
 
+		document.getElementById('startGameBtn').classList.remove("loading");
+
 		startRound();
 	});
 }
 
 function startRound() {
-
-	changeState(STATE.game)
     
+	updateState(STATE.game);
+
 	gameState.result.sources += gameState.currentSong.sources.filter(s => s[0]).length;
     gameState.result.songs += 1;
 
@@ -365,7 +366,9 @@ function startRound() {
     updateAnswerDisplay();
     updateLifelineButtons();
 
-	startCountdown();
+	startTimeout();
+
+	renderState(STATE.game);
 
 	console.log(gameState.currentSong.sources.map(source => source[1]))
 	console.log(gameState.currentSong.title.filter((title, i) => i !== 0))
@@ -373,29 +376,30 @@ function startRound() {
 
 function endGame() {
 
-	changeState(STATE.end)
+	updateState(STATE.end);
 
 	stopSong();
+	stopTimeout();
 
-    clearInterval(gameState.timeout);
-    
 	updateGame();
-
 	updateResult();
+
+	renderState(STATE.end);
 }
 
 async function nextRound() {
 
-	changeState(STATE.game)
+	updateState(STATE.game);
 
 	gameState.currentSongIndex++;
 
 	stopSong();
-  
-    clearInterval(gameState.timeout);
+    stopTimeout();
     
 	await initRound();
     await initAudio();
+
+	renderState(STATE.game);
 }
 
 function giveUp() {
@@ -403,8 +407,11 @@ function giveUp() {
 	showResult();
 }
 
-function changeState(state) {
+function updateState(state) {
 	gameState.state = state;
+}
+
+function renderState(state) {
 	document.body.dataset.state = state;
 }
 
@@ -1036,20 +1043,20 @@ function checkGuess() {
     }
     // Only stop countdown timer if all guessed (but keep clip timer running)
     if (allGuessed) {
-        clearInterval(gameState.timeout);
+        stopTimeout();
         gameState.canGuess = false;
         document.getElementById('guessInput').disabled = true;
 
         // Let the song play to the end and show full progress
-		
-		changeState(STATE.next);
 
         playFullSong();
         //! Resume playback if it was paused
 
 		if (!audio.isPlaying()) {
 			playSong();
-		} 
+		}
+
+		updateState(STATE.next);
     }
     
     // Show result (only if not game over)
@@ -1116,10 +1123,11 @@ function showResult() {
     // Show next button and disable input if required guessed or timeout (but not if game over)
     if ((requiredGuessed || !gameState.canGuess) && gameState.settings.lives > 0) {
         // Move into NEXT state so UI (CSS) shows the next button and hides game actions
-        changeState(STATE.next);
         
         // Stop the countdown timer when next state appears
-        clearInterval(gameState.timeout);
+		stopTimeout();
+
+        updateState(STATE.next);
     }
 }
 
@@ -1166,12 +1174,12 @@ function playFullSong() {
 // Timeout //
 // ******* //
 
-function startCountdown() {
+function startTimeout() {
     
     if (gameState.settings.timeout <= 0 || gameState.state != STATE.game) { return; }
 
     // Always clear any existing guess timer before starting a new one
-    clearInterval(gameState.timeout);
+    stopTimeout();
     let timeLeft = gameState.settings.timeout;
     const timerElement = document.getElementById('timer');
     timerElement.textContent = timeLeft;
@@ -1183,11 +1191,15 @@ function startCountdown() {
         // Update color as time decreases
         updateTimerColor(timeLeft, gameState.settings.timeout);
         if (timeLeft <= 0) {
-            clearInterval(gameState.timeout);
+            stopTimeout();
             // Time's up - mark as incorrect
             handleTimeout();
         }
     }, 1000);
+}
+
+function stopTimeout() {
+    clearInterval(gameState.timeout);
 }
 
 function updateTimerColor(timeLeft, totalTime) {
@@ -1352,7 +1364,7 @@ function useTimeLifeline() {
     
     // Add 10 seconds to timer
     if (gameState.timeout) {
-        clearInterval(gameState.timeout);
+        stopTimeout();
         let currentTime = parseInt(document.getElementById('timer').textContent);
         currentTime += 10;
         document.getElementById('timer').textContent = currentTime;
@@ -1363,7 +1375,7 @@ function useTimeLifeline() {
             document.getElementById('timer').textContent = currentTime;
             
             if (currentTime <= 0) {
-                clearInterval(gameState.timeout);
+                stopTimeout();
                 handleTimeout();
             }
         }, 1000);
@@ -1550,20 +1562,20 @@ function formatTime(seconds) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-async function getAudioDuration(audioUrl) {
+async function getAudioDuration(url) {
     return new Promise((resolve, reject) => {
-        const audio = new Audio();
+        const a = new Audio();
         
-        audio.addEventListener('loadedmetadata', () => {
-            resolve(audio.duration);
+        a.addEventListener('loadedmetadata', () => {
+            resolve(a.duration);
         });
         
-        audio.addEventListener('error', (error) => {
+        a.addEventListener('error', (error) => {
             reject(error);
         });
         
-        audio.src = audioUrl;
-        audio.load();
+        a.src = url;
+        a.load();
     });
 }
 
