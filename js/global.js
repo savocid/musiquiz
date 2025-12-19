@@ -96,10 +96,3 @@ const MODES = {
 function cleanUrl(url) {
     return `${url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').replace(/\?.*$/,'').trim()}`;
 }
-
-document.addEventListener('DOMContentLoaded', async () => {
-	if (window.location.protocol === "https:") {
-		//const newUrl = `https://${cleanUrl(window.location.href).toString().replace(".html",'')}`;
-		//history.replaceState(null, '', newUrl);
-	}
-});

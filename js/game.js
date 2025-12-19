@@ -207,9 +207,7 @@ async function loadGameData() {
         }).filter(song => song !== null && song.audioFile);
 
         gameState.collection = collectionData;
-		gameState.collection.songs = gameState.collection.songs.map(song => ({ ...song, audioFile: `${collectionsUrl}/audio/${song.audioFile}` }));
-
-
+		gameState.collection.songs = gameState.collection.songs.map(song => ({ ...song, audioFile: `https://${collectionsUrl}/audio/${song.audioFile}` }));
 
 		updateStart();
 
