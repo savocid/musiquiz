@@ -42,64 +42,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Generate mode buttons dynamically
-    const modeControl = document.getElementById('modeControl');
-    if (modeControl && MODES) {
-        const modes = MODES;
-        for (const [modeKey, modeData] of Object.entries(modes)) {
-            const button = document.createElement('button');
-            button.className = 'mode-btn-compact';
-            button.setAttribute('data-mode', modeKey);
-            
-            // Title
-            const title = modeKey.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-            const strong = document.createElement('strong');
-            strong.textContent = title;
-            
-            // Hearts
-            if (modeData.lives !== Infinity) {
-                const hearts = '❤️'.repeat(modeData.lives);
-                strong.innerHTML += `<span class="emoji">${hearts}</span>`;
-            }
-            
-            // Listen time and timeout
-            const listenSpan = document.createElement('span');
-            listenSpan.textContent = `${modeData.clipDuration}s Listen • ${modeData.timeout > 0 ? modeData.timeout + 's Timeout' : 'No Timeout'}`;
-            
-            // Lifelines
-            const lifelinesSpan = document.createElement('span');
-            let lifelines = [];
-            
-            // Add lifelines based on availability
-            if (modeData.lifelines) {
-                if (modeData.lifelines.hint.total > 0) {
-                    lifelines.push('💡');
-                }
-                if (modeData.lifelines.year.total > 0) {
-                    lifelines.push('📅');
-                }
-                if (modeData.lifelines.expand.total > 0) {
-                    lifelines.push('↔️');
-                }
-                if (modeData.lifelines.skip.total > 0) {
-                    lifelines.push('⏭️');
-                }
-                if (modeData.timeout > 0) {
-                    lifelines.push('⏱️');
-                }
-            } else {
-                // Fallback for old mode format
-                lifelines.push('💡', '📅', '↔️', '⏭️');
-            }
-            
-            lifelinesSpan.innerHTML = `<span class="emoji">${lifelines.join(' • ')}</span>`;
-            
-            button.appendChild(strong);
-            button.appendChild(listenSpan);
-            button.appendChild(lifelinesSpan);
-            
-            modeControl.appendChild(button);
-        }
-    }
+	for (const [modeKey, modeData] of Object.entries(MODES)) {
+		const button = document.createElement('button');
+		button.className = 'mode-btn-compact';
+		button.setAttribute('data-mode', modeKey);
+		document.getElementById('modeControl').appendChild(button);
+
+		// Title
+		const title = MODES[modeKey].title;
+		const strong = document.createElement('strong');
+		strong.textContent = title;
+		button.appendChild(strong);
+		
+		// Hearts
+		if (modeData.lives !== Infinity) {
+			const hearts = '❤️'.repeat(modeData.lives);
+			strong.innerHTML += `<span class="emoji">${hearts}</span>`;
+		}
+		
+		// Listen time and timeout
+		const listenSpan = document.createElement('span');
+		listenSpan.textContent = `${modeData.clipDuration}s Listen • ${modeData.timeout > 0 ? modeData.timeout + 's Timeout' : 'No Timeout'}`;
+		button.appendChild(listenSpan);
+
+		// Lifelines
+		const lifelinesWrap = document.createElement('span');
+		button.appendChild(lifelinesWrap);
+	
+		console.log(Object.keys(lifeLines))
+		Object.keys(lifeLines).forEach(key => {
+			if (MODES[modeKey].lifelines[key].total > 0) {
+				const lifelineSpan = document.createElement('span');
+				lifelineSpan.textContent = lifeLines[key].symbol;
+				lifelineSpan.classList.add("emoji");
+				lifelinesWrap.appendChild(lifelineSpan);
+				lifelinesWrap.innerHTML += " • "
+			}
+		});
+
+		lifelinesWrap.innerHTML = lifelinesWrap.innerHTML.replace(/ • $/,"")
+	}
+
     
     // Attach mode button listeners based on page
     const params = new URLSearchParams(window.location.search);

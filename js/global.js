@@ -44,7 +44,7 @@ const MODES = {
             expand: { total: Infinity, },
             year:	{ total: Infinity, },
             skip:	{ total: Infinity, },
-			time:	{ total: Infinity, },
+			time:	{ total: 0, },
         }
     },
     default: { 
@@ -86,7 +86,7 @@ const MODES = {
             expand:	{ total: 1, },
             year:	{ total: 1, }, 
             skip:	{ total: 1, },
-			time:	{ total: 1, },
+			time:	{ total: 0, },
         }
     }
 };
