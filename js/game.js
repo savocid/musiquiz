@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     params.set('collection', collectionId);
 	params.set('data', collectionsUrl);
 
-	let newUrl = params.toString() ? `${window.location.href}?${params.toString()}` : window.location.href;
+	let newUrl = params.toString() ? `${window.location.origin}${window.location.pathname}?${params.toString()}` : `${window.location.origin}${window.location.pathname}`;
 	history.replaceState(null, '', newUrl);
 
   	document.getElementById('volumeSlider').addEventListener('input', (e) => {
