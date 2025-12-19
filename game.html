@@ -77,11 +77,12 @@
     
                 <!-- Answer Display (hidden/revealed sources and song) -->
                 <div class="metadata-container">
-					<div class="album-container">
-						<div class="album-wrapper">
-							<img id="album-img" alt="Album Image" src />
-							<span id="album-alt">N/A</span>
-							<span class="album-qmark">?</span>
+
+					<div class="cover-container">
+						<div class="cover-wrapper">
+							<img id="cover-img" alt="Album Image" src />
+							<span id="cover-alt">N/A</span>
+							<span class="cover-qmark">?</span>
 						</div>
 					</div>
 
@@ -138,13 +139,13 @@
                 </div>
 
                 <!-- Game Info / Result Details Grid -->
-                <div style="display: inline-block;">
-                    <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                        <strong>Difficulty:</strong><strong class="difficulty"></strong>
-						<strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;" class="mode"></span>
-                        <strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span class="rounds"></span>/<span class="totalRounds"></span></span>
-                        <strong class="sourcesLabel">Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span class="sourcesGuessed"></span>/<span class="totalSources"></span></span>
-                        <strong>Songs:</strong><span style="color: var(--primary-color); font-weight: bold;"><span class="songsGuessed"></span>/<span class="totalSongs"></span></span>
+                <div style="display: inline-block; width: 100%;">
+                    <div style="color: #555; font-size: 1.2rem;">
+                        <span class="difficulty"><strong>Difficulty:</strong><strong></strong></span>
+						<span class="mode"><strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;"></span></span>
+                        <span class="rounds"><strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
+                        <span class="sources"><strong>Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
+                        <span class="songs"><strong>Songs:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
                     </div>
                 </div>
             </div>
@@ -170,7 +171,7 @@
 
                 <div style="display: flex;gap: 1rem;justify-content: center;margin-top: 1.5rem;">
                     <button class="btn btn-success" onclick="location.reload()">Play Again</button>
-                    <button class="btn btn-secondary" onclick="goHome()">Home</button>
+                    <button class="btn btn-secondary"><a href="./index.html">Home</a></button>
                 </div>
             </div>
         </div>

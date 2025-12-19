@@ -105,7 +105,7 @@ function displayCollections() {
             <div class="collection-info">
                 <h3>${collection.title}</h3>
                 <p>${collection.description || 'No description'}</p>
-                <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Language:</strong> ${collection.language.join("/")}</p>
+                <p><strong>Difficulty:</strong> <span data-difficulty='${collection.difficulty}'">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Language:</strong> ${collection.language.join("/")}</p>
             </div>
             <button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
         </div>

@@ -43,7 +43,7 @@ const MODES = {
 			cover:	{ total: Infinity, },
             expand: { total: Infinity, },
             year:	{ total: Infinity, },
-            skip:	{ total: Infinity, },
+            skip:	{ total: 0, },
 			time:	{ total: 0, },
         }
     },

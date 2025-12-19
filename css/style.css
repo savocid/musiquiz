@@ -840,15 +840,15 @@ header h5 {
     font-size: 1.2rem;
 }
 
-/* Album Image */
-.album-container {
+/* cover Image */
+.cover-container {
     padding: 0 1rem;
     background: transparent;
     border-radius: 0;
     width: 100%;
 }
 
-.album-wrapper {
+.cover-wrapper {
 	border: 5px inset slategray;
     border-radius: 10px;
     display: flex;
@@ -857,7 +857,7 @@ header h5 {
     background: gainsboro;
 }
 
-.album-container #album-img {
+.cover-container #cover-img {
     max-width: 100%;
     aspect-ratio: 1 / 1;
     z-index: 10;
@@ -865,7 +865,7 @@ header h5 {
     background: black;
 }
 
-.album-container #album-alt {
+.cover-container #cover-alt {
     width: 100%;
     aspect-ratio: 1 / 1;
     display: flex;
@@ -879,7 +879,7 @@ header h5 {
     font-style: italic;
 	font-weight: bold;
 }
-.album-container .album-qmark {
+.cover-container .cover-qmark {
 	position: absolute;
     font-size: 4rem;
     font-family: sans-serif;
@@ -887,10 +887,10 @@ header h5 {
 }
 
 
-#album-img[src=''],
-#album-img[src='null'],
-#album-img:not([src]),
-#album-img[src*='data'] ~ #album-alt { 
+#cover-img[src=''],
+#cover-img[src='null'],
+#cover-img:not([src]),
+#cover-img[src*='data'] ~ #cover-alt { 
 	display: none; 
 }
 
@@ -938,9 +938,12 @@ header h5 {
     flex-wrap: nowrap;
 }
 .answer-wrapper * {
-	text-transform: uppercase;
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 }
+.answer-wrapper .false {
+	text-transform: uppercase;
+}
+
 .answer-wrapper.hidden * {
 	opacity:0;
 }
@@ -1072,6 +1075,10 @@ header h5 {
 	filter:grayscale(100%);
 	opacity:0.5;
 }
+#resultLifelinesDisplay *[hidden] {
+	display: none;
+}
+
 
 .action-buttons {
     display: flex;
@@ -1158,6 +1165,7 @@ header h5 {
 
 /* Difficulty colors */
 
+#collectionsList,
 #startScreen,
 #resultScreen {
 	[data-difficulty='Easy'] {
@@ -1179,6 +1187,20 @@ header h5 {
 		color: #dc3545;
 		font-weight: bold;
 	}
+}
+
+#resultScreen .difficulty,
+#resultScreen .mode,
+#resultScreen .rounds,
+#resultScreen .sources,
+#resultScreen .songs {
+	display: flex;
+    justify-content: space-between;
+}
+
+#resultScreen .sources[hidden],
+#resultScreen .songs[hidden] {
+	display: none;
 }
 
 /* Song List */
@@ -1315,7 +1337,7 @@ header h5 {
 }
 
 
-body:not([data-state="2"]) #answerDisplay {
+body:not([data-state="2"]) #answerDisplay:not([data-hint='true']) {
 	.source[data-reveal='true'] .false,
 	.song[data-reveal='true'] .false,
 	.source[data-reveal='false'] .true,
@@ -1327,11 +1349,34 @@ body:not([data-state="2"]) #answerDisplay {
 	}
 }
 
+body[data-state="1"] #answerDisplay[data-hint='true'],
 body[data-state="2"] #answerDisplay {
 	.source .false,
 	.song .false {
 		display: none !important;
 	}
+}
+
+#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span.hint {
+    color: hsl(0, 0%, 30%);
+}
+
+#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint) {
+	font-size: 0;
+}
+
+#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint)::after {
+	content: "_";
+	font-size: 1.5rem;
+    padding: 0px 1px;
+}
+
+#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint).space::after {
+    content: " ";
+	padding: 0 .25rem;
+}
+#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span.special::after {
+	font-size:0;
 }
 
 
@@ -1364,7 +1409,7 @@ body[data-style="3"] {
 	.source[data-reveal='true'],
 	.song[data-reveal='true'],
 	.year[data-reveal='true'] {
-		color: #3ee33e;
+		color: #3ee33e !important;
 		font-weight: bold;
 		font-style: normal;
 	}
@@ -1380,6 +1425,7 @@ body[data-state="2"] #answerDisplay *[data-reveal='false'] {
 body[data-state="2"] #answerDisplay .year {
 	color: hsl(0,0%,70%);
 }
+
 
 /* 
 // STATE.start: 0
@@ -1414,8 +1460,8 @@ body:not([data-state="2"]) {
 	#audioPlayer::after {
 		display: none !important;
 	}
-	.album-container:not([data-reveal='true']) #album-alt,
-	.album-container:not([data-reveal='true']) #album-img {
+	.cover-container:not([data-reveal='true']) #cover-alt,
+	.cover-container:not([data-reveal='true']) #cover-img {
 		visibility: hidden !important;
 	}
 }
