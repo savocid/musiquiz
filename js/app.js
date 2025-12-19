@@ -5,7 +5,7 @@ let allCollections = []; // Store all collections
 let displayedCount = 5; // Number of collections to show initially
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
-collectionsUrl = cleanUrl(collectionsUrl);
+collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
 
 
 // Load collections when page loads

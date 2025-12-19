@@ -66,7 +66,7 @@ const params = new URLSearchParams();
 let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || null; 
 let collectionId = localStorage.getItem('collection') || params.get('collection') || null; 
 let currentMode = localStorage.getItem('selectedMode') || params.get('mode') || 'default'; 
-collectionsUrl = cleanUrl(collectionsUrl);
+collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
 
 
 // ************** //
