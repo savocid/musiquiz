@@ -99,7 +99,7 @@ function cleanUrl(url) {
 
 document.addEventListener('DOMContentLoaded', async () => {
 	if (window.location.protocol === "https:") {
-		const newUrl = window.location.href.toString().replace(".html",'').replace("/index",'');
+		const newUrl = `https://${cleanUrl(window.location.href).toString().replace(".html",'').replace("/index",'')}`;
 		history.replaceState(null, '', newUrl);
 	}
 });
