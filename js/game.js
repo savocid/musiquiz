@@ -61,7 +61,7 @@ let audio = WaveSurfer.create({
 	autoplay: true,
 });
 
-const params = new URLSearchParams();
+const params = new URLSearchParams(window.location.search);
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || null; 
 let collectionId = localStorage.getItem('collection') || params.get('collection') || null; 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!collectionsUrl || !collectionId) return;
 
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(window.location.search);
     params.set('mode', currentMode);
     params.set('collection', collectionId);
 	params.set('data', collectionsUrl);
