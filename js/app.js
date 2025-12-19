@@ -1,96 +1,50 @@
 let selectedMode = localStorage.getItem('selectedMode') || 'default'; // Restore saved mode or default
 let selectedCollection = null;
-let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
+
 let allCollections = []; // Store all collections
 let displayedCount = 5; // Number of collections to show initially
 
+let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
+collectionsUrl = cleanUrl(collectionsUrl);
+
+
 // Load collections when page loads
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check for data URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataParam = urlParams.get('data');
-    if (dataParam) {
-        collectionsUrl = cleanUrl(dataParam);
-        // Reconstruct full URL for fetching
-        let fullUrl = 'https://' + collectionsUrl;
-        loadCollections(fullUrl, collectionsUrl); // Pass cleaned to save on success
-    } else if (collectionsUrl) {
-        // Reconstruct full URL for fetching
-        let fullUrl = 'https://' + collectionsUrl;
-        loadCollections(fullUrl);
-    }
-    
-    // Set input values after DOM is ready
-    if (collectionsUrlInputMain) {
-        collectionsUrlInputMain.value = collectionsUrl;
-    }
-    
-    // Clear data button
-    const clearDataBtn = document.getElementById('clearDataBtn');
-    if (clearDataBtn) {
-        clearDataBtn.addEventListener('click', () => {
-            localStorage.clear();
-            // Remove data parameter from URL and reload
-            window.location.href = window.location.pathname;
-        });
-    }
-    
-    // Normalize URL to remove trailing slash for cleaner appearance
-    if (window.location.pathname.endsWith('/') && window.location.pathname !== '/') {
-        const newPath = window.location.pathname.slice(0, -1);
-        const newUrl = window.location.origin + newPath + window.location.search;
-        history.replaceState(null, '', newUrl);
-    }
+	loadCollections(collectionsUrl);
 });
 
-// Collections URL input logic
-const collectionsUrlInputMain = document.getElementById('collectionsUrlInputMain');
-const collectionsUrlSubmit = document.getElementById('collectionsUrlSubmit');
+document.getElementById('collectionsUrlSubmit').addEventListener('click', () => {
+	const input = document.getElementById('collectionsUrlInputMain');
+	loadCollections(input.value);
+});
 
-// Function to clean URL
-function cleanUrl(url) {
-    return url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+document.getElementById('collectionsUrlInputMain').addEventListener('blur', cleanInput);
+
+function cleanInput() {
+	const input = document.getElementById('collectionsUrlInputMain');
+	input.value = cleanUrl(input.value);
 }
 
-// Clean input on blur
-if (collectionsUrlInputMain) {
-    collectionsUrlInputMain.addEventListener('blur', () => {
-        collectionsUrlInputMain.value = cleanUrl(collectionsUrlInputMain.value.trim());
-    });
-}
+async function loadCollections(url) {
 
-if (collectionsUrlSubmit) {
-    collectionsUrlSubmit.addEventListener('click', () => {
-        let url = collectionsUrlInputMain.value.trim();
-        if (url) {
-            // Clean the URL by removing https:// and www.
-            let cleanedUrl = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
-            // Construct full URL for fetching
-            let fullUrl = 'https://' + cleanedUrl;
-            loadCollections(fullUrl, cleanedUrl);
-        }
-    });
-}
+	document.getElementById('collectionsList').innerHTML = "";
+	localStorage.setItem('collectionsUrl', "");
 
-async function loadCollections(fullUrl, cleanedUrl = null) {
-    if (!fullUrl) {
-        document.getElementById('collectionsList').innerHTML = `<p style="color: #fff; text-align: center; padding: 2rem;">Please enter a collections data URL above.</p>`;
-        if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
-        return;
-    }
+	if (!url) { return; }
 
     try {
-        // First fetch the collections index
-        const indexUrl = fullUrl + '/collections/index.json';
+        const indexUrl = `https://${url}/collections/index.json`;
         const indexResponse = await fetch(indexUrl);
+
         if (!indexResponse.ok) {
             throw new Error(`Failed to fetch collections index: ${indexResponse.status}`);
         }
+
         const collectionIds = await indexResponse.json();
 
         // Fetch all collection data files
         const collectionPromises = collectionIds.map(async (collectionId) => {
-            const collectionUrl = `${fullUrl}/collections/${collectionId}/data.json`;
+            const collectionUrl = `https://${url}/collections/${collectionId}/data.json`;
             try {
                 const response = await fetch(collectionUrl);
                 if (!response.ok) {
@@ -117,15 +71,14 @@ async function loadCollections(fullUrl, cleanedUrl = null) {
 			return;
 		}
 
-        // Save only if successful and cleanedUrl provided
-        if (cleanedUrl) {
-            localStorage.setItem('collectionsUrl', cleanedUrl);
-        }
+		localStorage.setItem('collectionsUrl', url);
+		document.getElementById('collectionsUrlInputMain').value = cleanUrl(url);
+        
         displayCollections();
     } catch (error) {
         console.error('Error loading collections:', error);
         document.getElementById('collectionsList').innerHTML = `<p style=\"color: #fff; text-align: center; padding: 2rem;\">Error loading collections. Please check the URL.</p>`;
-        if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').style.display = 'none';
+        document.getElementById('loadMoreBtn').style.display = 'none';
     }
 }
 
@@ -136,24 +89,23 @@ function displayCollections() {
     const collectionsToShow = allCollections.slice(0, displayedCount);
     
     container.innerHTML = collectionsToShow.map(collection => {
-		let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
+		const collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 
-        // Get random cover image if available
-        let coverImage = '';
-        if (collection.covers && collection.covers.length > 0) {
-            const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
-            // Resolve cover path relative to collection directory
-            const coverUrl = randomCover.startsWith('http') ? randomCover : 'https://' + collectionsUrl + '/collections/' + collection.id + '/' + randomCover.replace('./', '');
-            coverImage = `<img src="${coverUrl}" alt="${collection.title} cover" class="collection-cover" loading="lazy">`;
-        }
-        
+		const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
+		const coverSrc = 
+			collection.covers && collection.covers.length > 0 ? `https://${collectionsUrl}/collections/${collection.id}/${randomCover.replace('./', '')}` : 
+			"";
+		const coverTitle = 
+			collection.covers && collection.covers.length > 0 ? `${collection.title}` : 
+			"";
+
         return `
         <div class="collection-item">
-            ${coverImage}
+            <img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">
             <div class="collection-info">
                 <h3>${collection.title}</h3>
                 <p>${collection.description || 'No description'}</p>
-                <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Language:</strong> ${collection.language.join("/")} | <strong>Songs:</strong> ${collection.songs.length}</p>
+                <p><strong>Difficulty:</strong> <span class="difficulty-${collection.difficulty.toLowerCase().replace(' ', '-')}">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Language:</strong> ${collection.language.join("/")}</p>
             </div>
             <button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
         </div>
@@ -173,23 +125,6 @@ function loadMore() {
 }
 
 function startGame(collectionId) {
-	let selectedMode = localStorage.getItem('selectedMode') || 'default'; 
-
-    // Navigate to game with URL parameters
-    const params = new URLSearchParams();
-    params.set('collection', collectionId);
-    params.set('mode', selectedMode);
-	params.set('data', collectionsUrl);
-    
-    // Check if running locally (file:// or localhost)
-    const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    let url;
-    if (isLocal) {
-        url = `game.html?${params.toString()}`;
-    } else {
-        // Use absolute path for production
-        const basePath = '/' + window.location.pathname.split('/')[1] + '/';
-        url = basePath + 'game?' + params.toString();
-    }
-    window.location.href = url;
+	localStorage.setItem("collection",collectionId)
+    window.location.href = `game.html`;
 }

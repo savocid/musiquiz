@@ -9,21 +9,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/cleanUrls.js"></script>
 </head>
 <body class="preload" data-state="0">
     <div class="container">
         <div class="controls-wrapper">
             <!-- Header -->
             <header>
-                <h1><a href="/">MusiQuiz</a></h1>
+                <h1><a href="./index.html">MusiQuiz</a></h1>
 				<h5 style="display: none;">An Excuse to Listen to Great Soundtracks</h5>
             </header>
         </div>
         
         <!-- Start Screen -->
         <div id="startScreen" style="text-align: center;">
-            <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem;">Loading...</h2>
+            <h2 id="collectionTitle" style="color: var(--primary-color); margin-bottom: 1rem; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);">Loading...</h2>
             <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;"></p>
             
             <!-- Game Setup Layout -->
@@ -57,14 +56,14 @@
         
         <!-- Game Content (hidden initially) -->
         <div id="gameContent" class="game-container">
-            <h2 id="gameCollectionTitle" style="color: var(--primary-color); text-align: center; margin-top: 2rem;"></h2>
+            <h2 id="gameCollectionTitle" style="color: var(--primary-color); text-align: center; margin-top: 2rem; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);"></h2>
             <!-- Game Info Header -->
             <div class="game-info">
-                <div>
-                    <div><span id="sourceLabel">Sources</span>: <span id="sourceScore">0</span></div>
-                    <div>Songs: <span id="songScore">0</span></div>
+                <div id="scorePanel">
+                    <div class="sources"><span id="sourceLabel">Sources</span>: <span id="sourceScore">0</span></div>
+                    <div class="songs">Songs: <span id="songScore">0</span></div>
                 </div>
-                <div><span id="lives">3</span></div>
+                <div id="livesPanel"><span id="lives">3</span></div>
                 <div>Round: <span id="currentRound">1</span> / <span id="totalRounds">3</span></div>
             </div>
 
@@ -93,9 +92,11 @@
 						</div>
                 
 						<div class="answer-wrapper hidden" id="answerDisplay">
-							<span class="source-part" id="sourcePart"><span>Source</span></span>
-							<span class="separator"> - </span>
-							<span class="song-part" id="songPart"><span>Song</span></span>
+							<span class="sources"><span class="source1"><span class="true"></span><span class="false"></span></span></span>
+							<span class="seperator1"> - </span>
+							<span class="songs"></span>
+							<span class="seperator2"> </span>
+							<span class="year"></span>
 						</div>
                     </div>
                 </div>
@@ -107,28 +108,12 @@
        
 
             <!-- Lifeline Buttons -->
-            <div class="lifeline-buttons" id="lifelineButtons">
-                <button class="btn btn-lifeline" id="hintLifeline" title="Reveals some letters in the source and song names">
-                    💡 Hint (<span id="hintCount">0</span>)
-                </button>
-                <button class="btn btn-lifeline" id="yearLifeline" title="Shows the release year of the song">
-                    📅 Year (<span id="yearCount">0</span>)
-                </button>
-                <button class="btn btn-lifeline" id="expandLifeline" title="Expands the song to its full duration">
-                    ↔️ Expand (<span id="expandCount">0</span>)
-                </button>
-                <button class="btn btn-lifeline" id="skipLifeline" title="Skips the current song">
-                    ⏭️ Skip (<span id="skipCount">0</span>)
-                </button>
-                <button class="btn btn-lifeline" id="timeLifeline" title="Adds 10 seconds to the countdown timer">
-                    ⏱️ +10s (<span id="timeCount">0</span>)
-                </button>
-            </div>
+            <div class="lifeline-buttons" id="lifelineButtons"></div>
 
             <!-- Action Buttons -->
             <div class="action-buttons" id="actionButtons">
                 <button class="btn btn-primary" id="submitGuess">Submit Answer</button>
-                <button class="btn btn-secondary" id="giveUpBtn">Give Up</button>
+                <button class="btn btn-secondary" id="giveUpBtn">Give Up<span> (💔)</span></button>
             </div>
 
             <!-- Result Message -->
@@ -142,8 +127,8 @@
         
         <!-- Result Screen -->
         <div id="resultScreen">
-            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem; text-align:center;">Example Music Quiz</h2>
-            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;">A sample collection to demonstrate the structure</p>
+            <h2 id="resultCollection" style="color: var(--primary-color); margin-bottom: 1rem; text-align:center; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);">Example Collection</h2>
+            <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;">Example description.</p>
 
             <!-- Image and Difficulty/Rounds Layout -->
             <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px;">
@@ -155,11 +140,11 @@
                 <!-- Game Info / Result Details Grid -->
                 <div style="display: inline-block;">
                     <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem;">
-                        <strong>Difficulty:</strong><strong id="resultDifficulty">Medium</strong>
-						<strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;" id="resultMode">Default</span>
-                        <strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span id="totalRounds">3</span></span>
-                        <strong id="sourcesLabel">Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span id="sourcesGuessed">0</span>/<span id="totalSources">1</span></span>
-                        <strong>Songs:</strong><span style="color: var(--primary-color); font-weight: bold;"><span id="songsGuessed">0</span>/<span id="totalSongs">1</span></span>
+                        <strong>Difficulty:</strong><strong class="difficulty"></strong>
+						<strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;" class="mode"></span>
+                        <strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span class="totalRounds"></span></span>
+                        <strong class="sourcesLabel">Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span class="sourcesGuessed"></span>/<span class="totalSources"></span></span>
+                        <strong>Songs:</strong><span style="color: var(--primary-color); font-weight: bold;"><span class="songsGuessed"></span>/<span class="totalSongs"></span></span>
                     </div>
                 </div>
             </div>
@@ -172,7 +157,14 @@
                         <div id="resultHeartsDisplay" style="font-size: 2rem;"><span>❤️</span><span>❤️</span><span>❤️</span></div>
                     </div>
                     <div id="resultLifelines" style="padding-top: 1rem;display: block;padding-bottom: 1.5rem;">
-                        <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;"><span title="Hint: Unused">💡</span><span title="Year: Unused">📅</span><span title="Skip: Unused">⏭️</span></div>
+                        <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;">
+							<span class="hint">💡</span>
+							<span class="cover">🖼️</span>
+							<span class="year">📅</span>
+							<span class="expand">↔️</span>
+							<span class="skip">⏭️</span>
+							<span class="time">⏱️</span>
+						</div>
                     </div>
                 </div>
 
@@ -191,7 +183,7 @@
     </footer>
 
 	<script src="js/lib/wavesurfer.js-7.12.1-custom.1/wavesurfer.min.js"></script>
-	<script src="js/player.js"></script>
+	<script src="js/global.js"></script>
 	<script src="js/musicmetadata.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>

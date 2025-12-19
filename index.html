@@ -9,13 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/cleanUrls.js"></script>
 </head>
 <body class="preload">
     <div class="container home-container">
             <!-- Header -->
             <header>
-                <h1><a href="/">MusiQuiz</a></h1>
+                <h1><a href="./index.html">MusiQuiz</a></h1>
 				<h5>An Excuse to Listen to Great Soundtracks</h5>
             </header>
         </div>
@@ -30,7 +29,7 @@
             <h2>Collections</h2>
 
             <div id="collectionsList"></div>
-            <button id="loadMoreBtn" class="btn btn-primary" onclick="loadMore()" style="display: none; margin: 1.5rem auto;">Load More</button>
+            <button id="loadMoreBtn" class="btn btn-primary" onclick="loadMore()" style="margin: 1.5rem auto;">Load More</button>
         </div>
     </div>
 
@@ -40,9 +39,9 @@
         <a href="submit">submit</a>
     </footer>
 
+	<script src="js/global.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>
-    <script src="js/game.js"></script>
     <script>
         // Apply mode theme on page load
         (function() {

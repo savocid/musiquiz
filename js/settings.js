@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             strong.textContent = title;
             
             // Hearts
-            if (modeData.lives !== 999) {
+            if (modeData.lives !== Infinity) {
                 const hearts = '❤️'.repeat(modeData.lives);
                 strong.innerHTML += `<span class="emoji">${hearts}</span>`;
             }
@@ -158,6 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.remove('active');
         }
     });
+
+    // Clear data button
+    document.getElementById('clearDataBtn').addEventListener('click', () => {
+		localStorage.clear();
+		location.reload();
+	});
 });
 
 // Global function for mode theme application
@@ -197,7 +203,7 @@ function updateCSSVariables(mode) {
         root.style.setProperty('--primary-dark', '#f57c00');
         root.style.setProperty('--text-light', 'white');
         root.style.setProperty('--shadow-color', 'rgba(255, 152, 0, 0.4)');
-    } else if (mode === 'sudden-death') {
+    } else if (mode === 'suddendeath') {
         root.style.setProperty('--primary-color', '#ff6b6b');
         root.style.setProperty('--primary-dark', '#d94a4a');
         root.style.setProperty('--text-light', '#fff5f5');
