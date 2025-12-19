@@ -68,8 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Lifelines
 		const lifelinesWrap = document.createElement('span');
 		button.appendChild(lifelinesWrap);
-	
-		console.log(Object.keys(lifeLines))
+
 		Object.keys(lifeLines).forEach(key => {
 			if (MODES[modeKey].lifelines[key].total > 0) {
 				const lifelineSpan = document.createElement('span');

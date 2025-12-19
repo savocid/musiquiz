@@ -932,7 +932,6 @@ header h5 {
 }
 .answer-wrapper * {
 	text-transform: uppercase;
-	font-style: italic;
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 }
 .answer-wrapper.hidden * {
@@ -958,37 +957,23 @@ header h5 {
     padding: 3px 0;
 }
 
-#answerDisplay .hidden {
-    color: hsl(0,0%,70%);
+.answer-wrapper .seperator1,
+.answer-wrapper .seperator2 {
+	color: hsl(0,0%,70%);
+}
+#answerDisplay .false {
     font-style: italic;
     opacity: 0.7;
 }
 
-#answerDisplay .hint {
-    color: hsl(0,0%,70%);
-    font-style: italic;
-    letter-spacing: 0.08em;
-    word-spacing: 0.5em;
+#answerDisplay *[data-optional='true'] {
+	color: hsl(0,0%,70%);
+    opacity: 0.3;
 }
 
-#answerDisplay .hint .revealed {
-    color: hsl(0,0%,80%);
-    font-weight: bold;
-    font-style: normal;
-}
 
-#answerDisplay .revealed {
-    color: #4ade80;
-    font-weight: bold;
-	text-transform: none;
-	font-style: normal;
-	text-shadow: 1px 1px rgba(0, 0, 0, 0.3);
-}
 
-#answerDisplay .optional {
-	opacity: 0.3;
-	text-shadow: 1px 1px rgba(0, 0, 0, 1);
-}
+
 
 .guess-input {
     margin: 0;
@@ -1313,13 +1298,9 @@ header h5 {
 
 
 
+
+
 #answerDisplay {
-	.sources > *[data-reveal='true'] .false,
-	.songs > *[data-reveal='true'] .false,
-	.sources > *[data-reveal='false'] .true,
-	.songs > *[data-reveal='false'] .true {
-		display: none !important;
-	}
 	.year[data-reveal='false'] {
 		display: none !important;	
 	}
@@ -1329,6 +1310,67 @@ header h5 {
 	}
 }
 
+
+body:not([data-state="2"]) #answerDisplay {
+	.source[data-reveal='true'] .false,
+	.song[data-reveal='true'] .false,
+	.source[data-reveal='false'] .true,
+	.song[data-reveal='false'] .true {
+		display: none !important;
+	}
+}
+
+body[data-state="2"] #answerDisplay {
+	.source .false,
+	.song .false {
+		display: none !important;
+	}
+}
+
+
+/*
+GameStyle 1: Required Sources/Song
+GameStyle 2: Required Sources
+GameStyle 3: Required Song
+*/
+
+body[data-style="2"] {
+	#answerDisplay {
+		.songs,
+		.seperator1 {
+			display: none !important;		
+		}
+	}
+}
+
+body[data-style="3"] {
+	#answerDisplay {
+		.sources,
+		.seperator1 {
+			display: none !important;		
+		}
+	}
+}
+
+
+#answerDisplay {
+	.source[data-reveal='true'],
+	.song[data-reveal='true'],
+	.year[data-reveal='true'] {
+		color: green;
+		font-weight: bold;
+		font-style: normal;
+	}
+	.year[data-reveal='false'] {
+		display: none !important;
+	}
+}
+
+body[data-state="2"] #answerDisplay {
+	color: red;
+	font-weight: bold;
+	font-style: normal;
+}
 
 /* 
 // STATE.start: 0

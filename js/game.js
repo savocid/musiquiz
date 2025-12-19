@@ -417,6 +417,8 @@ function updateStart() {
 		gameState.lifelines[key] = { remaining: MODES[currentMode].lifelines[key].total, total: MODES[currentMode].lifelines[key].total };
 	});
 
+	document.body.dataset.style = gameState.collection.gameStyle;
+
 	updateRoundsSlider();
 }
 
@@ -532,8 +534,8 @@ function updateLifelineButtons() {
 }
 
 
-function updateAnswerDisplay() {
-	return;
+function _updateAnswerDisplay() {
+
     const song = gameState.currentSong;
     const sourcePart = document.getElementById('sourcePart');
     const songPart = document.getElementById('songPart');
@@ -697,6 +699,7 @@ function updateRoundStates() {
     gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };
     gameState.yearRevealed = false;
 	Object.values(gameState.lifelines).forEach(l => l.used = false);
+	document.querySelectorAll("#answerDisplay .source, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
 }
 
 function updateProgress() {
@@ -742,7 +745,7 @@ function removeLoad() {
 // Guess Logic //
 // *********** //
 
-function checkGuess() {
+function _checkGuess() {
     if (!gameState.canGuess) return;
     
     const userInput = document.getElementById('guessInput').value.trim();
@@ -1114,8 +1117,135 @@ function useLifeline(lifeline) {
 	updateLifelineButtons();
 }
 
-function revealSource(x) {
-	document.querySelector(`#answerDisplay .sources > .source${x}`).dataset.reveal = true;
+function updateAnswerDisplay() {
+
+	const sourcesContainer = document.querySelector("#answerDisplay .sources");
+	sourcesContainer.innerHTML = "";
+ 	gameState.currentSong.sources.forEach((source, i) => {
+		const index = i+1;
+
+		const sourceWrap = document.createElement("span");
+		sourceWrap.classList.add(`source`);
+		sourceWrap.dataset.index = i;
+		sourceWrap.dataset.optional = !gameState.currentSong.sources[i][0];
+		sourcesContainer.appendChild(sourceWrap);
+
+		const sourceTrue = document.createElement("span");
+		sourceTrue.classList.add("true");
+		sourceTrue.textContent = source[1];
+		sourceWrap.appendChild(sourceTrue);
+
+		const sourceFalse = document.createElement("span");
+		sourceFalse.classList.add("false");
+		sourceFalse.textContent = gameState.currentSong.sources > 1 ? `${gameState.collection.sourceName} ${index}` : `${gameState.collection.sourceName}`;
+		sourceWrap.appendChild(sourceFalse);
+	});
+
+	const songsContainer = document.querySelector("#answerDisplay .songs");
+	songsContainer.innerHTML = "";
+
+	const songWrap = document.createElement("span");
+	songWrap.classList.add(`song`);
+	songWrap.dataset.index = 1;
+	songWrap.dataset.optional = !gameState.currentSong.title[0];
+	songsContainer.appendChild(songWrap);
+
+	const songTrue = document.createElement("span");
+	songTrue.classList.add("true");
+	songTrue.textContent = gameState.currentSong.title[1];
+	songWrap.appendChild(songTrue);
+
+	const songFalse = document.createElement("span");
+	songFalse.classList.add("false");
+	songFalse.textContent = `Song`;
+	songWrap.appendChild(songFalse);
+
+	document.querySelectorAll("#answerDisplay .source, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
+
+	document.querySelector("#answerDisplay .year").textContent = ` (${gameState.currentSong.year})`;
+}
+
+function checkGuess() {
+
+	let inputValue = document.getElementById('guessInput').value;
+    if (!inputValue) return;
+    
+    inputValue = normalize_str(inputValue);
+
+	const sources = gameState.currentSong.sources;
+	sources.forEach((source, index) => {
+		for (let i = 1; i < source.length; i++) {
+
+			if (inputValue.includes(normalize_str(source[i]))) {
+				revealSource(true,index);
+				break;
+			}
+		}
+	});
+
+	const song = gameState.currentSong.title;
+	for (let i = 1; i < song.length; i++) {
+		if (inputValue.includes(normalize_str(song[i]))) {
+			revealSong(true);
+			break;
+		}
+	}
+
+	switch(gameState.collection.gameStyle) {
+		case 1: { // All Required Sources/Song
+			if (requiredSourcesRevealed() && requiredSongsRevealed()) {
+				prepRound();
+			}
+			break;
+		}
+		case 2: { // All Required Sources
+			if (requiredSourcesRevealed()) {
+				prepRound();
+			}
+			break;
+		}
+		case 3: { // Required Song
+			if (requiredSongsRevealed()) {
+				prepRound();
+			}
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+
+	document.getElementById('guessInput').value = "";
+}
+
+function requiredSourcesRevealed() {
+	const sources = document.querySelectorAll("#answerDisplay .source");
+	for (let i = 0; i < sources.length; i++) {
+		if (sources[i].dataset.optional) { continue; }
+		if (!sources[i].dataset.reveal) { return false; }
+	};
+
+	return true;
+}
+
+function requiredSongsRevealed() {
+	const songs = document.querySelectorAll("#answerDisplay .song");
+	for (let i = 0; i < songs.length; i++) {
+		if (songs[i].dataset.optional) { continue; }
+		if (!songs[i].dataset.reveal) { return false; }
+	};
+
+	return true;
+}
+
+function revealSource(bool,i) {
+	const source = document.querySelector(`#answerDisplay .source[data-index='${i}']`)
+	source && (source.dataset.reveal = bool);
+}
+
+function revealSong(bool) {
+	const song = document.querySelector(`#answerDisplay .song`)
+	song && (song.dataset.reveal = bool);
 }
 
 function useTimeLifeline() {
