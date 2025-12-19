@@ -19,17 +19,17 @@ const gameState_default = {
     shuffledSongs: [],
 	currentSong: null,
     currentSongIndex: 0,
-	revealed: {
-		sources: [],
-		songs: [],
-		year: false,
-	},
 	result: {
+		rounds: 0,
 		score: 0,
 		sources: 0,
 		totalSources: 0,
 		songs: 0,
 		totalSongs: 0,
+	},
+	revealed: {
+		sources: {},
+		songs: {},
 	},
 
 
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	document.getElementById('continueBtn').addEventListener('click', () => {
 		if (!document.getElementById("continueBtn").classList.contains("btn-success")) {
 			gameState.settings.lives--
-			updateGame();
+			updateHearts();
 		};
 		continueRound();
 	});
@@ -343,6 +343,7 @@ function continueRound() {
 	updateState(STATE.next);
 
 	playFullSong();
+	stopTimeout();
 
 	updateContinue();
 
@@ -422,6 +423,13 @@ function updateStart() {
 		gameState.collection.covers && gameState.collection.covers.length > 0 ? `${gameState.collection.title}` : 
 		"";
 
+
+	// Hearts
+    document.getElementById('livesPanel').hidden = gameState.settings.totalLives === Infinity;
+	document.getElementById('lives').innerHTML = 
+		gameState.settings.totalLives !== Infinity ? '<span class="heart">❤️</span>'.repeat(gameState.settings.totalLives) : 
+		"";
+
 	// Set lifeline defaults
 	Object.keys(lifeLines).forEach(key => {
 		gameState.lifelines[key] = { remaining: MODES[currentMode].lifelines[key].total, total: MODES[currentMode].lifelines[key].total };
@@ -440,11 +448,6 @@ function updateGame() {
 
 	// Score
 	document.getElementById('sourceLabel').textContent = gameState.collection.sourceName+"s" || "Sources";
-	document.getElementById('sourceScore').textContent = `${gameState.result.totalSources}`;
-    document.getElementById('songScore').textContent = `${gameState.result.totalSongs}`;
-
-	// Source Answer Display Label
-	//!document.getElementById('sourcePart').innerHTML = `<span>${gameState.collection.sourceName || "Source"}</span>`;
 
 	// Update Collection Label
 	document.getElementById('gameCollectionTitle').textContent = gameState.collection.title;
@@ -458,19 +461,6 @@ function updateGame() {
 	// Hide unused score
 	document.querySelector('#scorePanel .songs').hidden = gameState.collection.gameStyle === 2;
 	document.querySelector('#scorePanel .sources').hidden = gameState.collection.gameStyle === 3;
-
-	// Hearts
-    document.getElementById('livesPanel').hidden = gameState.settings.totalLives === Infinity;
-	document.getElementById('lives').innerHTML = 
-		gameState.settings.totalLives !== Infinity ? '<span class="heart">❤️</span>'.repeat(gameState.settings.totalLives) : 
-		"";
-
-	document.querySelectorAll('#livesPanel .heart').forEach((heart, index) => {
-		const isVisible = index <= gameState.settings.lives;
-		heart.style.visibility = isVisible ? 'visible' : 'hidden';
-		heart.classList.toggle('heartbeat', isVisible && index === gameState.settings.lives);
-		if (!isVisible) heart.classList.remove('heartbeat');
-	});
 
 	// Update Continue Button
 	document.getElementById('continueBtn').className = "btn btn-secondary";
@@ -490,12 +480,22 @@ function updateGame() {
 	extractAudioCover(gameState.currentSong.audioFile).then(src => { document.getElementById("album-img").src = src; });
 
 	// Update Rounds
-    document.getElementById('currentRound').textContent = gameState.currentSongIndex + 1;
-    document.getElementById('totalRounds').textContent = gameState.shuffledSongs.length;
+    document.querySelector('#gameContent .currentRound').textContent = gameState.currentSongIndex + 1;
+    document.querySelector('#gameContent .totalRounds').textContent = gameState.shuffledSongs.length;
 
 	// Reset Next Button
 	document.getElementById("nextBtn").className = "btn btn-success";
 	document.getElementById("nextBtn").textContent = "Next Song";
+}
+
+function updateHearts() {
+
+	document.querySelectorAll('#livesPanel .heart').forEach((heart, index) => {
+		const isVisible = index <= gameState.settings.lives;
+		heart.style.visibility = isVisible ? 'visible' : 'hidden';
+		heart.classList.toggle('heartbeat', isVisible && index === gameState.settings.lives);
+		if (!isVisible) heart.classList.remove('heartbeat');
+	});
 }
 
 function updateContinue() {
@@ -503,6 +503,41 @@ function updateContinue() {
 	// Dynamic Next Button
 	document.getElementById("nextBtn").className = gameState.settings.lives == 0 ? "btn btn-primary" : "btn btn-success";
 	document.getElementById("nextBtn").textContent = gameState.settings.lives == 0 ? "View Results" : "Next Song";
+
+	updateScore();
+}
+
+function updateScore() {
+
+	gameState.revealed.sources = Object.keys(gameState.revealed.sources).length ? gameState.revealed.sources : sourcesRevealed();
+	gameState.revealed.songs = Object.keys(gameState.revealed.songs).length ? gameState.revealed.songs : songsRevealed();
+
+	gameState.result.rounds = gameState.currentSongIndex + 1;
+
+	gameState.result.sources += 
+		gameState.revealed.sources.required.value +
+		gameState.revealed.sources.optional.value;
+
+	gameState.result.totalSources += 
+		gameState.revealed.sources.required.total +
+		gameState.revealed.sources.optional.total;
+	
+	gameState.result.songs += 
+		gameState.revealed.songs.required.value +
+		gameState.revealed.songs.optional.value;
+
+	gameState.result.totalSongs += 
+		gameState.revealed.songs.required.total +
+		gameState.revealed.songs.optional.total;
+
+	gameState.result.score += 
+		(50*gameState.revealed.sources.required.value) +
+		(100*gameState.revealed.sources.optional.value) +
+		(50*gameState.revealed.songs.required.value) +
+		(100*gameState.revealed.songs.optional.value);
+
+	document.getElementById('sourceScore').textContent = `${gameState.result.sources}`;
+    document.getElementById('songScore').textContent = `${gameState.result.songs}`;
 }
 
 function updateResult() {
@@ -527,11 +562,13 @@ function updateResult() {
     
     // Update Stats
 	document.querySelector('#resultScreen .sourcesLabel').textContent = `${(gameState.collection.sourceName || "Source")}s`;
+
+	document.querySelector('#resultScreen .rounds').textContent = gameState.result.rounds;
     document.querySelector('#resultScreen .totalRounds').textContent = gameState.rounds;
-    document.querySelector('#resultScreen .sourcesGuessed').textContent = gameState.result.totalSources;
-    document.querySelector('#resultScreen .totalSources').textContent = gameState.result.sources;
-    document.querySelector('#resultScreen .songsGuessed').textContent = gameState.result.totalSongs;
-    document.querySelector('#resultScreen .totalSongs').textContent = gameState.result.songs;
+    document.querySelector('#resultScreen .sourcesGuessed').textContent = gameState.result.sources;
+    document.querySelector('#resultScreen .totalSources').textContent = gameState.result.totalSources;
+    document.querySelector('#resultScreen .songsGuessed').textContent = gameState.result.songs;
+    document.querySelector('#resultScreen .totalSongs').textContent = gameState.result.totalSongs;
 
 	// Hearts
   	document.getElementById('resultHearts').hidden = gameState.settings.totalLives === Infinity;
@@ -1015,28 +1052,32 @@ function playFullSong() {
 // Timeout //
 // ******* //
 
-function startTimeout() {
+function startTimeout(timeOut = gameState.settings.timeout) {
     
     if (gameState.settings.timeout <= 0 || gameState.state != STATE.game) { return; }
 
-    // Always clear any existing guess timer before starting a new one
     stopTimeout();
-    let timeLeft = gameState.settings.timeout;
+
+	let timeLeft = timeOut
+
     const timerElement = document.getElementById('timer');
     timerElement.textContent = timeLeft;
-    // Update color based on time remaining
-    updateTimerColor(timeLeft, gameState.settings.timeout);
+
+
+    updateTimerColor(timeLeft, timeOut);
+
     gameState.timeout = setInterval(() => {
         timeLeft--;
         timerElement.textContent = timeLeft;
-        // Update color as time decreases
-        updateTimerColor(timeLeft, gameState.settings.timeout);
+
+        updateTimerColor(timeLeft, timeOut);
+
         if (timeLeft <= 0) {
             stopTimeout();
 
-            // Time's up - mark as incorrect
             gameState.settings.lives--;
-			updateGame();
+			updateHearts();
+
 			continueRound();
         }
     }, 1000);
@@ -1100,6 +1141,13 @@ function useLifeline(lifeline) {
 			break;
 		}
 		case "time": {
+			stopTimeout();
+
+			let currentTime = parseInt(document.getElementById('timer').textContent)+10;
+			document.getElementById('timer').textContent = currentTime;
+
+			startTimeout(currentTime);
+
 			break;
 		}
 		default: {
@@ -1249,6 +1297,8 @@ function checkGuess() {
 	else {
 		gameState.settings.lives--;
 
+		updateHearts();
+
 		const answerDisplay = document.getElementById('answerDisplay');
 		answerDisplay.classList.remove('shake');
 		void answerDisplay.offsetWidth;
@@ -1259,7 +1309,6 @@ function checkGuess() {
 			continueRound();
 		}
 	}
-
 }
 
 function sourcesRevealed() {
@@ -1329,7 +1378,7 @@ function useTimeLifeline() {
                 stopTimeout();
 
                 gameState.settings.lives--;
-				updateGame();
+				updateHearts();
 				continueRound();
             }
         }, 1000);
