@@ -3,14 +3,14 @@
 // ********* //
 
 const STATE = {
-  start: 0,
+  init: 0,
   game: 1,
   next: 2,
-  end: 3,
+  result: 3,
 };
 
 const gameState_default = {
-	state: STATE.start,
+	state: STATE.init,
     collection: null,
     settings: null,
 	rounds: 0,
@@ -58,7 +58,7 @@ let audio = WaveSurfer.create({
 	responsive: true,
 	interact: true,
 	mediaControls: false,
-	autoplay: true,
+	autoplay: false,
 });
 
 const params = new URLSearchParams(window.location.search);
@@ -131,7 +131,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 	});
 
 	document.getElementById('repeatBtn').addEventListener('click', repeatSong);
-	document.getElementById('giveUpBtn').addEventListener('click', giveUp);
+	document.getElementById('continueBtn').addEventListener('click', () => {
+		if (!document.getElementById("continueBtn").classList.contains("btn-success")) {
+			gameState.settings.lives--
+			updateGame();
+		};
+		continueRound();
+	});
     document.getElementById('nextBtn').addEventListener('click', nextRound);
 
 	document.getElementById('lifelineButtons').innerHTML = "";
@@ -225,7 +231,7 @@ async function loadGameData() {
 
 async function startGame() {
 
-	updateState(STATE.start);
+	updateState(STATE.init);
 
     const numRounds = parseInt(gameState.rounds);
     const shuffled = [...gameState.collection.songs].sort(() => Math.random() - 0.5);
@@ -241,7 +247,7 @@ async function startGame() {
 
 async function initRound() {
     stopTimeout();
-	updateRoundStates();
+	updateNewRound();
 
     // Generate random startTime based on startTime and endTime
     try {
@@ -301,6 +307,12 @@ async function initAudio() {
 
 		audio.options.startTime = startTime;
 		audio.options.endTime = endTime;
+
+		audio.options.autoplay = true;
+
+		audio.seekTo(0)
+		audio.play()
+
 		audio.getRenderer().reRender();
 
 		removeLoad();
@@ -308,7 +320,7 @@ async function initAudio() {
 	});
 }
 
-function startRound() {
+async function startRound() {
     
 	updateState(STATE.game);
 
@@ -327,24 +339,29 @@ function startRound() {
 	console.log(gameState.currentSong.title.filter((title, i) => i !== 0))
 }
 
+function continueRound() {
+	updateState(STATE.next);
+
+	playFullSong();
+
+	updateContinue();
+
+	renderState(STATE.next);
+}
+
+
 function endGame() {
 
-	updateState(STATE.end);
+	updateState(STATE.result);
 
 	stopSong();
 	stopTimeout();
 
-	updateGame();
 	updateResult();
 
-	renderState(STATE.end);
+	renderState(STATE.result);
 }
 
-function prepRound() {
-	updateState(STATE.next);
-	playFullSong();
-	renderState(STATE.next);
-}
 
 async function nextRound() {
 
@@ -355,7 +372,7 @@ async function nextRound() {
 	stopSong();
     stopTimeout();
     
-	if (gameState.currentSongIndex >= gameState.shuffledSongs.length) {
+	if (gameState.currentSongIndex >= gameState.shuffledSongs.length || gameState.settings.lives <= 0) {
         endGame();
         return;
     }
@@ -363,13 +380,6 @@ async function nextRound() {
 	await initRound();
 }
 
-function giveUp() {
-
-	updateGame();
-	updateResult();
-
-	showResult();
-}
 
 function updateState(state) {
 	applyLoad();
@@ -401,7 +411,7 @@ function updateStart() {
 	document.getElementById('collectionTitle').textContent = gameState.collection.title;
 	document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
 	document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty;
-	document.getElementById('collectionDifficulty').className = `difficulty-${gameState.collection.difficulty.toLowerCase().replace(' ', '-')}`;
+	document.getElementById('collectionDifficulty').dataset.difficulty = gameState.collection.difficulty;
 
 	// Update Collection Cover
 	const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
@@ -421,6 +431,7 @@ function updateStart() {
 
 	updateRoundsSlider();
 }
+
 
 function updateGame() {
 
@@ -461,8 +472,9 @@ function updateGame() {
 		if (!isVisible) heart.classList.remove('heartbeat');
 	});
 
-	// Update Give Up Button
- 	document.querySelector('#giveUpBtn > span').style.display = gameState.settings.lives != Infinity ? "initial" : "none"
+	// Update Continue Button
+	document.getElementById('continueBtn').className = "btn btn-secondary";
+ 	document.querySelector('#continueBtn > span:last-child').style.display = gameState.settings.lives != Infinity ? "initial" : "none";
 
 	// Update Input
     document.getElementById('guessInput').value = '';
@@ -481,6 +493,16 @@ function updateGame() {
     document.getElementById('currentRound').textContent = gameState.currentSongIndex + 1;
     document.getElementById('totalRounds').textContent = gameState.shuffledSongs.length;
 
+	// Reset Next Button
+	document.getElementById("nextBtn").className = "btn btn-success";
+	document.getElementById("nextBtn").textContent = "Next Song";
+}
+
+function updateContinue() {
+
+	// Dynamic Next Button
+	document.getElementById("nextBtn").className = gameState.settings.lives == 0 ? "btn btn-primary" : "btn btn-success";
+	document.getElementById("nextBtn").textContent = gameState.settings.lives == 0 ? "View Results" : "Next Song";
 }
 
 function updateResult() {
@@ -489,7 +511,7 @@ function updateResult() {
     document.getElementById('resultCollection').textContent = gameState.collection.title;
     document.getElementById('resultDescription').textContent = gameState.collection.description || '';
     document.querySelector('#resultScreen .difficulty').textContent = gameState.collection.difficulty;
-    document.querySelector('#resultScreen .difficulty').className = `difficulty-${gameState.collection.difficulty.toLowerCase().replace(' ', '-')}`;
+    document.querySelector('#resultScreen .difficulty').dataset.difficulty = gameState.collection.difficulty;
 
 	// Update Collection Cover
 	const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
@@ -501,7 +523,7 @@ function updateResult() {
 		"";
 
 	// Update Mode Label
-    document.querySelector('#resultScreen .mode').textContent = gameState.settings.mode;
+    document.querySelector('#resultScreen .mode').textContent = MODES[currentMode].title;
     
     // Update Stats
 	document.querySelector('#resultScreen .sourcesLabel').textContent = `${(gameState.collection.sourceName || "Source")}s`;
@@ -521,6 +543,18 @@ function updateResult() {
 	Object.keys(gameState.lifelines).forEach(key => {
 		document.querySelector(`#resultLifelinesDisplay .${key}`).dataset.hidden = gameState.lifelines[key].remaining === 0;
 	});
+}
+
+function updateNewRound() {
+	gameState.timeout = null;
+    gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
+    gameState.sourceRevealed = [];
+    gameState.songRevealed = false;
+    gameState.canGuess = true;
+    gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };
+    gameState.yearRevealed = false;
+	Object.values(gameState.lifelines).forEach(l => l.used = false);
+	document.querySelectorAll("#answerDisplay .source, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
 }
 
 function updateLifelineButtons() {
@@ -690,17 +724,7 @@ if (separator) separator.hidden = false;
 	document.getElementById("answerDisplay").classList.remove("hidden");
 }
 
-function updateRoundStates() {
-	gameState.timeout = null;
-    gameState.currentSong = gameState.shuffledSongs[gameState.currentSongIndex];
-    gameState.sourceRevealed = [];
-    gameState.songRevealed = false;
-    gameState.canGuess = true;
-    gameState.hintLettersRevealed = { source: gameState.currentSong.sources.map(() => []), song: [] };
-    gameState.yearRevealed = false;
-	Object.values(gameState.lifelines).forEach(l => l.used = false);
-	document.querySelectorAll("#answerDisplay .source, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
-}
+
 
 function updateProgress() {
     if (!audio || !gameState.currentSong) return;
@@ -872,7 +896,7 @@ function _checkGuess() {
 			playSong();
 		}
 
-		prepRound();
+		continueRound();
     }
     
     // Show result (only if not game over)
@@ -943,7 +967,7 @@ function showResult() {
         // Stop the countdown timer when next state appears
 		stopTimeout();
 
-        prepRound();
+        continueRound();
     }
 }
 
@@ -981,7 +1005,8 @@ function playFullSong() {
 	audio.options.startTime = gameState.currentSong.startTime;
 	audio.options.endTime = gameState.currentSong.endTime;
 
-	updateGame();
+	audio.play();
+
 	updateProgress();
 }
 
@@ -1008,8 +1033,11 @@ function startTimeout() {
         updateTimerColor(timeLeft, gameState.settings.timeout);
         if (timeLeft <= 0) {
             stopTimeout();
+
             // Time's up - mark as incorrect
-            handleTimeout();
+            gameState.settings.lives--;
+			updateGame();
+			continueRound();
         }
     }, 1000);
 }
@@ -1043,39 +1071,6 @@ function updateTimerColor(timeLeft, totalTime) {
     timerElement.style.color = `rgb(${r}, ${g}, ${b})`;
 }
 
-function handleTimeout() {
-    gameState.canGuess = false;
-    
-    // Deduct life
-    if (gameState.settings.lives !== Infinity) {
-        gameState.settings.lives--;
-    }
-    
-    // Don't reveal answers on timeout (only reveal on correct guess or hints)
-    // Keep the answer hidden so player can try again next round
-    
-    // Update UI first so lives count is correct
-    updateGame();
-    
-    // Check game over
-    if (gameState.settings.lives <= 0) {
-        // On game over, reveal the answer
-        gameState.sourceRevealed = gameState.currentSong.sources.map((s, i) => s[0] ? i : null).filter(i => i !== null);
-        gameState.songRevealed = true;
-        updateAnswerDisplay();
-        
-        // Action buttons will be hidden by endGame() when state moves to END
-        document.getElementById('guessInput').disabled = true;
-        // Go directly to game over immediately
-        endGame();
-    } else {
-		prepRound();
-        // Disable input and show result when timed out but still have lives
-        document.getElementById('guessInput').disabled = true;
-        // Show result and next button if still alive (without revealing answer)
-        showResult();
-    }
-}
 
 
 // ********* //
@@ -1101,7 +1096,7 @@ function useLifeline(lifeline) {
 			break;
 		}
 		case "skip": {
-			prepRound();
+			continueRound();
 			break;
 		}
 		case "time": {
@@ -1127,7 +1122,7 @@ function updateAnswerDisplay() {
 		const sourceWrap = document.createElement("span");
 		sourceWrap.classList.add(`source`);
 		sourceWrap.dataset.index = i;
-		sourceWrap.dataset.optional = !gameState.currentSong.sources[i][0];
+		sourceWrap.dataset.optional = gameState.currentSong.sources[i][0] == false;
 		sourcesContainer.appendChild(sourceWrap);
 
 		const sourceTrue = document.createElement("span");
@@ -1137,9 +1132,13 @@ function updateAnswerDisplay() {
 
 		const sourceFalse = document.createElement("span");
 		sourceFalse.classList.add("false");
-		sourceFalse.textContent = gameState.currentSong.sources > 1 ? `${gameState.collection.sourceName} ${index}` : `${gameState.collection.sourceName}`;
+		sourceFalse.textContent = gameState.currentSong.sources.length > 1 ? `${gameState.collection.sourceName}${index}` : `${gameState.collection.sourceName}`;
 		sourceWrap.appendChild(sourceFalse);
+
+		sourcesContainer.innerHTML += ", ";
 	});
+
+	sourcesContainer.innerHTML = sourcesContainer.innerHTML.replace(/\, $/,"");
 
 	const songsContainer = document.querySelector("#answerDisplay .songs");
 	songsContainer.innerHTML = "";
@@ -1147,7 +1146,7 @@ function updateAnswerDisplay() {
 	const songWrap = document.createElement("span");
 	songWrap.classList.add(`song`);
 	songWrap.dataset.index = 1;
-	songWrap.dataset.optional = !gameState.currentSong.title[0];
+	songWrap.dataset.optional = gameState.currentSong.title[0] == false;
 	songsContainer.appendChild(songWrap);
 
 	const songTrue = document.createElement("span");
@@ -1172,11 +1171,14 @@ function checkGuess() {
     
     inputValue = normalize_str(inputValue);
 
+	let correct = false;
+
 	const sources = gameState.currentSong.sources;
 	sources.forEach((source, index) => {
 		for (let i = 1; i < source.length; i++) {
 
 			if (inputValue.includes(normalize_str(source[i]))) {
+				correct = true;
 				revealSource(true,index);
 				break;
 			}
@@ -1186,57 +1188,114 @@ function checkGuess() {
 	const song = gameState.currentSong.title;
 	for (let i = 1; i < song.length; i++) {
 		if (inputValue.includes(normalize_str(song[i]))) {
+			correct = true;
 			revealSong(true);
 			break;
 		}
 	}
 
-	switch(gameState.collection.gameStyle) {
-		case 1: { // All Required Sources/Song
-			if (requiredSourcesRevealed() && requiredSongsRevealed()) {
-				prepRound();
+	const continueBtn = document.getElementById('continueBtn');	
+
+	const revealed_sources = sourcesRevealed();
+	const revealed_songs = songsRevealed();
+
+	const revealedRequiredSources = revealed_sources.required.total == (revealed_sources.required.value);
+	const revealedOptionalSources = revealed_sources.optional.total == (revealed_sources.optional.value);
+	const revealedAllSources = revealedRequiredSources && revealedOptionalSources;
+
+	const revealedRequiredSongs = revealed_songs.required.total == (revealed_songs.required.value);
+	const revealedOptionalSongs = revealed_songs.optional.total == (revealed_songs.optional.value);
+	const revealedAllSongs = revealedRequiredSongs && revealedOptionalSongs;
+
+	document.getElementById('guessInput').value = "";
+
+	if (correct) {
+		switch(gameState.collection.gameStyle) {
+			case 1: { // All Sources/Song
+				continueBtn.className = (revealedRequiredSources && revealedRequiredSongs) ? "btn btn-success" : "btn btn-secondary";
+
+				(revealedRequiredSources && revealedRequiredSongs) && (stopTimeout());
+
+				if (revealedAllSources && revealedAllSongs) {
+					continueRound();
+				}
+				break;
 			}
-			break;
-		}
-		case 2: { // All Required Sources
-			if (requiredSourcesRevealed()) {
-				prepRound();
+			case 2: { // All Sources
+				continueBtn.className = (revealedRequiredSources) ? "btn btn-success" : "btn btn-secondary";
+
+				(revealedRequiredSources) && (stopTimeout());
+
+				if (revealedAllSources) {
+					continueRound();
+				}
+				break;
 			}
-			break;
-		}
-		case 3: { // Required Song
-			if (requiredSongsRevealed()) {
-				prepRound();
+			case 3: { // Song
+				continueBtn.className = (revealedRequiredSongs) ? "btn btn-success" : "btn btn-secondary";
+
+				(revealedRequiredSongs) && (stopTimeout());
+
+				if (revealedAllSongs) {
+					continueRound();
+				}
+				break;
 			}
-			break;
+			default: {
+				break;
+			}
 		}
-		default: {
-			break;
+	}
+	else {
+		gameState.settings.lives--;
+
+		const answerDisplay = document.getElementById('answerDisplay');
+		answerDisplay.classList.remove('shake');
+		void answerDisplay.offsetWidth;
+		answerDisplay.classList.add('shake');
+		setTimeout(() => answerDisplay.classList.remove('shake'), 400);
+
+		if (gameState.settings.lives <= 0) {
+			continueRound();
 		}
 	}
 
-	document.getElementById('guessInput').value = "";
 }
 
-function requiredSourcesRevealed() {
+function sourcesRevealed() {
+	let result = {
+		required: { value: 0, total: 0, },
+		optional: { value: 0, total: 0, },
+	}
 	const sources = document.querySelectorAll("#answerDisplay .source");
 	for (let i = 0; i < sources.length; i++) {
-		if (sources[i].dataset.optional) { continue; }
-		if (!sources[i].dataset.reveal) { return false; }
+		const item = sources[i].dataset.optional == "true" ? "optional" : "required";
+
+		result[item].total++;
+		sources[i].dataset.reveal == "true" && (result[item].value++);
 	};
 
-	return true;
+	return result;
 }
 
-function requiredSongsRevealed() {
+function songsRevealed() {
+	let result = {
+		required: { value: 0, total: 0, },
+		optional: { value: 0, total: 0, },
+	}
 	const songs = document.querySelectorAll("#answerDisplay .song");
 	for (let i = 0; i < songs.length; i++) {
-		if (songs[i].dataset.optional) { continue; }
-		if (!songs[i].dataset.reveal) { return false; }
+		const item = songs[i].dataset.optional == "true" ? "optional" : "required";
+
+		result[item].total++;
+		songs[i].dataset.reveal == "true" && (result[item].value++);
 	};
 
-	return true;
+	return result;
 }
+
+
+
 
 function revealSource(bool,i) {
 	const source = document.querySelector(`#answerDisplay .source[data-index='${i}']`)
@@ -1268,7 +1327,10 @@ function useTimeLifeline() {
             
             if (currentTime <= 0) {
                 stopTimeout();
-                handleTimeout();
+
+                gameState.settings.lives--;
+				updateGame();
+				continueRound();
             }
         }, 1000);
     }
@@ -1394,15 +1456,6 @@ async function useSkipLifeline() {
     }
 
 	nextRound();
-
-    // Temporarily disable skip button to prevent rapid skipping
-    const skipBtn = document.getElementById('skipLifeline');
-    if (skipBtn) {
-        skipBtn.classList.add('skip-disabled');
-        setTimeout(() => {
-            skipBtn.classList.remove('skip-disabled');
-        }, 500);
-    }
 }
 
 function useExpandLifeline() {

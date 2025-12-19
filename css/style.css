@@ -634,6 +634,11 @@ header h5 {
   }
 }
 
+#continueBtn.btn-success > span:last-child {
+	display: none !important;
+}
+
+
 /* Game Styles */
 .game-container {
     background: transparent;
@@ -733,6 +738,9 @@ header h5 {
 	width: 100%;
 	background: rgba(50, 50, 80, 1);
     position: relative;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+	border-left: none;
+	border-right: none;
 }
 #audioPlayer {
 	width: 100%;
@@ -928,7 +936,6 @@ header h5 {
     align-items: stretch;
     flex-direction: row;
     flex-wrap: nowrap;
-    border-top: 3px solid rgba(0, 0, 0, 0.3);
 }
 .answer-wrapper * {
 	text-transform: uppercase;
@@ -961,14 +968,10 @@ header h5 {
 .answer-wrapper .seperator2 {
 	color: hsl(0,0%,70%);
 }
-#answerDisplay .false {
-    font-style: italic;
-    opacity: 0.7;
-}
 
 #answerDisplay *[data-optional='true'] {
 	color: hsl(0,0%,70%);
-    opacity: 0.3;
+    opacity: 0.5;
 }
 
 
@@ -1154,24 +1157,28 @@ header h5 {
 }
 
 /* Difficulty colors */
-.difficulty-easy {
-    color: #28a745;
-    font-weight: bold;
-}
 
-.difficulty-medium {
-    color: #667eea;
-    font-weight: bold;
-}
+#startScreen,
+#resultScreen {
+	[data-difficulty='Easy'] {
+		color: #28a745;
+		font-weight: bold;
+	}
 
-.difficulty-hard {
-    color: #ff9800;
-    font-weight: bold;
-}
+	[data-difficulty='Medium'] {
+		color: #667eea;
+		font-weight: bold;
+	}
 
-.difficulty-extreme {
-    color: #dc3545;
-    font-weight: bold;
+	[data-difficulty='Hard'] {
+		color: #ff9800;
+		font-weight: bold;
+	}
+
+	[data-difficulty='Extreme'] {
+		color: #dc3545;
+		font-weight: bold;
+	}
 }
 
 /* Song List */
@@ -1301,9 +1308,6 @@ header h5 {
 
 
 #answerDisplay {
-	.year[data-reveal='false'] {
-		display: none !important;	
-	}
 	:has(.songs:empty) .seperator1,
 	:has(.sources:empty) .seperator1 {
 		display: none !important;	
@@ -1316,6 +1320,9 @@ body:not([data-state="2"]) #answerDisplay {
 	.song[data-reveal='true'] .false,
 	.source[data-reveal='false'] .true,
 	.song[data-reveal='false'] .true {
+		display: none !important;
+	}
+	.year[data-reveal='false'] {
 		display: none !important;
 	}
 }
@@ -1357,19 +1364,21 @@ body[data-style="3"] {
 	.source[data-reveal='true'],
 	.song[data-reveal='true'],
 	.year[data-reveal='true'] {
-		color: green;
+		color: #3ee33e;
 		font-weight: bold;
 		font-style: normal;
 	}
-	.year[data-reveal='false'] {
-		display: none !important;
-	}
+	
 }
 
-body[data-state="2"] #answerDisplay {
-	color: red;
+body[data-state="2"] #answerDisplay *[data-reveal='false'] {
+	color: #cb0000;
 	font-weight: bold;
 	font-style: normal;
+}
+
+body[data-state="2"] #answerDisplay .year {
+	color: hsl(0,0%,70%);
 }
 
 /* 
