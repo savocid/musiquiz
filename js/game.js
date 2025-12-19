@@ -82,8 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     params.set('collection', collectionId);
 	params.set('data', collectionsUrl);
 
-	//let newUrl = params.toString() ? `${cleanUrl(window.location.href)}?${params.toString()}` : window.location.href;
-	//history.replaceState(null, '', newUrl);
+	let newUrl = params.toString() ? `${window.location.href}?${params.toString()}` : window.location.href;
+	history.replaceState(null, '', newUrl);
 
   	document.getElementById('volumeSlider').addEventListener('input', (e) => {
 		const volume = e.target.value / 100;
