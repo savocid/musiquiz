@@ -620,14 +620,17 @@ function updateRoundsSlider() {
 	const roundsSlider = document.getElementById('roundsSlider');
 
 	if (!roundsSlider.max) { // Initialization
+		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
 		roundsSlider.max = gameState.collection.songs.length;
-		roundsSlider.value = gameState.collection.songs.length >= 10 ? 10 : Math.ceil(gameState.collection.songs.length * 0.5);
+		roundsSlider.value = storedVal && storedVal <= gameState.collection.songs.length ? storedVal : gameState.collection.songs.length >= 10 ? 10 : Math.ceil(gameState.collection.songs.length * 0.5);
 	}
 
 	const maxDigits = roundsSlider.max.toString().length;
 	const padNumber = (num) => num.toString().padStart(maxDigits, '0');
 	document.getElementById('roundsValue').textContent = padNumber(roundsSlider.value);
 	gameState.rounds = roundsSlider.value;
+
+	localStorage.setItem(`${collectionsUrl}-${collectionId}-rounds`, roundsSlider.value);
 }
 
 function updateAnswerDisplay() {
@@ -1061,7 +1064,7 @@ function extractTime(str) {
 }
 
 function normalize_str(str) {
-    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').trim();
+    return str.toLowerCase().trim().replace(' ','').replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').trim();
 }
 
 function formatTime(seconds) {
