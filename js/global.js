@@ -109,5 +109,8 @@ function cleanUrl(url) {
 	setTimeout(() => {
 		document.body.classList.remove('preload');
 	}, 100);
+
+	let newUrl = params.toString() ? `${window.location.origin}${window.location.pathname.replace(/\/$/,"")}?${params.toString()}` : `${window.location.origin}${window.location.pathname}`;
+	history.replaceState(null, '', newUrl);
 })();
 	

@@ -1463,7 +1463,7 @@ body[data-state="2"] #answerDisplay .year {
 		-webkit-appearance: none;
 		height: 100%;
 		background: darkslategrey;
-		border: 1px solid rgba(0,0,0,0.2);
+		border: 2px solid rgba(0,0,0,0.2);
 		border-top: none;
 		border-bottom: none;
 		cursor: pointer;

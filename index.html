@@ -39,6 +39,15 @@
         <a href="./submit/">submit</a>
     </footer>
 
+	<script>
+	    const params = new URLSearchParams(window.location.search);
+		const paramsCollection = params.get('data');
+		if (paramsCollection) {
+			localStorage.setItem('collectionsUrl', paramsCollection);
+			document.getElementById("collectionsUrlInputMain").value = paramsCollection;
+			loadCollections(paramsCollection);
+		};
+	</script>
 	<script src="js/global.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>

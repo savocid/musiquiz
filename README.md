@@ -1,3 +1,3 @@
 # MusiQuiz
 
-https://savocid.github.io/musiquiz
+https://savocid.github.io/musiquiz/
