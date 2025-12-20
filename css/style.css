@@ -1417,7 +1417,7 @@ body[data-style="3"] {
 }
 
 body[data-state="2"] #answerDisplay *[data-reveal='false'] {
-	color: #cb0000;
+	color: #c96060;
 	font-weight: bold;
 	font-style: normal;
 }
