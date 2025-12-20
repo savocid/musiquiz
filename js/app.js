@@ -126,5 +126,5 @@ function loadMore() {
 
 function startGame(collectionId) {
 	localStorage.setItem("collection",collectionId)
-    window.location.href = `game.html`;
+    window.location.href = `game/index.html`;
 }
