@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
 </head>
-<body class="preload" data-state="0">
+<body class="preload" data-page="game" data-state="0">
     <div class="container">
         <div class="controls-wrapper">
             <!-- Header -->
@@ -27,7 +27,7 @@
             <p id="collectionDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;"></p>
             
             <!-- Game Setup Layout -->
-            <div style="display: flex; gap: 2rem; align-items: center; justify-content: center; margin: 1rem auto 2rem; max-width: 800px;">
+            <div id="collectionOptions" style="display: flex; gap: 2rem; align-items: center; justify-content: center; margin: 1rem auto 2rem; max-width: 800px;">
                 <!-- Cover Image -->
                 <div style="flex-shrink: 0;">
                     <img id="startScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
@@ -49,9 +49,9 @@
             <button id="startGameBtn" class="btn btn-success" style="font-size: 1.5rem; padding: 1.5rem 3rem; margin-top: 1rem; margin-left: auto; margin-right: auto;">Start Game</button>
             
             <!-- Error Message -->
-            <div id="errorMessage" style="margin-top: 2rem;">
+            <div id="errorMessage">
                 <h2 style="color: #f56565; margin-bottom: 1rem;">Collection not found.</h2>
-                <button class="btn btn-secondary"><a href="/">Return to Home</a></button>
+                <button class="btn btn-secondary"><a href="./">Return to Home</a></button>
             </div>
         </div>
         

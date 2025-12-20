@@ -71,15 +71,19 @@ async function loadCollections(url) {
 			return;
 		}
 
+		document.body.dataset.collectionsUrl = url;
 		localStorage.setItem('collectionsUrl', url);
 		document.getElementById('collectionsUrlInputMain').value = cleanUrl(url);
-        
+
+		updateUrl();
+
         displayCollections();
     } catch (error) {
         console.error('Error loading collections:', error);
         document.getElementById('collectionsList').innerHTML = `<p style=\"color: #fff; text-align: center; padding: 2rem;\">Error loading collections. Please check the URL.</p>`;
         document.getElementById('loadMoreBtn').style.display = 'none';
     }
+
 }
 
 function displayCollections() {

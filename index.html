@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
 </head>
-<body class="preload">
+<body class="preload" data-page="index">
     <div class="container home-container">
             <!-- Header -->
             <header>
@@ -39,15 +39,6 @@
         <a href="./submit/">submit</a>
     </footer>
 
-	<script>
-	    const params = new URLSearchParams(window.location.search);
-		const paramsCollection = params.get('data');
-		if (paramsCollection) {
-			localStorage.setItem('collectionsUrl', paramsCollection);
-			document.getElementById("collectionsUrlInputMain").value = paramsCollection;
-			loadCollections(paramsCollection);
-		};
-	</script>
 	<script src="js/global.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/volume.js"></script>

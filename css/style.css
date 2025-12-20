@@ -1446,7 +1446,6 @@ body[data-state="2"] #answerDisplay .year {
 
 #startScreen {
 	input[type='range'] {
-		--color: red;
 		width: 100%;
 		height: 35px;
 		-webkit-appearance: none;
@@ -1539,7 +1538,7 @@ body:not([data-state="1"]):not([data-state="2"]) {
 #startScreen[data-error]:not([data-error=""]) {
 	#collectionTitle,
 	#collectionDescription,
-	#startScreen > div,
+	#collectionOptions,
 	#startGameBtn {
 		display: none !important;
 	}

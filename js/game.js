@@ -66,7 +66,7 @@ collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    if (!collectionsUrl || !collectionId) return;
+    if (!collectionsUrl || !collectionId) { document.getElementById('startScreen').dataset.error = 'collection'; return; };
 
     const params = new URLSearchParams(window.location.search);
     params.set('mode', currentMode);

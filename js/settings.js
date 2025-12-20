@@ -85,17 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Attach mode button listeners based on page
     const params = new URLSearchParams(window.location.search);
-    const isGamePage = params.get('collection') !== null;
+    const isGamePage = document.body.dataset.page == "game";
     const modeButtons = document.querySelectorAll('.mode-btn-compact');
     
     modeButtons.forEach(btn => {
         btn.addEventListener('click', function() {
             // Prevent clicks during animation
             if (document.body.classList.contains('mode-animating')) return;
-            
+
             const newMode = this.dataset.mode;
-            const params = new URLSearchParams(window.location.search);
-            const currentMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
+            const currentMode = document.body.dataset.mode;
 
             if (newMode !== currentMode) {
                 if (isGamePage) {
@@ -114,13 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.classList.add('active');
                 }
             }
+			updateUrl();
         });
     });
     
     // Apply current mode styling (without animation)
-    const savedMode = params.get('mode') || localStorage.getItem('selectedMode') || 'default';
-    // Use data-mode attribute so JS can base visibility on it (not classes)
-    document.body.dataset.mode = savedMode;
+    const savedMode = localStorage.getItem('selectedMode') || params.get('mode') || 'default';
 
     updateCSSVariables(savedMode)
     
@@ -136,8 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear data button
     document.getElementById('clearDataBtn').addEventListener('click', () => {
 		localStorage.clear();
-		location.reload();
+		window.location.href = window.location.href.replace(/\?.*$/,"");
 	});
+
+	updateUrl();
 });
 
 // Global function for mode theme application
@@ -147,12 +147,13 @@ window.applyModeTheme = function(mode, animate = false, callback) {
     if (animate) {
         // Trigger animation
         document.body.classList.add('mode-animating');
-        document.body.setAttribute('data-new-mode', mode);
+        document.body.dataset.newMode = mode;
         
         // Apply new theme after animation completes
         setTimeout(() => {
             // Use data attribute for current mode
             document.body.dataset.mode = mode;
+
             // reflect whether this mode uses a timeout (controls timer preview visibility)
             // Remove animation class
             document.body.classList.remove('mode-animating');

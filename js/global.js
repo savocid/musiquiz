@@ -106,6 +106,14 @@ function cleanUrl(url) {
 		});
 	}
 
+	const collectionId = localStorage.getItem("collection");
+	document.body.dataset.collection = collectionId ? collectionId : "";
+
+	const currentMode = localStorage.getItem('selectedMode');
+	document.body.dataset.mode = currentMode ? currentMode : "default";
+
+	updateUrl();
+
 	setTimeout(() => {
 		document.body.classList.remove('preload');
 	}, 100);
@@ -114,4 +122,19 @@ function cleanUrl(url) {
 	let newUrl = params.toString() ? `${window.location.origin}${window.location.pathname.replace(/\/$/,"")}?${params.toString()}` : `${window.location.origin}${window.location.pathname}`;
 	history.replaceState(null, '', newUrl);
 })();
-	
+
+function updateUrl() {
+	const modeBtn = document.querySelector("#modeControl > button.active");
+
+	const collectionsUrl = document.body.dataset.collectionsUrl;
+	const collectionId = document.body.dataset.collection;
+	const currentMode = modeBtn ? modeBtn.dataset.mode : "";
+
+	const params = new URLSearchParams(window.location.search);
+	currentMode && (params.set('mode', currentMode));
+	collectionId && (params.set('collection', collectionId));
+	collectionsUrl && (params.set('data', collectionsUrl));
+
+	const newUrl = params.toString() ? `${window.location.origin}${window.location.pathname.replace(/\/$/,"")}?${params.toString()}` : `${window.location.origin}${window.location.pathname}`;
+	history.replaceState(null, '', newUrl);
+}
