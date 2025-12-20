@@ -96,3 +96,18 @@ const MODES = {
 function cleanUrl(url) {
     return `${url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').replace(/\?.*$/,'').trim()}`;
 }
+
+
+(function() {
+	if (location.protocol === 'file:') {
+		document.querySelectorAll('a[href$="/"]').forEach(a => {
+		const href = a.getAttribute('href');
+		if (!href.endsWith('index.html')) a.setAttribute('href', href + 'index.html');
+		});
+	}
+
+	setTimeout(() => {
+		document.body.classList.remove('preload');
+	}, 100);
+})();
+	
