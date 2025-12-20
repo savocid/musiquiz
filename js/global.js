@@ -110,6 +110,7 @@ function cleanUrl(url) {
 		document.body.classList.remove('preload');
 	}, 100);
 
+    const params = new URLSearchParams(window.location.search);
 	let newUrl = params.toString() ? `${window.location.origin}${window.location.pathname.replace(/\/$/,"")}?${params.toString()}` : `${window.location.origin}${window.location.pathname}`;
 	history.replaceState(null, '', newUrl);
 })();
