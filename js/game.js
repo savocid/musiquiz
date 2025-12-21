@@ -164,7 +164,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadGameData() {
 
-   	gameState = gameState_default;
+   	try {
+		gameState = structuredClone(gameState_default);
+	} catch {
+		gameState = JSON.parse(JSON.stringify(gameState_default));
+	}
 
     if (!collectionId) {
         console.error('No collection ID in URL');
@@ -366,7 +370,7 @@ function selectAudioClipWindow(quietParts = [], { minStart = 0, maxClipStart = 0
 
     // 2) Fallback: try random starts and prefer minimal overlap (<50% if possible)
     let best = null;
-    const effectiveMaxStart = Math.max(minStart, maxClipStart);
+    const effectiveMaxStart = Math.min(maxClipStart, Math.max(minStart, duration - clipDuration));
 
     for (let i = 0; i < attempts; i++) {
         const s = minStart + Math.random() * (effectiveMaxStart - minStart);
@@ -805,16 +809,10 @@ function updateAnswerDisplay() {
 }
 
 function applyLoad() {
-	document.getElementById('progressTimer').style.visibility = "hidden";
-	document.getElementById('progressBar').style.visibility = "hidden";
-	document.getElementById('audioPlayer').style.visibility = "hidden";
-	document.getElementById('startGameBtn').classList.add("loading");
+	document.body.classList.add("loading");
 }
 function removeLoad() {
-	document.getElementById('progressTimer').style.visibility = "visible";
-	document.getElementById('progressBar').style.visibility = "visible";
-	document.getElementById('audioPlayer').style.visibility = "visible";
-	document.getElementById('startGameBtn').classList.remove("loading");
+	document.body.classList.remove("loading");
 }
 
 
@@ -829,26 +827,31 @@ function checkGuess() {
 
 	let correct = false;
 
-	const sources = gameState.currentSong.sources;
-	sources.forEach((source, index) => {
-		for (let i = 1; i < source.length; i++) {
-			if (compareGuess(source[i])) {
+	const sources = gameState.collection.gameStyle != 3 ? gameState.currentSong.sources : [];
+	for (let i = 0; i < sources.length; i++) {
+		const el = document.querySelector(`#answerDisplay .source[data-index='${i}']`)
+		if (!el || el.dataset.reveal == "true") continue;
+
+		for (let s = 1; s < sources[i].length; s++) {
+
+			if (compareGuess(sources[i][s], inputValue)) {
 				correct = true;
-				revealSource(true,index);
-				break;
+				revealSource(true,i);
 			}
 		}
-	});
+	};
 
-	const song = gameState.currentSong.title;
-	for (let i = 1; i < song.length; i++) {
-		if (compareGuess(song[i])) {
+	const song = gameState.collection.gameStyle != 2 ? gameState.currentSong.title : [];
+	for (let s = 1; s < song.length; s++) {
+		const el = document.querySelector(`#answerDisplay .song`)
+		if (!el || el.dataset.reveal == "true") continue;
+
+		if (compareGuess(song[s], inputValue) ) {
 			correct = true;
 			revealSong(true);
-			break;
 		}
 	}
-
+	
 	const continueBtn = document.getElementById('continueBtn');	
 
 	const revealed_sources = sourcesRevealed();
@@ -918,28 +921,30 @@ function checkGuess() {
 	}
 }
 
-function compareGuess(val) {
+function compareGuess(val1,val2) {
 
-	let inputValue = document.getElementById('guessInput').value;
+	val1 = val1.toLowerCase();
+	val2 = val2.toLowerCase();
 
-	val = val.toLowerCase();
-	inputValue = inputValue.toLowerCase();
+	const normalizedVal1 = normalize_str(val1);
+	const normalizedVal2 = normalize_str(val2);
 
-	const stringSimilarityPlain = calcStringSimilarity(val);
-	const stringSimilarityNormalized = calcStringSimilarity(normalize_str(inputValue),normalize_str(val));
-	const wordSimilarityPlain = calcWordSimilarity(inputValue,val);
-	const wordSimilarityNormalized = calcWordSimilarity(normalize_str(inputValue),normalize_str(val));
+	const stringSimilarityPlain = calcStringSimilarity(val1, val2);
+	const stringSimilarityNormalized = calcStringSimilarity(normalizedVal1, normalizedVal2);
+
+	const wordSimilarityPlain = calcWordSimilarity(val1, val2);
+	const wordSimilarityNormalized = calcWordSimilarity(normalizedVal1, normalizedVal2);
 
 	const stringSimilarity = Math.max(stringSimilarityPlain, stringSimilarityNormalized);
 	const wordSimilarity = Math.max(wordSimilarityPlain, wordSimilarityNormalized);
 
-	const normalizedInput = normalize_str(inputValue);
-	const normalizedVal = normalize_str(val);
-
 	if (
-		inputValue.includes(val) || 
-		normalizedInput.includes(normalizedVal) || 
+		val1.includes(val2) ||
+		val2.includes(val1) || 
+		normalizedVal1.includes(normalizedVal2) || 
+		normalizedVal2.includes(normalizedVal1) ||
 		stringSimilarity >= 0.75 || 
+		wordSimilarity >= 0.8 ||
 		(stringSimilarity >= 0.5 && wordSimilarity >= 0.5) 
 	) {
 		return true;	
@@ -992,12 +997,8 @@ function revealSong(bool) {
 
 function calcStringSimilarity(str1, str2) {
 
-	if (!str1 || !str2) return 0;
-
-    // If both strings are empty, they're 100% similar
-    if (str1.length === 0 && str2.length === 0) return 100;
-    
-    // If one string is empty and the other isn't, similarity is 0%
+	if (str1 == null || str2 == null) return 0;
+    if (str1.length === 0 && str2.length === 0) return 1;
     if (str1.length === 0 || str2.length === 0) return 0;
     
     // Convert to lowercase for case-insensitive comparison
@@ -1037,36 +1038,23 @@ function calcStringSimilarity(str1, str2) {
 }
 
 function calcWordSimilarity(str1, str2) {
-	if (!str1 || !str2) return 0;
+  	if (str1 == null || str2 == null) return 0;
+  	if (str1.length === 0 && str2.length === 0) return 1;
+	if (str1.length === 0 || str2.length === 0) return 0;
 
-    // If both strings are empty, they're 100% similar
-    if (str1.length === 0 && str2.length === 0) return 100;
-    
-    // Convert to lowercase for case-insensitive comparison
-    const s1 = str1.toLowerCase();
-    const s2 = str2.toLowerCase();
-    
-    // Split strings into words
-    const words1 = s1.split(/\s+/).filter(word => word.length > 0);
-    const words2 = s2.split(/\s+/).filter(word => word.length > 0);
-    
-    // If one has no words and the other does, similarity is 0%
-    if (words1.length === 0 || words2.length === 0) return 0;
-    
-    // Create sets of unique words
-    const set1 = new Set(words1);
-    const set2 = new Set(words2);
-    
-    // Find intersection (common words)
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    
-    // Find union (all unique words)
-    const union = new Set([...set1, ...set2]);
-    
-    // Calculate Jaccard similarity
-    const similarity = (intersection.size / union.size);
-    
-    return similarity;
+	const w1 = str1.split(/\s+/).filter(Boolean).map(w => w.toLowerCase());
+	const w2 = str2.split(/\s+/).filter(Boolean).map(w => w.toLowerCase());
+
+	if (w1.length === 0 || w2.length === 0) return 0;
+
+	const set1 = new Set(w1);
+	const set2 = new Set(w2);
+
+	let matches = 0;
+	set1.forEach(w => { if (set2.has(w)) matches++; });
+
+	const denom = Math.max(set1.size, set2.size);
+	return denom === 0 ? 1 : (matches / denom);
 }
 
 
@@ -1222,13 +1210,12 @@ function revealLetters() {
 
 	document.getElementById("answerDisplay").dataset.hint = true;
 
-	const optionalBool = [false, true];
 	let check = false;
 
-	for (let o = 0; 0 < optionalBool.length; o++) {
+	for (const optional of [false, true]) {
 
-		const sourceSpans = document.querySelectorAll(`#answerDisplay .source[data-optional='${optionalBool[o]}'][data-reveal='false'] .true > span`);
-		const songSpans = document.querySelectorAll(`#answerDisplay .song[data-optional='${optionalBool[o]}'][data-reveal='false'] .true > span`);
+		const sourceSpans = document.querySelectorAll(`#answerDisplay .source[data-optional='${optional}'][data-reveal='false'] .true > span`);
+		const songSpans = document.querySelectorAll(`#answerDisplay .song[data-optional='${optional}'][data-reveal='false'] .true > span`);
 		const spans = gameState.collection.gameStyle == 1 ? [...sourceSpans, ...songSpans] : gameState.collection.gameStyle == 2 ? [...sourceSpans] : gameState.collection.gameStyle == 3 ? [...songSpans] : [];
 
 		let letters = [...spans].filter(span => { return /^[A-Za-z0-9]+$/.test(span.textContent); });
@@ -1255,7 +1242,6 @@ function revealLetters() {
 	}
 
 	if (!check) { return false; }
-
 
 	const allSpans = document.querySelectorAll("#answerDisplay .source .true > span, #answerDisplay .song .true > span");
 

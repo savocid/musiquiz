@@ -604,28 +604,43 @@ header h5 {
 .btn-back {
     margin-bottom: 1rem;
 }
-.btn.loading {
-	transition:none;
-    color: transparent;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.btn.loading:before {
-	--border: rgba(50,50,50,1);
-    --color1: var(--primary-color);
-    position: absolute;
-    content: '';
-    height: 50%;
-    aspect-ratio: 1 / 1;
-    animation: spin 3s linear infinite;
-    border-radius: 50%;
-    border: 4px dashed var(--border);
-    /*background: radial-gradient(var(--color1) 60%, transparent 65%);*/
-	background: transparent;
-	opacity: 0.5;
+body.loading {
+	#startScreen,
+	#gameContent,
+	#resultScreen {
+		position: relative;
+		overflow: hidden;
+	}
+	#startScreen::before,
+	#gameContent::before,
+	#resultScreen::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+		background: white;
+		z-index: 1000;
+	}
+	#startScreen::after,
+	#gameContent::after,
+	#resultScreen::after {
+		--widthHeight: 50;
+        content: '';
+        position: absolute;
+        top: calc(50% - calc((var(--widthHeight) / 2) * 1px));
+        left: calc(50% - calc((var(--widthHeight) / 2) * 1px));
+        height: calc(var(--widthHeight) * 1px);
+        aspect-ratio: 1 / 1;
+        animation: spin 3s linear infinite;
+        border-radius: 50%;
+        border: 4px dashed rgba(50, 50, 50, 0.5);
+        background: radial-gradient(var(--primary-color) 60%, transparent 65%);
+		z-index: 1000;
+	}
 }
 
 @keyframes spin { 
