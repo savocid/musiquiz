@@ -721,13 +721,14 @@ function checkGuess() {
     
     inputValue = normalize_str(inputValue);
 
+	const similarityVal = 0.75;
 	let correct = false;
 
 	const sources = gameState.currentSong.sources;
 	sources.forEach((source, index) => {
 		for (let i = 1; i < source.length; i++) {
 
-			if (inputValue.includes(normalize_str(source[i]))) {
+			if (inputValue.includes(normalize_str(source[i])) || calcSimilarity(inputValue,normalize_str(source[i])) >= similarityVal) {
 				correct = true;
 				revealSource(true,index);
 				break;
@@ -737,7 +738,7 @@ function checkGuess() {
 
 	const song = gameState.currentSong.title;
 	for (let i = 1; i < song.length; i++) {
-		if (inputValue.includes(normalize_str(song[i]))) {
+		if (inputValue.includes(normalize_str(song[i])) || calcSimilarity(inputValue,normalize_str(song[i])) >= similarityVal) {
 			correct = true;
 			revealSong(true);
 			break;
@@ -853,6 +854,49 @@ function revealSource(bool,i) {
 function revealSong(bool) {
 	const song = document.querySelector(`#answerDisplay .song`)
 	song && (song.dataset.reveal = bool);
+}
+
+function calcSimilarity(str1, str2) {
+    // If both strings are empty, they're 100% similar
+    if (str1.length === 0 && str2.length === 0) return 100;
+    
+    // If one string is empty and the other isn't, similarity is 0%
+    if (str1.length === 0 || str2.length === 0) return 0;
+    
+    // Convert to lowercase for case-insensitive comparison
+    const s1 = str1.toLowerCase();
+    const s2 = str2.toLowerCase();
+    
+    // Calculate Levenshtein distance (edit distance)
+    const track = Array(s2.length + 1).fill(null).map(() =>
+        Array(s1.length + 1).fill(null));
+    
+    for (let i = 0; i <= s1.length; i += 1) {
+        track[0][i] = i;
+    }
+    
+    for (let j = 0; j <= s2.length; j += 1) {
+        track[j][0] = j;
+    }
+    
+    for (let j = 1; j <= s2.length; j += 1) {
+        for (let i = 1; i <= s1.length; i += 1) {
+            const indicator = s1[i - 1] === s2[j - 1] ? 0 : 1;
+            track[j][i] = Math.min(
+                track[j][i - 1] + 1, // deletion
+                track[j - 1][i] + 1, // insertion
+                track[j - 1][i - 1] + indicator, // substitution
+            );
+        }
+    }
+    
+    const distance = track[s2.length][s1.length];
+    const maxLength = Math.max(s1.length, s2.length);
+    
+    // Calculate similarity percentage
+    const similarity = ((maxLength - distance) / maxLength);
+    
+    return similarity;
 }
 
 
@@ -1134,3 +1178,4 @@ function extractAudioCover(url) {
 			return Promise.resolve(null);
 		});
 }
+
