@@ -240,50 +240,160 @@ async function startGame() {
 
 async function initRound() {
     stopTimeout();
-	updateNewRound();
+    updateNewRound();
 
-    // Generate random startTime based on startTime and endTime
     try {
-		const duration = await extractAudioDuration(gameState.currentSong.audioFile);
-		gameState.currentSong.duration = duration;
+        // Get duration
+        const duration = await extractAudioDuration(gameState.currentSong.audioFile);
+        gameState.currentSong.duration = duration;
 
-		const endPadding = 5;
-		// Use original start/end if present, else default to 0/duration
-		let origStart = extractTime(gameState.currentSong.startTime);
-		let origEnd = extractTime(gameState.currentSong.endTime);
+        const endPadding = 5;
+        // Use original start/end if present, else default to 0/duration
+        let origStart = extractTime(gameState.currentSong.startTime);
+        let origEnd = extractTime(gameState.currentSong.endTime);
 
-		let minStart = (typeof origStart === 'number' && !isNaN(origStart)) ? origStart : 0;
-		let maxEnd = (typeof origEnd === 'number' && !isNaN(origEnd)) ? origEnd : duration;
+        let minStart = (typeof origStart === 'number' && !isNaN(origStart)) ? origStart : 0;
+        let maxEnd = (typeof origEnd === 'number' && !isNaN(origEnd)) ? origEnd : duration;
 
-		// Ensure maxEnd is not beyond duration - endPadding
-		maxEnd = Math.max(Math.min(maxEnd, duration - endPadding), minStart + 1);
+        // Ensure maxEnd is not beyond duration - endPadding
+        maxEnd = Math.max(Math.min(maxEnd, duration - endPadding), minStart + 1);
 
-		// Calculate the latest possible start time for the clip
-		let maxClipStart = Math.max(maxEnd - gameState.settings.clipDuration, minStart);
-		let startTime = minStart;
-		if (maxClipStart > minStart) {
-			startTime = minStart + Math.random() * (maxClipStart - minStart);
-		}
-		let endTime = Math.min(startTime + gameState.settings.clipDuration, maxEnd);
+        // Calculate the latest possible start time for the clip
+        let maxClipStart = Math.max(maxEnd - gameState.settings.clipDuration, minStart);
 
-		// Clamp values to valid range
-		startTime = Math.max(0, Math.min(startTime, duration - 1));
-		endTime = Math.max(startTime + 1, Math.min(endTime, duration - endPadding));
+        // Analyse quiet parts for this audio file (if available)
+        let quietParts = [];
+        try {
+            quietParts = await findQuietParts(gameState.currentSong.audioFile);
+        } catch (err) {
+            console.warn('findQuietParts failed:', err);
+            quietParts = [];
+        }
 
-		gameState.currentSong.startTime = startTime;
-		gameState.currentSong.endTime = endTime;
+        // Pick a start/end while avoiding quiet segments if possible
+        const chosen = selectClipWindow(quietParts, {
+            minStart,
+            maxClipStart,
+            clipDuration: gameState.settings.clipDuration,
+            duration
+        });
 
-		gameState.currentSong.originalStartTime = startTime;
-		gameState.currentSong.originalEndTime = endTime;
-		
-		await initAudio();
+        // Sanitize chosen values
+        const startTime = Math.max(0, Math.min(typeof chosen.startTime === 'number' ? chosen.startTime : 0, Math.max(0, duration - 1)));
+        const endTime = Math.max(startTime + 1, Math.min(typeof chosen.endTime === 'number' ? chosen.endTime : startTime + gameState.settings.clipDuration, duration));
 
+        // Debug (remove when satisfied)
+        console.log('quietParts:', quietParts);
+        console.log('chosen clip:', { startTime, endTime });
+
+        // Commit to state
+        gameState.currentSong.startTime = startTime;
+        gameState.currentSong.endTime = endTime;
+
+        // Keep "original" values for UI display
+        gameState.currentSong.originalStartTime = startTime;
+        gameState.currentSong.originalEndTime = endTime;
+
+        await initAudio();
     } catch (error) {
         console.error('Failed to get audio duration, using 0:', error);
         gameState.currentSong.startTime = 0;
+        gameState.currentSong.endTime = Math.min(gameState.settings.clipDuration || 5, gameState.currentSong.duration || 1);
+        gameState.currentSong.originalStartTime = gameState.currentSong.startTime;
+        gameState.currentSong.originalEndTime = gameState.currentSong.endTime;
+        await initAudio();
+    }
+}
+
+function selectClipWindow(quietParts = [], { minStart = 0, maxClipStart = 0, clipDuration = 5, duration = 0, attempts = 30 } = {}) {
+    // ensure sane bounds
+    maxClipStart = Math.max(minStart, maxClipStart);
+    const reachableEnd = Math.min(maxClipStart + clipDuration, duration);
+
+    // normalize, filter and sort quiet segments
+    // Ignore quiet parts that are:
+    // - too short (<= 3s)
+    // - shorter than 25% of the clip duration
+    // - or excessively large (>= 50% of total audio duration)
+    const minQuietByClip = clipDuration * 0.25;
+    const segs = (quietParts || [])
+        .map(s => ({ start: s.start, end: s.end, dur: (s.end - s.start) }))
+        .filter(s => {
+            // drop if duration is not a positive number
+            if (!isFinite(s.dur) || s.dur <= 0) return false;
+            if (s.dur <= 3) return false; // too short
+            if (s.dur < minQuietByClip) return false; // too small relative to clip
+            if (duration > 0 && s.dur >= duration * 0.5) return false; // too large relative to total
+            return true;
+        })
+        .sort((a, b) => a.start - b.start)
+        .map(({ start, end }) => ({ start, end }));
+
+    // 1) Find any non-quiet gaps that can fit the full clip (zero overlap)
+    let cursor = minStart;
+    const gaps = [];
+
+    for (const seg of segs) {
+        if (seg.end <= minStart) continue;
+        if (seg.start >= reachableEnd) break;
+
+        const gapStart = Math.max(cursor, minStart);
+        const gapEnd = Math.min(seg.start, reachableEnd);
+
+        if (gapEnd - gapStart >= clipDuration) {
+            gaps.push({ start: gapStart, end: gapEnd });
+        }
+
+        cursor = Math.max(cursor, seg.end);
     }
 
+    // tail gap
+    if (reachableEnd - cursor >= clipDuration) {
+        gaps.push({ start: cursor, end: reachableEnd });
+    }
 
+    // If any gaps exist, pick a random position inside a gap
+    if (gaps.length > 0) {
+        // weighted pick by available space
+        const weights = gaps.map(g => Math.max(0, (g.end - g.start) - clipDuration + 0.0001));
+        const totalW = weights.reduce((s, w) => s + w, 0);
+        let r = Math.random() * totalW;
+        for (let i = 0; i < gaps.length; i++) {
+            if (r <= weights[i]) {
+                const g = gaps[i];
+                const start = g.start + Math.random() * (g.end - g.start - clipDuration);
+                return { startTime: start, endTime: Math.min(start + clipDuration, duration) };
+            }
+            r -= weights[i];
+        }
+    }
+
+    // 2) Fallback: try random starts and prefer minimal overlap (<50% if possible)
+    let best = null;
+    const effectiveMaxStart = Math.max(minStart, maxClipStart);
+
+    for (let i = 0; i < attempts; i++) {
+        const s = minStart + Math.random() * (effectiveMaxStart - minStart);
+        const e = Math.min(s + clipDuration, duration);
+        let maxOverlapFraction = 0;
+        for (const seg of segs) {
+            const overlap = Math.max(0, Math.min(e, seg.end) - Math.max(s, seg.start));
+            const frac = overlap / (e - s);
+            if (frac > maxOverlapFraction) maxOverlapFraction = frac;
+        }
+
+        // Prefer any candidate that has < 0.5 overlap
+        if (maxOverlapFraction < 0.5) {
+            return { startTime: s, endTime: e };
+        }
+
+        if (!best || maxOverlapFraction < best.overlap) {
+            best = { startTime: s, endTime: e, overlap: maxOverlapFraction };
+        }
+    }
+
+    // No acceptable candidate found — return the best we saw
+    return { startTime: best.startTime, endTime: best.endTime };
 }
 
 async function initAudio() {
