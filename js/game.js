@@ -502,7 +502,9 @@ function updateHearts() {
 
 	document.querySelectorAll('#livesPanel .heart').forEach((heart, index) => {
 		const isVisible = index <= gameState.settings.lives;
-		heart.style.visibility = isVisible ? 'visible' : 'hidden';
+		heart.style.filter = isVisible ? '' : 'grayscale(1)';
+		heart.style.opacity = isVisible ? '' : '0.5';
+
 		heart.classList.toggle('heartbeat', isVisible && index === gameState.settings.lives);
 		if (!isVisible) heart.classList.remove('heartbeat');
 	});
