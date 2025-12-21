@@ -816,7 +816,7 @@ header h5 {
 
 .btn-repeat {
 	display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: flex-end;
     position: absolute;
 	top: 0;
@@ -833,11 +833,13 @@ header h5 {
     transition: all 0.1s;
 	text-shadow: 1px 1px 1px black;
 	font-size: 1rem;
-	display: none !important;
 }
 
 .btn-repeat:hover {
     font-size: 1.2rem;
+}
+.btn-repeat[hidden] {
+	display: none;
 }
 
 /* cover Image */

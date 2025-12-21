@@ -311,6 +311,15 @@ async function initAudio() {
 		removeLoad();
 		startRound();
 	});
+
+	audio.on('play', () => {
+		document.getElementById("repeatBtn").hidden = audio.isPlaying();
+	});
+	audio.on('pause', () => {
+		document.getElementById("repeatBtn").hidden = audio.isPlaying();
+	});
+
+	
 }
 
 async function startRound() {
@@ -421,6 +430,8 @@ function updateStart() {
 	document.getElementById('lives').innerHTML = 
 		gameState.settings.totalLives !== Infinity ? '<span class="heart">❤️</span>'.repeat(gameState.settings.totalLives) : 
 		"";
+
+	document.getElementById("repeatBtn").hidden = audio.isPlaying();
 
 	// Set lifeline defaults
 	Object.keys(lifeLines).forEach(key => {
@@ -864,10 +875,7 @@ function stopSong() {
 function repeatSong() {
 	if (!audio || !gameState.currentSong) return;
 
-    const startTime = gameState.currentSong.startTime || 0;
-	const endTime = gameState.currentSong.endTime || gameState.currentSong.duration || 0;
-
-	audio.play(startTime, endTime);
+	audio.play(0);
 }
 
 function playFullSong() {
