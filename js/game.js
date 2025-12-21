@@ -980,10 +980,6 @@ function checkGuess() {
 			optionalBool = revealedRequiredSongs;
 			continueBool = revealedAllSongs;
 		}
-		
-
-		console.log(optionalBool)
-		console.log(continueBool)
 
 		if (optionalBool) {
 			stopTimeout();
@@ -1328,11 +1324,11 @@ function revealLetters() {
 		const sourceSpans = document.querySelectorAll(`#answerDisplay .source[data-optional='${optional}'][data-reveal='false'] .true > span`);
 		const artistSpans = document.querySelectorAll(`#answerDisplay .artist[data-optional='${optional}'][data-reveal='false'] .true > span`);
 		const songSpans = document.querySelectorAll(`#answerDisplay .song[data-optional='${optional}'][data-reveal='false'] .true > span`);
-		const spans = [];
+		let spans = [];
 
-		gameState.collection.guess.includes("Sources") && (spans = [...spans, sourceSpans]);
-		gameState.collection.guess.includes("Artists") && (spans = [...spans, artistSpans]);
-		gameState.collection.guess.includes("Songs") && (spans = [...spans, songSpans]);
+		gameState.collection.guess.includes("Sources") && (spans = [...spans, ...sourceSpans]);
+		gameState.collection.guess.includes("Artists") && (spans = [...spans, ...artistSpans]);
+		gameState.collection.guess.includes("Songs") && (spans = [...spans, ...songSpans]);
 
 		let letters = [...spans].filter(span => { return /^[A-Za-z0-9]+$/.test(span.textContent); });
 

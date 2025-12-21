@@ -637,7 +637,7 @@ body.loading {
         aspect-ratio: 1 / 1;
         animation: spin 3s linear infinite;
         border-radius: 50%;
-        border: 4px dashed rgba(50, 50, 50, 0.5);
+        border: 4px dashed var(--primary-dark);
         background: radial-gradient(var(--primary-color) 60%, transparent 65%);
 		z-index: 1000;
 	}
@@ -990,10 +990,7 @@ body.loading {
 	color: hsl(0,0%,70%);
 }
 
-#answerDisplay *[data-optional='true'] {
-	color: hsl(0,0%,70%);
-    opacity: 0.5;
-}
+
 
 
 
@@ -1355,6 +1352,8 @@ body:not([data-state="2"]) #answerDisplay:not([data-hint='true']) {
 	.song[data-reveal='false'] .true {
 		display: none !important;
 	}
+}
+body:not([data-state="2"]) #answerDisplay {
 	.year[data-reveal='false'] {
 		display: none !important;
 	}
@@ -1375,6 +1374,7 @@ body[data-state="2"] #answerDisplay {
 
 #answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint) {
 	font-size: 0;
+	user-select: none;
 }
 
 #answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint)::after {
@@ -1439,10 +1439,18 @@ body[data-state="2"] #answerDisplay *[data-reveal='false'] {
 	font-style: normal;
 }
 
+body[data-state="2"]:not([data-guess*="Sources"]) #answerDisplay .source,
+body[data-state="2"]:not([data-guess*="Artists"]) #answerDisplay .artist,
+body[data-state="2"]:not([data-guess*="Songs"]) #answerDisplay .song,
 body[data-state="2"] #answerDisplay .year {
 	color: hsl(0,0%,70%);
 }
 
+body[data-guess*="Sources"] #answerDisplay .source[data-optional='true'],
+body[data-guess*="Artists"] #answerDisplay .artist[data-optional='true'],
+body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
+    opacity: 0.5;
+}
 
 
 #startScreen {
