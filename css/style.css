@@ -1394,23 +1394,28 @@ body[data-state="2"] #answerDisplay {
 
 
 /* Hide sep1 when Sources is absent OR when BOTH Artists and Songs are absent */
-body:not([data-guess*="Sources"]) #answerDisplay .seperator1,
-body:not([data-guess*="Artists"]):not([data-guess*="Songs"]) #answerDisplay .seperator1 {
+body:not([data-state="2"]):not([data-guess*="Sources"]) #answerDisplay .seperator1,
+body:not([data-state="2"]):not([data-guess*="Artists"]):not([data-guess*="Songs"]) #answerDisplay .seperator1 {
   display: none !important;
 }
 
 /* Hide sep2 unless BOTH Artists AND Songs are present */
-body:not([data-guess*="Artists"]) #answerDisplay .seperator2,
-body:not([data-guess*="Songs"])  #answerDisplay .seperator2 {
+body:not([data-state="2"]):not([data-guess*="Artists"]) #answerDisplay .seperator2,
+body:not([data-state="2"]):not([data-guess*="Songs"])  #answerDisplay .seperator2 {
   display: none !important;
 }
 
 /* Hide sep3 when Songs is absent */
-body:not([data-guess*="Songs"]) #answerDisplay .seperator3 {
+body:not([data-state="2"]):not([data-guess*="Songs"]) #answerDisplay .seperator3 {
   display: none !important;
 }
 
 
+body[data-state="1"]:not([data-guess*="Sources"]) .sources,
+body[data-state="1"]:not([data-guess*="Artists"]) .artists,
+body[data-state="1"]:not([data-guess*="Songs"]) .songs {
+	display:none !important;
+}
 
 #answerDisplay {
 	.source[data-reveal='true'],

@@ -928,9 +928,9 @@ function checkGuess() {
 
 	document.getElementById('guessInput').value = "";
 
-	const requireSource = gameState.collection.guess.includes("Source");
-	const requireArtist = gameState.collection.guess.includes("Artist");
-	const requireSong = gameState.collection.guess.includes("Song");
+	const requireSource = gameState.collection.guess.includes("Sources");
+	const requireArtist = gameState.collection.guess.includes("Artists");
+	const requireSong = gameState.collection.guess.includes("Songs");
 	
 
 	if (correct) {
@@ -981,6 +981,10 @@ function checkGuess() {
 			continueBool = revealedAllSongs;
 		}
 		
+
+		console.log(optionalBool)
+		console.log(continueBool)
+
 		if (optionalBool) {
 			stopTimeout();
 			continueBtn.className = "btn btn-success";
