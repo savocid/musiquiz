@@ -834,8 +834,6 @@ function compareGuess(val) {
 		stringSimilarity >= 0.75 || 
 		(stringSimilarity >= 0.5 && wordSimilarity >= 0.5) 
 	) {
-		console.log(stringSimilarity)
-		console.log(wordSimilarity)
 		return true;	
 	}
 
