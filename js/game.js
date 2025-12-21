@@ -271,7 +271,7 @@ async function initRound() {
         }
 
         // Pick a start/end while avoiding quiet segments if possible
-        const chosen = selectClipWindow(quietParts, {
+        const chosen = selectAudioClipWindow(quietParts, {
             minStart,
             maxClipStart,
             clipDuration: gameState.settings.clipDuration,
@@ -301,7 +301,7 @@ async function initRound() {
     }
 }
 
-function selectClipWindow(quietParts = [], { minStart = 0, maxClipStart = 0, clipDuration = 5, duration = 0, attempts = 30 } = {}) {
+function selectAudioClipWindow(quietParts = [], { minStart = 0, maxClipStart = 0, clipDuration = 5, duration = 0, attempts = 30 } = {}) {
     // ensure sane bounds
     maxClipStart = Math.max(minStart, maxClipStart);
     const reachableEnd = Math.min(maxClipStart + clipDuration, duration);
