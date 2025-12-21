@@ -716,19 +716,15 @@ function removeLoad() {
 
 function checkGuess() {
 
-	let inputValue = document.getElementById('guessInput').value;
+	const inputValue = document.getElementById('guessInput').value;
     if (!inputValue) return;
-    
-    inputValue = normalize_str(inputValue);
 
-	const similarityVal = 0.75;
 	let correct = false;
 
 	const sources = gameState.currentSong.sources;
 	sources.forEach((source, index) => {
 		for (let i = 1; i < source.length; i++) {
-
-			if (inputValue.includes(normalize_str(source[i])) || calcSimilarity(inputValue,normalize_str(source[i])) >= similarityVal) {
+			if (compareGuess(source[i])) {
 				correct = true;
 				revealSource(true,index);
 				break;
@@ -738,7 +734,7 @@ function checkGuess() {
 
 	const song = gameState.currentSong.title;
 	for (let i = 1; i < song.length; i++) {
-		if (inputValue.includes(normalize_str(song[i])) || calcSimilarity(inputValue,normalize_str(song[i])) >= similarityVal) {
+		if (compareGuess(song[i])) {
 			correct = true;
 			revealSong(true);
 			break;
@@ -814,6 +810,38 @@ function checkGuess() {
 	}
 }
 
+function compareGuess(val) {
+
+	let inputValue = document.getElementById('guessInput').value;
+
+	val = val.toLowerCase();
+	inputValue = inputValue.toLowerCase();
+
+	const stringSimilarityPlain = calcStringSimilarity(val);
+	const stringSimilarityNormalized = calcStringSimilarity(normalize_str(inputValue),normalize_str(val));
+	const wordSimilarityPlain = calcWordSimilarity(inputValue,val);
+	const wordSimilarityNormalized = calcWordSimilarity(normalize_str(inputValue),normalize_str(val));
+
+	const stringSimilarity = Math.max(stringSimilarityPlain, stringSimilarityNormalized);
+	const wordSimilarity = Math.max(wordSimilarityPlain, wordSimilarityNormalized);
+
+	const normalizedInput = normalize_str(inputValue);
+	const normalizedVal = normalize_str(val);
+
+	if (
+		inputValue.includes(val) || 
+		normalizedInput.includes(normalizedVal) || 
+		stringSimilarity >= 0.75 || 
+		(stringSimilarity >= 0.5 && wordSimilarity >= 0.5) 
+	) {
+		console.log(stringSimilarity)
+		console.log(wordSimilarity)
+		return true;	
+	}
+
+	return false;
+}
+
 function sourcesRevealed() {
 	let result = {
 		required: { value: 0, total: 0, },
@@ -856,7 +884,10 @@ function revealSong(bool) {
 	song && (song.dataset.reveal = bool);
 }
 
-function calcSimilarity(str1, str2) {
+function calcStringSimilarity(str1, str2) {
+
+	if (!str1 || !str2) return 0;
+
     // If both strings are empty, they're 100% similar
     if (str1.length === 0 && str2.length === 0) return 100;
     
@@ -895,6 +926,39 @@ function calcSimilarity(str1, str2) {
     
     // Calculate similarity percentage
     const similarity = ((maxLength - distance) / maxLength);
+    
+    return similarity;
+}
+
+function calcWordSimilarity(str1, str2) {
+	if (!str1 || !str2) return 0;
+
+    // If both strings are empty, they're 100% similar
+    if (str1.length === 0 && str2.length === 0) return 100;
+    
+    // Convert to lowercase for case-insensitive comparison
+    const s1 = str1.toLowerCase();
+    const s2 = str2.toLowerCase();
+    
+    // Split strings into words
+    const words1 = s1.split(/\s+/).filter(word => word.length > 0);
+    const words2 = s2.split(/\s+/).filter(word => word.length > 0);
+    
+    // If one has no words and the other does, similarity is 0%
+    if (words1.length === 0 || words2.length === 0) return 0;
+    
+    // Create sets of unique words
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+    
+    // Find intersection (common words)
+    const intersection = new Set([...set1].filter(x => set2.has(x)));
+    
+    // Find union (all unique words)
+    const union = new Set([...set1, ...set2]);
+    
+    // Calculate Jaccard similarity
+    const similarity = (intersection.size / union.size);
     
     return similarity;
 }
@@ -1116,7 +1180,7 @@ function extractTime(str) {
 }
 
 function normalize_str(str) {
-    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').replace(' ','').trim();
+    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replaceAll('  ',' ').replaceAll(' ','').trim();
 }
 
 function formatTime(seconds) {
