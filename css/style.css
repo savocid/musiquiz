@@ -1426,7 +1426,11 @@ body[data-state="1"]:not([data-guess*="Songs"]) .songs {
 		font-weight: bold;
 		font-style: normal;
 	}
-	
+	.sources:empty,
+	.artists:empty,
+	.songs:empty {
+		display: none !important;	
+	}
 }
 
 body[data-state="2"] #answerDisplay *[data-reveal='false'] {
