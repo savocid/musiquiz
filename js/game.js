@@ -1072,7 +1072,7 @@ function extractTime(str) {
 }
 
 function normalize_str(str) {
-    return str.toLowerCase().trim().replace(' ','').replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').trim();
+    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replace('  ',' ').replace(' ','').trim();
 }
 
 function formatTime(seconds) {
