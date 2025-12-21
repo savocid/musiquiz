@@ -985,7 +985,8 @@ body.loading {
 }
 
 .answer-wrapper .seperator1,
-.answer-wrapper .seperator2 {
+.answer-wrapper .seperator2,
+.answer-wrapper .seperator3 {
 	color: hsl(0,0%,70%);
 }
 
@@ -1210,12 +1211,14 @@ body.loading {
 #resultScreen .mode,
 #resultScreen .rounds,
 #resultScreen .sources,
+#resultScreen .artists,
 #resultScreen .songs {
 	display: flex;
     justify-content: space-between;
 }
 
 #resultScreen .sources[hidden],
+#resultScreen .artists[hidden],
 #resultScreen .songs[hidden] {
 	display: none;
 }
@@ -1343,21 +1346,12 @@ body.loading {
 }
 
 
-
-
-
-#answerDisplay {
-	:has(.songs:empty) .seperator1,
-	:has(.sources:empty) .seperator1 {
-		display: none !important;	
-	}
-}
-
-
 body:not([data-state="2"]) #answerDisplay:not([data-hint='true']) {
 	.source[data-reveal='true'] .false,
+	.artist[data-reveal='true'] .false,
 	.song[data-reveal='true'] .false,
 	.source[data-reveal='false'] .true,
+	.artist[data-reveal='false'] .true,
 	.song[data-reveal='false'] .true {
 		display: none !important;
 	}
@@ -1369,6 +1363,7 @@ body:not([data-state="2"]) #answerDisplay:not([data-hint='true']) {
 body[data-state="1"] #answerDisplay[data-hint='true'],
 body[data-state="2"] #answerDisplay {
 	.source .false,
+	.artist .false,
 	.song .false {
 		display: none !important;
 	}
@@ -1397,49 +1392,29 @@ body[data-state="2"] #answerDisplay {
 }
 
 
-/*
-GameStyle 1: Required Sources/Song
-GameStyle 2: Required Sources
-GameStyle 3: Required Song
-*/
 
-body[data-style="2"]:not([data-state='2']) {
-	#answerDisplay {
-		.songs,
-		.seperator1 {
-			display: none !important;		
-		}
-	}
-}
-body[data-style="2"] {
-	#answerDisplay {
-		.song,
-		.seperator1 {
-			color: hsl(0, 0%, 70%) !important;
-		}
-	}
+/* Hide sep1 when Sources is absent OR when BOTH Artists and Songs are absent */
+body:not([data-guess*="Sources"]) #answerDisplay .seperator1,
+body:not([data-guess*="Artists"]):not([data-guess*="Songs"]) #answerDisplay .seperator1 {
+  display: none !important;
 }
 
-body[data-style="3"]:not([data-state='2']) {
-	#answerDisplay {
-		.sources,
-		.seperator1 {
-			display: none !important;		
-		}
-	}
+/* Hide sep2 unless BOTH Artists AND Songs are present */
+body:not([data-guess*="Artists"]) #answerDisplay .seperator2,
+body:not([data-guess*="Songs"])  #answerDisplay .seperator2 {
+  display: none !important;
 }
-body[data-style="3"] {
-	#answerDisplay {
-		.source,
-		.seperator1 {
-			color: hsl(0, 0%, 70%) !important;
-		}
-	}
+
+/* Hide sep3 when Songs is absent */
+body:not([data-guess*="Songs"]) #answerDisplay .seperator3 {
+  display: none !important;
 }
+
 
 
 #answerDisplay {
 	.source[data-reveal='true'],
+	.artist[data-reveal='true'],
 	.song[data-reveal='true'],
 	.year[data-reveal='true'] {
 		color: #3ee33e !important;

@@ -62,6 +62,7 @@
             <div class="game-info">
                 <div id="scorePanel">
                     <div class="sources"><span id="sourceLabel">Sources</span>: <span id="sourceScore">0</span></div>
+					<div class="artists"><span id="artistLabel">Artists</span>: <span id="artistScore">0</span></div>
                     <div class="songs">Songs: <span id="songScore">0</span></div>
                 </div>
                 <div id="livesPanel"><span id="lives"></span></div>
@@ -94,10 +95,12 @@
 						</div>
                 
 						<div class="answer-wrapper" id="answerDisplay">
-							<span class="sources"><span class="source1"><span class="true"></span><span class="false"></span></span></span>
-							<span class="seperator1"> - </span>
+							<span class="sources"></span>
+							<span class="seperator1"> </span>
+							<span class="artists"></span>
+							<span class="seperator2"> - </span>
 							<span class="songs"></span>
-							<span class="seperator2"> </span>
+							<span class="seperator3"> </span>
 							<span class="year"></span>
 						</div>
                     </div>
@@ -105,7 +108,7 @@
 
                 <!-- Guess Input (always visible) -->
                 <div class="guess-input">
-                    <input type="text" id="guessInput" placeholder="Type source and/or song name..." autocomplete="off" style="outline:none;">
+                    <input type="text" id="guessInput" placeholder="Input guess..." autocomplete="off" style="outline:none;">
                 </div>
        
 
@@ -146,6 +149,7 @@
 						<span class="mode"><strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;"></span></span>
                         <span class="rounds"><strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
                         <span class="sources"><strong>Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
+						<span class="artists"><strong>Artists:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
                         <span class="songs"><strong>Songs:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
                     </div>
                 </div>
