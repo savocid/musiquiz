@@ -992,6 +992,7 @@ function playFullSong() {
 	audio.options.startTime = gameState.currentSong.startTime;
 	audio.options.endTime = gameState.currentSong.endTime;
 
+	audio.getRenderer().reRender();
 	audio.play();
 
 	updateProgress();

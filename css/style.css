@@ -827,7 +827,7 @@ header h5 {
     background: none;
 	border: none;
     color: white;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.1s;
