@@ -982,7 +982,7 @@ body.loading {
 .answer-wrapper {
 	color: hsl(0,0%,70%);
     padding: 3px 0;
-	text-transform: capitalize;
+	/*text-transform: capitalize;*/
 }
 
 .answer-wrapper .seperator1,
