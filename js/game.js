@@ -1385,7 +1385,20 @@ function extractTime(str) {
 }
 
 function normalize_str(str) {
-    return str.toLowerCase().trim().replace(/^the\s+/, '').replace(/^a\s+/, '').replace(/^an\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace('&','and').replace(/[^a-z0-9 ]/g, '').replaceAll('  ',' ').replaceAll(' ','').trim();
+
+	str = str.toLowerCase();
+	str = str.trim();
+	str = convertRomanToNumber(str);
+	str = str.replace(/^the\s+/, '');
+	str = str.replace(/^a\s+/, '');
+	str = str.replace(/^an\s+/, '');
+	str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+	str = str.replace('&','and');
+	str = str.replace(/[^a-z0-9 ]/g, '');
+	str = str.replaceAll('  ',' ').replaceAll(' ','');
+	str = str.trim();
+
+    return str;
 }
 
 function formatTime(seconds) {
@@ -1448,3 +1461,48 @@ function extractAudioCover(url) {
 		});
 }
 
+function romanToInt(roman) {
+    const romanMap = {
+        'I': 1,
+        'V': 5,
+        'X': 10,
+        'L': 50,
+        'C': 100,
+        'D': 500,
+        'M': 1000
+    };
+    
+    let total = 0;
+    let previousValue = 0;
+    
+    // Process from right to left
+    for (let i = roman.length - 1; i >= 0; i--) {
+        const currentChar = roman[i].toUpperCase();
+        const currentValue = romanMap[currentChar];
+        
+        if (!currentValue) {
+            throw new Error(`Invalid Roman numeral character: ${roman[i]}`);
+        }
+        
+        if (currentValue < previousValue) {
+            total -= currentValue; // Subtraction case (like IV, IX, etc.)
+        } else {
+            total += currentValue; // Addition case
+        }
+        
+        previousValue = currentValue;
+    }
+    
+    return total;
+}
+
+function convertRomanToNumber(text) {
+    // This function finds and converts Roman numerals in a string
+    return text.replace(/\b([IVXLCDM]+)\b/gi, (match, romanNumeral) => {
+        try {
+            return romanToInt(romanNumeral).toString();
+        } catch (e) {
+            return match; // Return original if conversion fails
+        }
+    });
+}
