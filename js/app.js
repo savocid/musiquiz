@@ -2,7 +2,7 @@ let selectedMode = localStorage.getItem('selectedMode') || 'default'; // Restore
 let selectedCollection = null;
 
 let allCollections = []; // Store all collections
-let displayedCount = 5; // Number of collections to show initially
+let displayedCount = 10; // Number of collections to show initially
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
@@ -61,19 +61,24 @@ async function loadCollections(url) {
         const collections = await Promise.all(collectionPromises);
         allCollections = collections.filter(collection => collection !== null);
 
-		console.log(collections)
-
         allCollections.sort((a, b) => {
-            return a.title.localeCompare(b.title, undefined, { numeric: true });
-        });
-
-		allCollections.sort((a, b) => {
-            return a.group.localeCompare(b.group, undefined, { numeric: true });
+			const aText = a.title || "";
+			const bText = b.title || "";
+            return aText.localeCompare(bText, undefined, { numeric: true });
         });
 
 		allCollections.sort((a, b) => {
 			return b.songs.length - a.songs.length;
 		});
+
+
+		const groupOrder = ["Artist", "Movie", "TV", "VGM"];
+		allCollections.sort((a, b) => {
+			const aIdx = groupOrder.indexOf(a.group || "");
+			const bIdx = groupOrder.indexOf(b.group || "");
+			return (aIdx === -1 ? Infinity : aIdx) - (bIdx === -1 ? Infinity : bIdx);
+		});
+
 
 		const container = document.getElementById('collectionsList');
 		if (allCollections.length === 0) {
@@ -102,28 +107,45 @@ function displayCollections() {
     // Get the collections to display (up to displayedCount)
     const collectionsToShow = allCollections.slice(0, displayedCount);
     
-    container.innerHTML = collectionsToShow.map(collection => {
-		const collectionsUrl = localStorage.getItem('collectionsUrl') || '';
+	// Build HTML with group headers when group changes
+	let lastGroup = null;
+	const parts = [];
+	const collectionsUrl = localStorage.getItem('collectionsUrl') || '';
 
-		const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
-		const coverSrc = 
-			collection.covers && collection.covers.length > 0 ? `https://${collectionsUrl}/collections/${collection.id}/${randomCover.replace('./', '')}` : 
-			"";
-		const coverTitle = 
-			collection.covers && collection.covers.length > 0 ? `${collection.title}` : 
-			"";
+	for (const collection of collectionsToShow) {
+	const group = collection.group || '';
 
-        return `
-        <div class="collection-item" data-songs="${collection.songs.length}">
-            <img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">
-            <div class="collection-info">
-                <h3>${collection.title}</h3>
-                <p>${collection.description || 'No description'}</p>
-                <p><strong>Difficulty:</strong> <span data-difficulty='${collection.difficulty}'">${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Language:</strong> ${collection.language.join("/")}</p>
-            </div>
-            <button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
-        </div>
-    `}).join('');
+	// Insert group header when group changes and group is non-empty
+	if (group && group !== lastGroup) {
+		parts.push(`<div class="collection-group">${group}</div>`);
+		lastGroup = group;
+	}
+
+	const randomCover = collection.covers[Math.floor(Math.random() * collection.covers.length)];
+	const coverSrc = 
+		collection.covers && collection.covers.length > 0 ? `https://${collectionsUrl}/collections/${collection.id}/${randomCover.replace('./', '')}` : 
+		"";
+	const coverTitle = 
+		collection.covers && collection.covers.length > 0 ? `${collection.title}` : 
+		"";
+
+	const languages = Array.isArray(collection.language) ? collection.language.join('/') : (collection.language || '');
+
+	parts.push(`
+		<div class="collection-item" data-songs="${collection.songs.length}">
+		<img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">
+		<div class="collection-info">
+			<h3>${collection.title}</h3>
+			<p>${collection.description || 'No description'}</p>
+			<p><strong>Difficulty:</strong> <span data-difficulty='${collection.difficulty}'>${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Language:</strong> ${languages}</p>
+		</div>
+		<button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
+		</div>
+	`);
+	}
+
+	container.innerHTML = parts.join('');
+
 
     // Show/hide load more button
     const loadMoreBtn = document.getElementById('loadMoreBtn');
