@@ -197,22 +197,8 @@ async function loadGameData() {
         }
         const songsData = await songsResponse.json();
 
-        // Resolve song references to actual song objects
-        collectionData.songs = collectionData.songs.map(ref => {
-			if (!ref || ref.key == null) return null;
-            const song = songsData[ref.key];
-
-            if (!song) {
-                console.warn('Song not found:', songKey);
-                return null;
-            }
-			song.year = ref.year !== null ? ref.year : song.year;
-
-            return song;
-        }).filter(song => song !== null && song.audioFile);
-
         gameState.collection = collectionData;
-		gameState.collection.songs = gameState.collection.songs.map(song => ({ ...song, audioFile: `https://${collectionsUrl}/audio/${song.audioFile}` }));
+		gameState.collection.songs = collectionData.songs.map(song => ({ ...songsData[song.key], year: song.year || songsData[song.key].year, audioFile: `https://${collectionsUrl}/audio/${song.audioFile}` }));
 
 		updateStart();
 
@@ -675,7 +661,7 @@ function updateYearSlider() {
 	const slider = document.getElementById("yearSlider");
 	if (slider.noUiSlider) slider.noUiSlider.destroy();
 
-	const years = gameState.collection.songs.map(item => item.year)
+	const years = gameState.collection.songs.map(item => (item.year || 0))
 	const minYear = Math.min(...years);
 	const maxYear = Math.max(...years);
 
