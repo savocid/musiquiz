@@ -156,7 +156,7 @@ function displayCollections() {
 }
 
 function loadMore() {
-    displayedCount += 5;
+    displayedCount += 10;
     displayCollections();
 }
 
