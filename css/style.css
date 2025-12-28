@@ -1454,31 +1454,75 @@ body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
 }
 
 
-#startScreen {
-	input[type='range'] {
-		width: 100%;
-		height: 35px;
-		-webkit-appearance: none;
-		background-color: cadetblue;
-		border: 1px solid rgba(0,0,0,0.5);
-    }
-	input[type='range']::-webkit-slider-runnable-track {
-		height: 100%;
-		-webkit-appearance: none;
-		color: #13bba4;
-    }
-	input[type='range']::-webkit-slider-thumb {
-		width: 30px;
-		-webkit-appearance: none;
-		height: 100%;
-		background: darkslategrey;
-		border: 2px solid rgba(0,0,0,0.2);
-		border-top: none;
-		border-bottom: none;
-		cursor: pointer;
-    }
+
+
+
+
+#roundSlider,
+#yearSlider {
+	& {
+		margin: 1rem 1rem;
+		width: 90%;
+	}
+	.noUi-tooltip {
+		display: none;
+	}
+
+	&.noUi-state-drag .noUi-active .noUi-tooltip {
+		display: block;
+	}
+
+	& {
+		border-radius: 0;
+	}
+
+
+
+	.noUi-handle {
+		border-radius: 0;
+		background: #2980b9;
+		box-shadow: none;
+		height: 18px;
+		width: 18px;
+		top: -1px;
+		right: -0px;
+	}
+	.noUi-handle:after, 
+	.noUi-handle:before {
+		display: none;
+	}
+	.noUi-connects {
+		border-radius: 0;
+	}
 }
 
+#yearSlider {
+	& {
+		padding: 0 18px;
+	}
+
+	.noUi-handle-lower {
+		right: 0 !important;
+	}
+	.noUi-handle-upper {
+		right: -18px !important;
+	}
+
+}
+
+#roundSlider {
+	& {
+		padding: 0 9px;
+	}
+
+	.noUi-handle-lower {
+		right: -9px !important;
+	}
+	.noUi-handle-upper {
+		right: 0 !important;
+	}
+
+}
 
 /* 
 // STATE.start: 0

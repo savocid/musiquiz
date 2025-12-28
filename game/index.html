@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
+	<link rel="stylesheet" href="./css/nouislider.min.css">
 </head>
 <body class="preload" data-page="game" data-state="0">
     <div class="container">
@@ -35,15 +36,21 @@
                 
                 <!-- Game Controls -->
                 <div  style="flex: 1; text-align: left;">
-                    <div style="display: grid; grid-template-columns: auto auto; gap: 0.5rem 1rem; color: #555; font-size: 1.2rem; margin-bottom: 1rem;">
-                        <strong>Difficulty:</strong><strong id="collectionDifficulty"></strong>
-                        <strong>Rounds:</strong><span id="roundsValue">10</span>
-                    </div>
-                    
-                    <!-- Round Selection Slider -->
-                    <div>
-                        <input type="range" id="roundsSlider" min="1" value="10" step="1" style="width: 100%; max-width: 300px;">
-                    </div>
+				
+					<div>
+						<strong>Difficulty:</strong><strong id="collectionDifficulty"></strong>
+					</div>
+					<div>
+						<strong>Year:</strong><span id="yearValue"></span>
+						<div id="yearSlider"></div>
+					</div>
+					<div>
+						<strong>Rounds:</strong><span id="roundValue">10</span>
+						<div id="roundSlider"></div>
+					</div>
+		
+				
+                
                 </div>
             </div>
             <button id="startGameBtn" class="btn btn-success" style="font-size: 1.5rem; padding: 1.5rem 3rem; margin-top: 1rem; margin-left: auto; margin-right: auto;">Start Game</button>
@@ -189,6 +196,7 @@
     </footer>
 
 	<script src="./js/wavesurfer.js-7.12.1-custom.1/wavesurfer.min.js"></script>
+	<script src="./js/nouislider.min.js"></script>
 	<script src="./js/global.js"></script>
 	<script src="./js/musicmetadata.js"></script>
     <script src="./js/settings.js"></script>
