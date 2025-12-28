@@ -104,7 +104,7 @@ function displayCollections() {
 			"";
 
         return `
-        <div class="collection-item">
+        <div class="collection-item" data-songs="${collection.songs.length}">
             <img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">
             <div class="collection-info">
                 <h3>${collection.title}</h3>

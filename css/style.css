@@ -1149,6 +1149,10 @@ body.loading {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+.collection-item[data-songs="0"] .btn-success {
+	display: none;
+}
+
 .collection-cover {
     max-width: 200px;
     max-height: 100px;
