@@ -61,9 +61,17 @@ async function loadCollections(url) {
         const collections = await Promise.all(collectionPromises);
         allCollections = collections.filter(collection => collection !== null);
 
+		console.log(collections)
+
         allCollections.sort((a, b) => {
-            return a.title.localeCompare(b.title, undefined, { numeric: true });
+			const aText = `${(a.group || "audio")}/${a.title}`;
+			const bText = `${(b.group || "audio")}/${b.title}`;
+            return aText.localeCompare(bText, undefined, { numeric: true });
         });
+
+		allCollections.sort((a, b) => {
+			return b.songs.length - a.songs.length;
+		});
 
 		const container = document.getElementById('collectionsList');
 		if (allCollections.length === 0) {
