@@ -198,7 +198,7 @@ async function loadGameData() {
         const songsData = await songsResponse.json();
 
         gameState.collection = collectionData;
-		gameState.collection.songs = collectionData.songs.map(song => ({ ...songsData[song.key], year: song.year || songsData[song.key].year, audioFile: `https://${collectionsUrl}/audio/${song.audioFile}` }));
+		gameState.collection.songs = collectionData.songs.map(song => ({ ...songsData[song.key], year: song.year || songsData[song.key].year, audioFile: `https://${collectionsUrl}/audio/${songsData[song.key].audioFile}` }));
 
 		updateStart();
 
