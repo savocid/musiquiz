@@ -72,7 +72,7 @@ async function loadCollections(url) {
 		});
 
 
-		const groupOrder = ["Artist", "Movie", "TV", "VGM"];
+		const groupOrder = ["Music", "Movie", "TV", "VGM"];
 		allCollections.sort((a, b) => {
 			const aIdx = groupOrder.indexOf(a.group || "");
 			const bIdx = groupOrder.indexOf(b.group || "");
