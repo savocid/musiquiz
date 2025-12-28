@@ -618,7 +618,8 @@ function updateRoundSlider() {
 
 	noUiSlider.create(slider, {
         start: valRound,
-        connect: true,
+        connect: "lower",
+		behaviour: 'drag',
         step: 1,
 		tooltips: false,
 		value: valRound,
@@ -683,6 +684,7 @@ function updateYearSlider() {
 	noUiSlider.create(slider, {
         start: [minYearVal, maxYearVal],
         connect: true,
+		behaviour: 'drag',
         step: 1,
 		tooltips: false,
 		margin: 0,

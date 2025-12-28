@@ -1481,8 +1481,10 @@ body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
 #roundSlider,
 #yearSlider {
 	& {
-		margin: 1rem 1rem;
-		width: 90%;
+		--width: 32;
+		--height: var(--width);
+		width: 100%;
+		height: calc(var(--height) * 1px);
 	}
 	.noUi-tooltip {
 		display: none;
@@ -1502,10 +1504,14 @@ body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
 		border-radius: 0;
 		background: #2980b9;
 		box-shadow: none;
-		height: 18px;
-		width: 18px;
+		height: calc(var(--height) * 1px);
+		width: calc(var(--width) * 1px);
 		top: -1px;
 		right: -0px;
+		cursor:grab;
+	}
+	.noUi-handle:active {
+		cursor:grabbing;
 	}
 	.noUi-handle:after, 
 	.noUi-handle:before {
@@ -1518,30 +1524,48 @@ body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
 
 #yearSlider {
 	& {
-		padding: 0 18px;
+		padding: 0 calc(var(--width) * 1px);
 	}
 
 	.noUi-handle-lower {
 		right: 0 !important;
 	}
 	.noUi-handle-upper {
-		right: -18px !important;
+		right: calc(var(--width) * -1px) !important;
 	}
 
 }
 
 #roundSlider {
 	& {
-		padding: 0 9px;
+		padding: 0 calc(calc(var(--width) / 2) * 1px);
 	}
 
 	.noUi-handle-lower {
-		right: -9px !important;
+		right: calc(calc(var(--width) / 2) * -1px) !important;
 	}
 	.noUi-handle-upper {
 		right: 0 !important;
 	}
+	*:has(> .noUi-connect) {
+		overflow: initial !important;
+	}
 
+	.noUi-connect {
+		margin-right: calc(calc(var(--width) / 2) * 1px);
+	}
+
+}
+
+#collectionOptions {
+	.difficulty-wrapper,
+	.year-wrapper,
+	.round-wrapper {
+		display: flex;
+        flex-wrap: wrap;
+        padding: 0.5rem 0;
+        justify-content: space-between;
+	}
 }
 
 /* 
