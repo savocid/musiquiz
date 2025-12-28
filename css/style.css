@@ -1148,7 +1148,10 @@ body.loading {
     gap: 1rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
-
+.collection-item[data-songs="0"] {
+	filter: opacity(0.5) brightness(0.8);
+	pointer-events: none;
+}
 .collection-item[data-songs="0"] .btn-success {
 	display: none;
 }
