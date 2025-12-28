@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// Add start button listener
 	document.getElementById('startGameBtn').addEventListener('click', () => {
-		startGame();
+		gameState.rounds && (startGame());
 	});
 
 	// Audio
@@ -156,136 +156,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadGameData();
 });
-
-function updateRoundSlider() {
-
-	const slider = document.getElementById("roundSlider");
-	if (slider.noUiSlider) slider.noUiSlider.destroy();
-
-	const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
-	const minRound = !maxRound ? maxRound : 1;
-
-	const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
-	const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
-
-	noUiSlider.create(slider, {
-        start: valRound,
-        connect: true,
-        step: 1,
-		tooltips: false,
-		value: valRound,
-		margin: 0,
-        range: {
-            min: minRound,
-            max: maxRound
-        }
-    });
-
-	slider.noUiSlider.on('slide', () => {
-		setRoundValue();
-
-		const roundSlider = document.getElementById("roundSlider");
-		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
-		const minRound = !maxRound ? maxRound : 1;
-
-		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
-		const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
-
-		roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
-		roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
-	});
-
-	slider.noUiSlider.on('update', () => {
-		setRoundValue();
-	});
-
-	setRoundValue();
-}
-
-function setRoundValue() {
-	const roundSlider = document.getElementById("roundSlider");
-	const value = roundSlider && roundSlider.noUiSlider ? roundSlider.noUiSlider.get() : null;
-
-	if (!value || value == null) return;
-
-	const valRound = parseInt(value);
-	const maxRound = roundSlider.noUiSlider.options.range.max;
-
-	document.getElementById("roundValue").textContent = `${valRound}/${maxRound}`;
-
-	localStorage.setItem(`${collectionsUrl}-${collectionId}-rounds`, valRound);
-	gameState.rounds = valRound;
-}
-
-function updateYearSlider() {
-
-	const slider = document.getElementById("yearSlider");
-	if (slider.noUiSlider) slider.noUiSlider.destroy();
-
-	const years = gameState.collection.songs.map(item => item.year)
-	const minYear = Math.min(...years);
-	const maxYear = Math.max(...years);
-
-	const minYearStored = localStorage.getItem(`${collectionsUrl}-${collectionId}-minYear`);
-	const maxYearStored = localStorage.getItem(`${collectionsUrl}-${collectionId}-maxYear`);
-
-	const minYearVal = (minYearStored && minYearStored >= minYear && minYearStored <= maxYear) ? minYearStored : minYear;
-	const maxYearVal = (maxYearStored && maxYearStored >= minYear && maxYearStored <= maxYear) ? maxYearStored : maxYear;
-
-	noUiSlider.create(slider, {
-        start: [minYearVal, maxYearVal],
-        connect: true,
-        step: 1,
-		tooltips: false,
-		margin: 1,
-		direction: "ltr",
-        range: {
-            min: minYear,
-            max: maxYear
-        }
-    });
-
-	slider.noUiSlider.on('slide', () => {
-		setYearValue();
-		setRoundValue();
-		
-		const roundSlider = document.getElementById("roundSlider");
-		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
-		const minRound = !maxRound ? maxRound : 1;
-
-		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
-		const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
-
-		roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
-		roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
-	});
-
-	slider.noUiSlider.on('update', () => {
-		setYearValue();
-		setRoundValue();
-	});
-
-
-	setYearValue();
-	setRoundValue();
-}
-
-function setYearValue() {
-	const yearSlider = document.getElementById("yearSlider");
-	const values = yearSlider && yearSlider.noUiSlider ? yearSlider.noUiSlider.get() : null;
-
-	if (!values || values == null) return;
-
-	const minYear = parseInt(values[0]);
-	const maxYear = parseInt(values[1]);
-	document.getElementById("yearValue").textContent = `${minYear} - ${maxYear}`;
-
-	localStorage.setItem(`${collectionsUrl}-${collectionId}-minYear`, minYear);
-	localStorage.setItem(`${collectionsUrl}-${collectionId}-maxYear`, maxYear);
-
-	gameState.minYear = minYear;
-	gameState.maxYear = maxYear;
-}
 
 
 // ************** //
@@ -733,6 +603,136 @@ function updateGame() {
 
 	// Reset Hint Lifeline
 	document.getElementById("answerDisplay").dataset.hint = false;
+}
+
+function updateRoundSlider() {
+
+	const slider = document.getElementById("roundSlider");
+	if (slider.noUiSlider) slider.noUiSlider.destroy();
+
+	const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
+	const minRound = !maxRound ? maxRound : 1;
+
+	const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
+	const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
+
+	noUiSlider.create(slider, {
+        start: valRound,
+        connect: true,
+        step: 1,
+		tooltips: false,
+		value: valRound,
+		margin: 0,
+        range: {
+            min: minRound,
+            max: maxRound
+        }
+    });
+
+	slider.noUiSlider.on('slide', () => {
+		setRoundValue();
+
+		const roundSlider = document.getElementById("roundSlider");
+		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
+		const minRound = !maxRound ? maxRound : 1;
+
+		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
+		const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
+
+		roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
+		roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
+	});
+
+	slider.noUiSlider.on('update', () => {
+		setRoundValue();
+	});
+
+	setRoundValue();
+}
+
+function setRoundValue() {
+	const roundSlider = document.getElementById("roundSlider");
+	const value = roundSlider && roundSlider.noUiSlider ? roundSlider.noUiSlider.get() : null;
+
+	if (!value || value == null) return;
+
+	const valRound = parseInt(value);
+	const maxRound = roundSlider.noUiSlider.options.range.max;
+
+	document.getElementById("roundValue").textContent = `${valRound}/${maxRound}`;
+
+	localStorage.setItem(`${collectionsUrl}-${collectionId}-rounds`, valRound);
+	gameState.rounds = valRound;
+}
+
+function updateYearSlider() {
+
+	const slider = document.getElementById("yearSlider");
+	if (slider.noUiSlider) slider.noUiSlider.destroy();
+
+	const years = gameState.collection.songs.map(item => item.year)
+	const minYear = Math.min(...years);
+	const maxYear = Math.max(...years);
+
+	const minYearStored = localStorage.getItem(`${collectionsUrl}-${collectionId}-minYear`);
+	const maxYearStored = localStorage.getItem(`${collectionsUrl}-${collectionId}-maxYear`);
+
+	const minYearVal = (minYearStored && minYearStored >= minYear && minYearStored <= maxYear) ? minYearStored : minYear;
+	const maxYearVal = (maxYearStored && maxYearStored >= minYear && maxYearStored <= maxYear) ? maxYearStored : maxYear;
+
+	noUiSlider.create(slider, {
+        start: [minYearVal, maxYearVal],
+        connect: true,
+        step: 1,
+		tooltips: false,
+		margin: 0,
+		direction: "ltr",
+        range: {
+            min: minYear,
+            max: maxYear
+        }
+    });
+
+	slider.noUiSlider.on('slide', () => {
+		setYearValue();
+		setRoundValue();
+		
+		const roundSlider = document.getElementById("roundSlider");
+		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
+		const minRound = !maxRound ? maxRound : 1;
+
+		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
+		const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
+
+		roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
+		roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
+	});
+
+	slider.noUiSlider.on('update', () => {
+		setYearValue();
+		setRoundValue();
+	});
+
+
+	setYearValue();
+	setRoundValue();
+}
+
+function setYearValue() {
+	const yearSlider = document.getElementById("yearSlider");
+	const values = yearSlider && yearSlider.noUiSlider ? yearSlider.noUiSlider.get() : null;
+
+	if (!values || values == null) return;
+
+	const minYear = parseInt(values[0]);
+	const maxYear = parseInt(values[1]);
+	document.getElementById("yearValue").textContent = `${minYear} - ${maxYear}`;
+
+	localStorage.setItem(`${collectionsUrl}-${collectionId}-minYear`, minYear);
+	localStorage.setItem(`${collectionsUrl}-${collectionId}-maxYear`, maxYear);
+
+	gameState.minYear = minYear;
+	gameState.maxYear = maxYear;
 }
 
 function updateHearts() {
