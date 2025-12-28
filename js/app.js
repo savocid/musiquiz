@@ -64,9 +64,11 @@ async function loadCollections(url) {
 		console.log(collections)
 
         allCollections.sort((a, b) => {
-			const aText = `${(a.group || "audio")}/${a.title}`;
-			const bText = `${(b.group || "audio")}/${b.title}`;
-            return aText.localeCompare(bText, undefined, { numeric: true });
+            return a.title.localeCompare(b.title, undefined, { numeric: true });
+        });
+
+		allCollections.sort((a, b) => {
+            return a.group.localeCompare(b.group, undefined, { numeric: true });
         });
 
 		allCollections.sort((a, b) => {
