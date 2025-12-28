@@ -1150,8 +1150,13 @@ body.loading {
 }
 .collection-item[data-songs="0"] {
 	filter: opacity(1) brightness(0.6);
-	pointer-events: none;
+	cursor:not-allowed;
 }
+.collection-item[data-songs="0"] * {
+	pointer-events: none;
+	user-select: none;
+}
+
 .collection-item[data-songs="0"] .btn-success {
 	display: none;
 }
@@ -1165,7 +1170,7 @@ body.loading {
 	border: 2px solid rgba(0,0,0,0.2);
 }
 
-.collection-item:hover {
+.collection-item:not([data-songs="0"]):hover {
     background: rgba(255, 255, 255, 1);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.15);
