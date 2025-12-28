@@ -198,12 +198,16 @@ async function loadGameData() {
         const songsData = await songsResponse.json();
 
         // Resolve song references to actual song objects
-        collectionData.songs = collectionData.songs.map(songKey => {
-            const song = songsData[songKey];
+        collectionData.songs = collectionData.songs.map(ref => {
+			if (!ref || ref.key == null) return null;
+            const song = songsData[ref.key];
+
             if (!song) {
                 console.warn('Song not found:', songKey);
                 return null;
             }
+			song.year = ref.year !== null ? ref.year : song.year;
+
             return song;
         }).filter(song => song !== null && song.audioFile);
 
@@ -1409,9 +1413,8 @@ function useLifeline(lifeline) {
 		case "time": {
 			stopTimeout();
 
-			let currentTime = parseInt(document.getElementById('timer').textContent)+10;
-			document.getElementById('timer').textContent = currentTime;
-			startTimeout(currentTime);
+			document.getElementById('timer').textContent = gameState.settings.timeout;
+			startTimeout(gameState.settings.timeout);
 
 			break;
 		}

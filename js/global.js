@@ -27,8 +27,8 @@ const lifeLines = {
 	},
 	time: {
 		symbol: "⏱️",
-		text: "+10s",
-		description: "Adds 10 seconds to the countdown timer.",
+		text: "Reset",
+		description: "Resets the countdown timer.",
 	},
 }
 

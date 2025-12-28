@@ -1485,6 +1485,7 @@ body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
 		--height: var(--width);
 		width: 100%;
 		height: calc(var(--height) * 1px);
+		border-radius: 0;
 	}
 	.noUi-tooltip {
 		display: none;
@@ -1493,12 +1494,6 @@ body[data-guess*="Songs"] #answerDisplay .song[data-optional='true'] {
 	&.noUi-state-drag .noUi-active .noUi-tooltip {
 		display: block;
 	}
-
-	& {
-		border-radius: 0;
-	}
-
-
 
 	.noUi-handle {
 		border-radius: 0;
