@@ -198,7 +198,14 @@ async function loadGameData() {
         const songsData = await songsResponse.json();
 
         gameState.collection = collectionData;
-		gameState.collection.songs = collectionData.songs.map(song => ({ ...songsData[song.key], year: song.year || songsData[song.key].year, audioFile: `https://${collectionsUrl}/audio/${songsData[song.key].audioFile}` }));
+		gameState.collection.songs = Object.keys(collectionData.songs).map(key => ({ 
+			...songsData[key], 
+			year: collectionData.songs[key].year || songsData[key].year, 
+			sources: collectionData.songs[key].sources || songsData[key].sources, 
+			artists: collectionData.songs[key].artists || songsData[key].artists, 
+			title: collectionData.songs[key].title || songsData[key].title, 
+			audioFile: `https://${collectionsUrl}/audio/${songsData[key].audioFile}` 
+		}));
 
 		updateStart();
 
