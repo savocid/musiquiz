@@ -57,7 +57,7 @@ const MODES = {
 			cover:	{ total: 1, },
             expand: { total: 1, },
             year:	{ total: 1, }, 
-            skip:	{ total: 1, },
+            skip:	{ total: 0, },
 			time:	{ total: 1, },
         }
     },
