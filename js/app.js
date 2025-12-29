@@ -68,7 +68,7 @@ async function loadCollections(url) {
         });
 
 		allCollections.sort((a, b) => {
-			return b.songs.length - a.songs.length;
+			return Object.keys(b.songs).length - Object.keys(a.songs).length;
 		});
 
 
@@ -131,13 +131,15 @@ function displayCollections() {
 
 	const languages = Array.isArray(collection.language) ? collection.language.join('/') : (collection.language || '');
 
+	console.log(collection)
+
 	parts.push(`
-		<div class="collection-item" data-songs="${collection.songs.length}">
+		<div class="collection-item" data-songs="${Object.keys(collection.songs).length}">
 		<img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">
 		<div class="collection-info">
 			<h3>${collection.title}</h3>
 			<p>${collection.description || 'No description'}</p>
-			<p><strong>Difficulty:</strong> <span data-difficulty='${collection.difficulty}'>${collection.difficulty}</span> | <strong>Songs:</strong> ${collection.songs.length} | <strong>Language:</strong> ${languages}</p>
+			<p><strong>Difficulty:</strong> <span data-difficulty='${collection.difficulty}'>${collection.difficulty}</span> | <strong>Songs:</strong> ${Object.keys(collection.songs).length} | <strong>Language:</strong> ${languages}</p>
 		</div>
 		<button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
 		</div>

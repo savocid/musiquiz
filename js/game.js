@@ -199,11 +199,8 @@ async function loadGameData() {
 
         gameState.collection = collectionData;
 		gameState.collection.songs = Object.keys(collectionData.songs).map(key => ({ 
-			...songsData[key], 
-			year: collectionData.songs[key].year || songsData[key].year, 
-			sources: collectionData.songs[key].sources || songsData[key].sources, 
-			artists: collectionData.songs[key].artists || songsData[key].artists, 
-			title: collectionData.songs[key].title || songsData[key].title, 
+			...songsData[key],
+			...collectionData.songs[key],
 			audioFile: `https://${collectionsUrl}/audio/${songsData[key].audioFile}` 
 		}));
 
