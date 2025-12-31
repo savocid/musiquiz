@@ -49,23 +49,23 @@ const MODES = {
     },
     default: { 
 		title: "Default",
-        lives: Infinity, 
+        lives: 3, 
         clipDuration: 20, 
-        timeout: 60,
+        timeout: 0,
         lifelines: {
             reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand: { total: 1, },
             year:	{ total: 1, }, 
-            skip:	{ total: 0, },
-			time:	{ total: 1, },
+            skip:	{ total: 1, },
+			time:	{ total: 0, },
         }
     },
     intense: { 
 		title: "Intense",
         lives: 3, 
         clipDuration: 10, 
-        timeout: 20,
+        timeout: 30,
         lifelines: {
             reveal:	{ total: 1, },
 			cover:	{ total: 1, },
