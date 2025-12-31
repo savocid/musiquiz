@@ -131,8 +131,6 @@ function displayCollections() {
 
 	const languages = Array.isArray(collection.language) ? collection.language.join('/') : (collection.language || '');
 
-	console.log(collection)
-
 	parts.push(`
 		<div class="collection-item" data-songs="${Object.keys(collection.songs).length}">
 		<img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">

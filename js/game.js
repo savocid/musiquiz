@@ -596,7 +596,7 @@ function updateGame() {
 	document.querySelectorAll("#answerDisplay .source, #answerDisplay .artist, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
 
 	// Reset Reveal Lifeline
-	document.getElementById("answerDisplay").dataset.hint = false;
+	document.getElementById("answerDisplay").dataset.lifeline.reveal = false;
 }
 
 function updateRoundSlider() {
@@ -750,7 +750,7 @@ function updateContinue() {
 	document.getElementById("nextBtn").textContent = (gameState.currentSongIndex+1 >= gameState.shuffledSongs.length || gameState.settings.lives <= 0) ? "View Results" : "Next Song";
 
 	// Reset Reveal Lifeline
-	document.getElementById("answerDisplay").dataset.hint = false;
+	document.getElementById("answerDisplay").dataset.lifeline.reveal = false;
 
 	updateScore();
 }
@@ -1420,7 +1420,7 @@ function useLifeline(lifeline) {
 
 function revealLetters() {
 
-	document.getElementById("answerDisplay").dataset.hint = true;
+	document.getElementById("answerDisplay").dataset.lifeline.reveal = true;
 
 	let check = false;
 

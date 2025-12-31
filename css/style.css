@@ -1364,7 +1364,7 @@ body.loading {
 }
 
 
-body:not([data-state="2"]) #answerDisplay:not([data-hint='true']) {
+body:not([data-state="2"]) #answerDisplay:not([data-lifeline-reveal='true']) {
 	.source[data-reveal='true'] .false,
 	.artist[data-reveal='true'] .false,
 	.song[data-reveal='true'] .false,
@@ -1380,7 +1380,7 @@ body:not([data-state="2"]) #answerDisplay {
 	}
 }
 
-body[data-state="1"] #answerDisplay[data-hint='true'],
+body[data-state="1"] #answerDisplay[data-lifeline-reveal='true'],
 body[data-state="2"] #answerDisplay {
 	.source .false,
 	.artist .false,
@@ -1389,26 +1389,26 @@ body[data-state="2"] #answerDisplay {
 	}
 }
 
-#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span.hint {
+#answerDisplay[data-lifeline-reveal='true'] *:not([data-reveal='true']) > .true > span.hint {
     color: hsl(0, 0%, 30%);
 }
 
-#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint) {
+#answerDisplay[data-lifeline-reveal='true'] *:not([data-reveal='true']) > .true > span:not(.hint) {
 	font-size: 0;
 	user-select: none;
 }
 
-#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint)::after {
+#answerDisplay[data-lifeline-reveal='true'] *:not([data-reveal='true']) > .true > span:not(.hint)::after {
 	content: "_";
 	font-size: 1.5rem;
     padding: 0px 1px;
 }
 
-#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint).space::after {
+#answerDisplay[data-lifeline-reveal='true'] *:not([data-reveal='true']) > .true > span:not(.hint).space::after {
     content: " ";
 	padding: 0 .5rem;
 }
-#answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span.special::after {
+#answerDisplay[data-lifeline-reveal='true'] *:not([data-reveal='true']) > .true > span.special::after {
 	font-size:0;
 }
 
