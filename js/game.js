@@ -592,10 +592,10 @@ function updateGame() {
 	document.getElementById("nextBtn").className = "btn btn-success";
 	document.getElementById("nextBtn").textContent = "Next Song";
 
-	// Reset reveal
+	// Reset revealed
 	document.querySelectorAll("#answerDisplay .source, #answerDisplay .artist, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
 
-	// Reset Hint Lifeline
+	// Reset Reveal Lifeline
 	document.getElementById("answerDisplay").dataset.hint = false;
 }
 
@@ -749,7 +749,7 @@ function updateContinue() {
 	document.getElementById("nextBtn").className = (gameState.currentSongIndex+1 >= gameState.shuffledSongs.length || gameState.settings.lives <= 0) ? "btn btn-primary" : "btn btn-success";
 	document.getElementById("nextBtn").textContent = (gameState.currentSongIndex+1 >= gameState.shuffledSongs.length || gameState.settings.lives <= 0) ? "View Results" : "Next Song";
 
-	// Reset Hint Lifeline
+	// Reset Reveal Lifeline
 	document.getElementById("answerDisplay").dataset.hint = false;
 
 	updateScore();
@@ -1380,7 +1380,7 @@ function updateTimeoutColor(timeLeft, totalTime) {
 function useLifeline(lifeline) {
 
 	switch(lifeline) {
-		case "hint": {
+		case "reveal": {
 			if (!revealLetters()) return;
 			break;
 		}

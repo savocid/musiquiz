@@ -1,8 +1,8 @@
 
 const lifeLines = {
-	hint: {
+	reveal: {
 		symbol: "💡",
-		text: "Hint",
+		text: "Reveal",
 		description: "Reveals some letters.",
 	},
 	cover: {
@@ -39,7 +39,7 @@ const MODES = {
         clipDuration: 20, 
         timeout: 0,
         lifelines: {
-            hint:	{ total: Infinity, },
+            reveal:	{ total: Infinity, },
 			cover:	{ total: Infinity, },
             expand: { total: Infinity, },
             year:	{ total: Infinity, },
@@ -53,7 +53,7 @@ const MODES = {
         clipDuration: 20, 
         timeout: 60,
         lifelines: {
-            hint:	{ total: 1, },
+            reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand: { total: 1, },
             year:	{ total: 1, }, 
@@ -67,7 +67,7 @@ const MODES = {
         clipDuration: 10, 
         timeout: 20,
         lifelines: {
-            hint:	{ total: 1, },
+            reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand:	{ total: 1, },
             year:	{ total: 1, }, 
@@ -81,7 +81,7 @@ const MODES = {
         clipDuration: 10, 
         timeout: 0,
         lifelines: {
-            hint:	{ total: 1, },
+            reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand:	{ total: 1, },
             year:	{ total: 1, }, 

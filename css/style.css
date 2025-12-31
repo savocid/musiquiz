@@ -1406,7 +1406,7 @@ body[data-state="2"] #answerDisplay {
 
 #answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span:not(.hint).space::after {
     content: " ";
-	padding: 0 .25rem;
+	padding: 0 .5rem;
 }
 #answerDisplay[data-hint='true'] *:not([data-reveal='true']) > .true > span.special::after {
 	font-size:0;
