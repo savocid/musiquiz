@@ -92,11 +92,9 @@ const MODES = {
 };
 
 
-// Function to clean URL
 function cleanUrl(url) {
     return `${url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').replace(/\?.*$/,'').trim()}`;
 }
-
 
 (function() {
 	if (location.protocol === 'file:') {
