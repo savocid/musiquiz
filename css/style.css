@@ -1335,7 +1335,7 @@ body.loading {
 }
 
 .mediaBtn.play {
-    --size: 3;
+    --size: 4;
     width: calc(var(--size) * 1.5rem);
     height: calc(var(--size) * 1.5rem);
 }
@@ -1355,6 +1355,8 @@ body.loading {
     user-select: none;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 

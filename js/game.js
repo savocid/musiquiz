@@ -431,9 +431,11 @@ async function initAudio() {
 
 	audio.on('play', () => {
 		document.querySelector(".mediaBtn.play > span").textContent = "❙❙";
+		document.querySelector(".mediaBtn.play > span").style.removeProperty("transform");
 	});
 	audio.on('pause', () => {
-		document.querySelector(".mediaBtn.play > span").textContent = audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) ? "⟳" : "▶";
+		document.querySelector(".mediaBtn.play > span").textContent = audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) ? "🗘" : "▶";
+		document.querySelector(".mediaBtn.play > span").style.transform = audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) ? "rotate(90deg)" : "";
 	});
 
 	
