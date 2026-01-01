@@ -124,7 +124,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		}
 	});
 
-	document.getElementById('repeatBtn').addEventListener('click', repeatSong);
 	document.getElementById('continueBtn').addEventListener('click', () => {
 		if (!document.getElementById("continueBtn").classList.contains("btn-success")) {
 			gameState.settings.lives--
@@ -136,7 +135,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	document.getElementById('lifelineButtons').innerHTML = "";
 	Object.keys(lifeLines).forEach(key => {
-		document.getElementById('lifelineButtons').innerHTML += `<button class="btn btn-lifeline" data-lifeline="${key}" id="${key}Lifeline" title="${lifeLines[key].description}">${lifeLines[key].symbol} ${lifeLines[key].text} (<span id="${key}Count">0</span>)</button>`;
+		document.getElementById('lifelineButtons').innerHTML += `
+			<button class="btn btn-lifeline" data-lifeline="${key}" id="${key}Lifeline" title="${lifeLines[key].description}">
+				<span>
+					<span>${lifeLines[key].symbol}</span>
+				</span>
+				<span>
+					<span>${lifeLines[key].text}</span>
+					<span id="${key}Count">(0)</span>
+				</span>
+			</button>`;
 	});
 
   	// Lifeline event listeners
@@ -153,6 +161,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 	audio.on('timeupdate', updateProgress);
     audio.on('ready', updateProgress);
     audio.on('interaction', updateProgress);
+
+	// Media Buttons
+	document.querySelector('.mediaBtn.previous').addEventListener('click', () => { seekSong(-5); });
+	document.querySelector('.mediaBtn.next').addEventListener('click', () => { seekSong(5); });
+	document.querySelector('.mediaBtn.play').addEventListener('click', playSong);
 
     await loadGameData();
 });
@@ -417,10 +430,10 @@ async function initAudio() {
 	});
 
 	audio.on('play', () => {
-		document.getElementById("repeatBtn").hidden = audio.isPlaying();
+		document.querySelector(".mediaBtn.play > span").textContent = "❙❙";
 	});
 	audio.on('pause', () => {
-		document.getElementById("repeatBtn").hidden = audio.isPlaying();
+		document.querySelector(".mediaBtn.play > span").textContent = audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) ? "⟳" : "▶";
 	});
 
 	
@@ -520,23 +533,23 @@ function updateStart() {
 	document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty;
 	document.getElementById('collectionDifficulty').dataset.difficulty = gameState.collection.difficulty;
 
-	// Update Collection Cover
+	// Update Collection Image
 	const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
-	document.getElementById('startScreenCover').src = 
-		gameState.collection.covers && gameState.collection.covers.length > 0 ? `https://${collectionsUrl}/collections/${collectionId}/${randomCover.replace('./', '')}` : 
-		"";
-	document.getElementById('startScreenCover').title = 
-		gameState.collection.covers && gameState.collection.covers.length > 0 ? `${gameState.collection.title}` : 
-		"";
-
+	const collectionImgs = document.querySelectorAll(".collection-img");
+	collectionImgs.forEach(img => {
+		img.src = 
+			gameState.collection.covers && gameState.collection.covers.length > 0 ? `https://${collectionsUrl}/collections/${collectionId}/${randomCover.replace('./', '')}` : 
+			"";
+		img.title = 
+			gameState.collection.covers && gameState.collection.covers.length > 0 ? `${gameState.collection.title}` : 
+			"";
+	});
 
 	// Hearts
-    document.getElementById('livesPanel').hidden = gameState.settings.totalLives === Infinity;
-	document.getElementById('lives').innerHTML = 
+    document.querySelector('#game-info .lives').hidden = gameState.settings.totalLives === Infinity;
+	document.querySelector('#game-info .lives').innerHTML = 
 		gameState.settings.totalLives !== Infinity ? '<span class="heart">❤️</span>'.repeat(gameState.settings.totalLives) : 
 		"";
-
-	document.getElementById("repeatBtn").hidden = audio.isPlaying();
 
 	// Set lifeline defaults
 	Object.keys(lifeLines).forEach(key => {
@@ -556,15 +569,15 @@ function updateGame() {
 	document.getElementById("timerDisplay").hidden = gameState.settings.timeout <= 0;
 
 	// Score
-	document.getElementById('sourceLabel').textContent = gameState.collection.sourceName+"s" || "Sources";
+	document.querySelector('#game-info .sources .label').textContent = gameState.collection.sourceName+"s" || "Sources";
 
 	// Update Collection Label
 	document.getElementById('gameCollectionTitle').textContent = gameState.collection.title;
 	
 	// Hide unused score
-	document.querySelector('#scorePanel .sources').hidden = !gameState.collection.guess.includes("Sources");
-	document.querySelector('#scorePanel .artists').hidden = !gameState.collection.guess.includes("Artists");
-	document.querySelector('#scorePanel .songs').hidden = !gameState.collection.guess.includes("Songs");
+	document.querySelector('#game-info .sources').hidden = !gameState.collection.guess.includes("Sources");
+	document.querySelector('#game-info .artists').hidden = !gameState.collection.guess.includes("Artists");
+	document.querySelector('#game-info .songs').hidden = !gameState.collection.guess.includes("Songs");
 
 	// Update Continue Button
 	document.getElementById('continueBtn').className = "btn btn-secondary";
@@ -585,8 +598,8 @@ function updateGame() {
 	document.querySelector(".cover-container").dataset.reveal = false;
 
 	// Update Rounds
-    document.querySelector('#gameContent .currentRound').textContent = gameState.currentSongIndex + 1;
-    document.querySelector('#gameContent .totalRounds').textContent = gameState.shuffledSongs.length;
+    document.querySelector('#game-info .rounds .score').textContent = gameState.result.rounds+1;
+    document.querySelector('#game-info .rounds .total').textContent = gameState.rounds;
 
 	// Reset Next Button
 	document.getElementById("nextBtn").className = "btn btn-success";
@@ -692,7 +705,7 @@ function updateYearSlider() {
 	slider.noUiSlider.on('slide', () => {
 		setYearValue();
 		setRoundValue();
-		
+	
 		const roundSlider = document.getElementById("roundSlider");
 		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
 		const minRound = !maxRound ? maxRound : 1;
@@ -708,7 +721,6 @@ function updateYearSlider() {
 		setYearValue();
 		setRoundValue();
 	});
-
 
 	setYearValue();
 	setRoundValue();
@@ -733,7 +745,7 @@ function setYearValue() {
 
 function updateHearts() {
 
-	document.querySelectorAll('#livesPanel .heart').forEach((heart, index) => {
+	document.querySelectorAll('#game-info .lives .heart').forEach((heart, index) => {
 		const isVisible = index <= gameState.settings.lives;
 		heart.style.filter = isVisible ? '' : 'grayscale(1)';
 		heart.style.opacity = isVisible ? '' : '0.5';
@@ -751,53 +763,15 @@ function updateContinue() {
 
 	// Reset Reveal Lifeline
 	document.getElementById("answerDisplay").dataset.lifelineReveal = false;
-
-	updateScore();
 }
 
 function updateScore() {
-
-	gameState.revealed.sources = Object.keys(gameState.revealed.sources).length ? gameState.revealed.sources : sourcesRevealed();
-	gameState.revealed.artists = Object.keys(gameState.revealed.artists).length ? gameState.revealed.artists : artistsRevealed();
-	gameState.revealed.songs = Object.keys(gameState.revealed.songs).length ? gameState.revealed.songs : songsRevealed();
-
-	gameState.result.rounds = gameState.currentSongIndex + 1;
-
-	gameState.result.sources += 
-		gameState.revealed.sources.required.value +
-		gameState.revealed.sources.optional.value;
-
-	gameState.result.totalSources += 
-		gameState.revealed.sources.required.total +
-		gameState.revealed.sources.optional.total;
-
-	gameState.result.artists += 
-		gameState.revealed.artists.required.value +
-		gameState.revealed.artists.optional.value;
-
-	gameState.result.totalArtists += 
-		gameState.revealed.artists.required.total +
-		gameState.revealed.artists.optional.total;
-	
-	gameState.result.songs += 
-		gameState.revealed.songs.required.value +
-		gameState.revealed.songs.optional.value;
-
-	gameState.result.totalSongs += 
-		gameState.revealed.songs.required.total +
-		gameState.revealed.songs.optional.total;
-
-	gameState.result.score += 
-		(50*gameState.revealed.sources.required.value) +
-		(100*gameState.revealed.sources.optional.value) +
-		(50*gameState.revealed.artists.required.value) +
-		(100*gameState.revealed.artists.optional.value) +
-		(50*gameState.revealed.songs.required.value) +
-		(100*gameState.revealed.songs.optional.value);
-
-	document.getElementById('sourceScore').textContent = `${gameState.result.sources}`;
-	document.getElementById('artistScore').textContent = `${gameState.result.artists}`;
-    document.getElementById('songScore').textContent = `${gameState.result.songs}`;
+	document.querySelector('#game-info .sources .score').textContent = `${gameState.result.sources}`;
+	document.querySelector('#game-info .sources .total').textContent = `${gameState.result.totalSources}`;
+	document.querySelector('#game-info .artists .score').textContent = `${gameState.result.artists}`;
+	document.querySelector('#game-info .artists .total').textContent = `${gameState.result.totalArtists}`;
+    document.querySelector('#game-info .songs .score').textContent = `${gameState.result.songs}`;
+	document.querySelector('#game-info .songs .total').textContent = `${gameState.result.totalSongs}`;
 }
 
 function updateResult() {
@@ -807,15 +781,6 @@ function updateResult() {
     document.getElementById('resultDescription').textContent = gameState.collection.description || '';
     document.querySelector('#resultScreen .difficulty > *:last-child').textContent = gameState.collection.difficulty;
     document.querySelector('#resultScreen .difficulty > *:last-child').dataset.difficulty = gameState.collection.difficulty;
-
-	// Update Collection Cover
-	const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
-	document.getElementById('resultScreenCover').src = 
-		gameState.collection.covers && gameState.collection.covers.length > 0 ? `https://${collectionsUrl}/collections/${collectionId}/${randomCover.replace('./', '')}` : 
-		"";
-	document.getElementById('resultScreenCover').title = 
-		gameState.collection.covers && gameState.collection.covers.length > 0 ? `${gameState.collection.title}` : 
-		"";
 
 	// Update Mode Label
     document.querySelector('#resultScreen .mode > span').textContent = MODES[currentMode].title;
@@ -861,7 +826,7 @@ function updateLifelineButtons() {
 	Object.keys(gameState.lifelines).forEach(key => {
 		document.getElementById(`${key}Lifeline`).hidden = gameState.lifelines[key].total == 0;
 		document.getElementById(`${key}Lifeline`).disabled = gameState.lifelines[key].used || !gameState.lifelines[key].remaining;
-		document.getElementById(`${key}Count`).textContent = gameState.lifelines[key].remaining.toString().replace("Infinity","∞");
+		document.getElementById(`${key}Count`).textContent = `(${gameState.lifelines[key].remaining.toString().replace("Infinity","∞")})`;
 	});
 }
 
@@ -954,6 +919,26 @@ function updateAnswerDisplay() {
 
 	document.querySelector("#answerDisplay .year").textContent = ` (${gameState.currentSong.year})`;
 	document.querySelectorAll("#answerDisplay .source, #answerDisplay .artist, #answerDisplay .song, #answerDisplay .year").forEach((el, index) => { el.dataset.reveal = false; });
+
+	// Update Scores
+	const sources_revealed = sourcesRevealed();
+	const artists_revealed = artistsRevealed();
+	const songs_revealed = songsRevealed();
+
+	gameState.result.totalSources += 
+		sources_revealed.required.total +
+		sources_revealed.optional.total;
+
+	gameState.result.totalArtists += 
+		artists_revealed.required.total +
+		artists_revealed.optional.total;
+
+	gameState.result.totalSongs += 
+		songs_revealed.required.total +
+		songs_revealed.optional.total;
+
+	gameState.result.rounds = gameState.currentSongIndex;
+	updateScore();
 }
 
 function applyLoad() {
@@ -1013,6 +998,8 @@ function checkGuess() {
 			revealSong(true);
 		}
 	}
+
+	updateScore();
 	
 	const continueBtn = document.getElementById('continueBtn');	
 
@@ -1195,17 +1182,31 @@ function songsRevealed() {
 
 function revealSource(bool,i) {
 	const source = document.querySelector(`#answerDisplay .source[data-index='${i}']`)
-	source && (source.dataset.reveal = bool);
+	if (source) {
+		source.dataset.reveal = bool;
+		gameState.result.sources += 1;
+		gameState.result.score += source.dataset.optional ? 100 : 50;
+	}
 }
 
 function revealArtist(bool,i) {
 	const artist = document.querySelector(`#answerDisplay .artist[data-index='${i}']`)
-	artist && (artist.dataset.reveal = bool);
+
+	if (artist) {
+		artist.dataset.reveal = bool;
+		gameState.result.artists += 1;
+		gameState.result.score += artist.dataset.optional ? 100 : 50;
+	}
 }
 
 function revealSong(bool) {
 	const song = document.querySelector(`#answerDisplay .song`)
-	song && (song.dataset.reveal = bool);
+
+	if (song) {
+		song.dataset.reveal = bool;
+		gameState.result.songs += 1;
+		gameState.result.score += song.dataset.optional ? 100 : 50;
+	}
 }
 
 function calcStringSimilarity(str1, str2) {
@@ -1276,21 +1277,29 @@ function calcWordSimilarity(str1, str2) {
 // ************** //
 
 function playSong() {
-	audio.play();
-}
 
-function pauseSong() {
-	audio.pause();
+	if (audio.isPlaying()) {
+		audio.pause();	
+	}
+	else if (audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3)) {
+		audio.play(0);
+	}
+	else {
+		audio.play();
+	}
+
+}
+function seekSong(time) {
+
+	if (audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) && time > 0) return;
+
+	const currentTime = audio.getCurrentTime()-audio.options.startTime;
+	const seekTime = (currentTime+time);
+	audio.play(seekTime)
 }
 
 function stopSong() {
 	audio.stop();
-}
-
-function repeatSong() {
-	if (!audio || !gameState.currentSong) return;
-
-	audio.play(0);
 }
 
 function playFullSong() {

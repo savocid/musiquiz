@@ -14,13 +14,13 @@
 </head>
 <body class="preload" data-page="game" data-state="0">
     <div class="container">
-        <div class="controls-wrapper">
-            <!-- Header -->
-            <header>
-                <h1><a href="./">MusiQuiz</a></h1>
-				<h5 style="display: none;">An Excuse to Listen to Great Soundtracks</h5>
-            </header>
-        </div>
+
+		<!-- Header -->
+		<header>
+			<h1><a href="./">MusiQuiz</a></h1>
+			<h5 style="display: none;">An Excuse to Listen to Great Soundtracks</h5>
+		</header>
+
         
         <!-- Start Screen -->
         <div id="startScreen" style="text-align: center;">
@@ -29,9 +29,9 @@
             
             <!-- Game Setup Layout -->
             <div id="collectionOptions" style="display: flex; gap: 2rem; align-items: center; justify-content: center; margin: 1rem auto 2rem; max-width: 800px;">
-                <!-- Cover Image -->
+                <!-- Collection Image -->
                 <div style="flex-shrink: 0;">
-                    <img id="startScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
+                    <img class="collection-img" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
                 </div>
                 
                 <!-- Game Controls -->
@@ -64,59 +64,71 @@
         
         <!-- Game Content (hidden initially) -->
         <div id="gameContent" class="game-container">
-            <h2 id="gameCollectionTitle" style="color: var(--primary-color); text-align: center; margin-top: 2rem; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);"></h2>
+            <div style="padding-top: 1rem;">
+				<h3 id="gameCollectionTitle" style="color: var(--primary-color); text-align: center; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5); opacity: 0.8;"></h3>
+			</div>
+
             <!-- Game Info Header -->
-            <div class="game-info">
-                <div id="scorePanel">
-                    <div class="sources"><span id="sourceLabel">Sources</span>: <span id="sourceScore">0</span></div>
-					<div class="artists"><span id="artistLabel">Artists</span>: <span id="artistScore">0</span></div>
-                    <div class="songs">Songs: <span id="songScore">0</span></div>
-                </div>
-                <div id="livesPanel"><span id="lives"></span></div>
-                <div>Round: <span class="currentRound"></span> / <span class="totalRounds"></span></div>
+            <div id="game-info">
+				<div class="left">
+					<img class="collection-img" src="" alt="" style="max-width: 100%; max-height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0, 0, 0, 0.2);">
+				</div>
+				<div class="center">
+					<button class="mediaBtn previous"><span>5s</span><span>↺</span></button>
+					<button class="mediaBtn play"><span>▶</span></button>
+					<button class="mediaBtn next"><span>5s</span><span>↻</span></button>
+				</div>
+				<div class="right">
+					<div class="scores">
+						<div class="rounds" style="margin-bottom: 0.5rem;"><strong class="label">Round: </strong><span><span class="score">0</span><span class="seperator">/</span><span class="total">0</span></span></div>
+						<div class="sources"><strong class="label">Sources: </strong><span><span class="score">0</span><span class="seperator">/</span><span class="total">0</span></span></div>
+						<div class="artists"><strong class="label">Artists: </strong><span><span class="score">0</span><span class="seperator">/</span><span class="total">0</span></span></div>
+						<div class="songs"><strong class="label">Songs: </strong><span><span class="score">0</span><span class="seperator">/</span><span class="total">0</span></span></div>
+                	</div>
+					<div class="lives"></div>
+				</div>
             </div>
 
-  				<!-- Audio Player -->
-                <div class="audioPlayer-container">
-					<div id="progressBar"></div>
-					<div id="audioPlayer"></div>
-					<div id="progressTimer"></div>
-					<button class="btn-repeat" id="repeatBtn">🔄</button>
-                </div>
-    
-                <!-- Answer Display (hidden/revealed sources and song) -->
-                <div class="metadata-container">
+			<!-- Audio Player -->
+			<div class="audioPlayer-container">
+				<div id="progressBar"></div>
+				<div id="audioPlayer"></div>
+				<div id="progressTimer"></div>
+			</div>
 
-					<div class="cover-container">
-						<div class="cover-wrapper">
-							<img id="cover-img" alt="Album Image" src />
-							<span id="cover-alt">N/A</span>
-							<span class="cover-qmark">?</span>
-						</div>
+			<!-- Answer Display (hidden/revealed sources and song) -->
+			<div class="metadata-container">
+
+				<div class="cover-container">
+					<div class="cover-wrapper">
+						<img id="cover-img" alt="Album Image" src />
+						<span id="cover-alt">N/A</span>
+						<span class="cover-qmark">?</span>
 					</div>
+				</div>
 
 
-                    <div class="timerAnswer-container" style="color:transparent;">
-						<div class="timer-wrapper" id="timerDisplay">
-							<span id="timer">5</span>
-						</div>
-                
-						<div class="answer-wrapper" id="answerDisplay">
-							<span class="sources"></span>
-							<span class="seperator1"><br></span>
-							<span class="artists"></span>
-							<span class="seperator2"> - </span>
-							<span class="songs"></span>
-							<span class="seperator3"> </span>
-							<span class="year"></span>
-						</div>
-                    </div>
-                </div>
+				<div class="timerAnswer-container" style="color:transparent;">
+					<div class="timer-wrapper" id="timerDisplay">
+						<span id="timer">5</span>
+					</div>
+			
+					<div class="answer-wrapper" id="answerDisplay">
+						<span class="sources"></span>
+						<span class="seperator1"><br></span>
+						<span class="artists"></span>
+						<span class="seperator2"> - </span>
+						<span class="songs"></span>
+						<span class="seperator3"> </span>
+						<span class="year"></span>
+					</div>
+				</div>
+			</div>
 
-                <!-- Guess Input (always visible) -->
-                <div class="guess-input">
-                    <input type="text" id="guessInput" placeholder="Input guess..." autocomplete="off" style="outline:none;">
-                </div>
+			<!-- Guess Input (always visible) -->
+			<div class="guess-input">
+				<input type="text" id="guessInput" placeholder="Input guess..." autocomplete="off" style="outline:none;">
+			</div>
        
 
             <!-- Lifeline Buttons -->
@@ -144,9 +156,9 @@
 
             <!-- Image and Difficulty/Rounds Layout -->
             <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px;">
-                <!-- Cover Image -->
+                <!-- Collection Image -->
                 <div style="flex-shrink: 0;">
-                    <img id="resultScreenCover" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
+                    <img class="collection-img" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
                 </div>
 
                 <!-- Game Info / Result Details Grid -->
@@ -167,7 +179,7 @@
           
                 <div style="margin: 2rem auto;border: 2px solid rgb(221, 221, 221);border-left: none;border-right: none;">
                     <div id="resultHearts" style="padding-top: 1rem; display: block;">
-                        <div id="resultHeartsDisplay" style="font-size: 2rem;"><span>❤️</span><span>❤️</span><span>❤️</span></div>
+                        <div id="resultHeartsDisplay" style="font-size: 2rem;"></div>
                     </div>
                     <div id="resultLifelines" style="padding-top: 1rem;display: block;padding-bottom: 1.5rem;">
                         <div id="resultLifelinesDisplay" style="display: flex; gap: 1rem; justify-content: center; font-size: 1.5rem;">
