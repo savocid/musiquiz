@@ -93,7 +93,20 @@ const MODES = {
 
 
 function cleanUrl(url) {
-    return `${url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').replace(/\?.*$/,'').trim()}`;
+
+	try {
+		const decoded = decodeURIComponent(url);
+		url = decoded;
+	} catch (e) {
+	}
+
+	url = url.replace(/^https?:\/\//, '');
+	url = url.replace(/^www\./, '');
+	url = url.replace(/\/$/, '');
+	url = url.replace(/\?.*$/,'');
+	url = url.trim();
+
+    return url;
 }
 
 (function() {
