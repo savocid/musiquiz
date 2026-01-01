@@ -3,32 +3,32 @@ const lifeLines = {
 	reveal: {
 		symbol: "💡",
 		text: "Reveal",
-		description: "Reveals some letters.",
+		description: "Reveal some letters.",
 	},
 	cover: {
 		symbol: "🖼️",
 		text: "Cover",
-		description: "Reveals the Cover Image.",
+		description: "Display the Cover Image.",
 	},
 	year: {
 		symbol: "📅",
 		text: "Year",
-		description: "Shows the release year of the song.",
+		description: "Show the release year of the song.",
 	},
 	expand: {
 		symbol: "↔️",
 		text: "Expand",
-		description: "Expands the song to its full duration.",
+		description: "Expand the song to its full duration.",
 	},
 	skip: {
 		symbol: "⏭️",
 		text: "Skip",
-		description: "Skips the current song.",
+		description: "Skip the current song.",
 	},
 	time: {
 		symbol: "⏱️",
 		text: "Reset",
-		description: "Resets the countdown timer.",
+		description: "Reset the countdown timer.",
 	},
 }
 
