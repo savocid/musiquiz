@@ -434,8 +434,8 @@ async function initAudio() {
 		document.querySelector(".mediaBtn.play > span").style.removeProperty("transform");
 	});
 	audio.on('pause', () => {
-		document.querySelector(".mediaBtn.play > span").textContent = audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) ? "🗘" : "▶";
-		document.querySelector(".mediaBtn.play > span").style.transform = audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) ? "rotate(90deg)" : "";
+		document.querySelector(".mediaBtn.play > span").textContent = audio.getCurrentTime().toFixed(1) == audio.options.endTime.toFixed(1) ? "🗘" : "▶";
+		document.querySelector(".mediaBtn.play > span").style.transform = audio.getCurrentTime().toFixed(1) == audio.options.endTime.toFixed(1) ? "rotate(90deg)" : "";
 	});
 
 	
@@ -461,7 +461,7 @@ async function startRound() {
 function continueRound() {
 	updateState(STATE.next);
 
-	playFullSong();
+	fullSong();
 	stopTimeout();
 
 	updateContinue();
@@ -1283,7 +1283,7 @@ function playSong() {
 	if (audio.isPlaying()) {
 		audio.pause();	
 	}
-	else if (audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3)) {
+	else if (audio.getCurrentTime().toFixed(1) == audio.options.endTime.toFixed(1)) {
 		audio.play(0);
 	}
 	else {
@@ -1293,7 +1293,7 @@ function playSong() {
 }
 function seekSong(time) {
 
-	if (audio.getCurrentTime().toFixed(3) == audio.options.endTime.toFixed(3) && time > 0) return;
+	if (audio.getCurrentTime().toFixed(1) == audio.options.endTime.toFixed(1) && time > 0) return;
 
 	const currentTime = audio.getCurrentTime()-audio.options.startTime;
 	const seekTime = (currentTime+time);
@@ -1304,7 +1304,7 @@ function stopSong() {
 	audio.stop();
 }
 
-function playFullSong() {
+function fullSong() {
 
 	gameState.currentSong.startTime = 0;
 	gameState.currentSong.endTime = gameState.currentSong.duration;
@@ -1404,7 +1404,7 @@ function useLifeline(lifeline) {
 			break;
 		}
 		case "expand": {
-			playFullSong();
+			fullSong();
 			break;
 		}
 		case "skip": {
