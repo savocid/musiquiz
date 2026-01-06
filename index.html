@@ -22,14 +22,12 @@
         <!-- Collection Selection -->
         <div id="collectionSelection" class="collections-list">
             <!-- Collections Data URL Input -->
-            <div style="margin-bottom:1rem; text-align: center;">
-                <input type="text" id="collectionsUrlInputMain" placeholder="Collections data URL" style="width:350px;max-width:90%;padding:0.5rem;font-size:1rem;margin:0;outline:none;" autocomplete="off">
-                <button id="collectionsUrlSubmit" style="padding:0.5rem 1.5rem;font-size:1rem;">Set</button>
+            <div class="collection-input-wrapper">
+                <input type="text" id="collectionsUrlInputMain" placeholder="Collections data URL" autocomplete="off">
+                <button id="collectionsUrlSubmit">Set</button>
             </div>
-            <h2>Collections</h2>
-
             <div id="collectionsList"></div>
-            <button id="loadMoreBtn" class="btn btn-primary" onclick="loadMore()" style="margin: 1.5rem auto;">Load More</button>
+            <button id="loadMoreBtn" class="btn btn-primary" onclick="loadMore()">Load More</button>
         </div>
     </div>
 

@@ -131,13 +131,21 @@ function displayCollections() {
 
 	const languages = Array.isArray(collection.language) ? collection.language.join('/') : (collection.language || '');
 
+	const difficulties = Object.keys(collection.songs)
+	const totalSongs = Object.values(collection.songs || {}).reduce((sum, bucket) => sum + Object.keys(bucket || {}).length, 0);
+
 	parts.push(`
-		<div class="collection-item" data-songs="${Object.keys(collection.songs).length}">
+		<div class="collection-item" data-songs="${totalSongs}">
 		<img src="${coverSrc}" title="${coverTitle}" class="collection-cover" loading="lazy">
 		<div class="collection-info">
 			<h3>${collection.title}</h3>
 			<p>${collection.description || 'No description'}</p>
-			<p><strong>Difficulty:</strong> <span data-difficulty='${collection.difficulty}'>${collection.difficulty}</span> | <strong>Songs:</strong> ${Object.keys(collection.songs).length} | <strong>Language:</strong> ${languages}</p>
+			<p>
+				<strong>Difficulty:</strong>
+				${difficulties.map(d => `<span data-difficulty="${d}">${d}</span>`).join('/')} |
+				<strong>Songs:</strong> ${totalSongs} | 
+				<strong>Language:</strong> ${languages}
+			</p>
 		</div>
 		<button class="btn btn-success" onclick="startGame('${collection.id}')">Start Game</button>
 		</div>

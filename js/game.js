@@ -242,7 +242,11 @@ async function startGame() {
 	updateState(STATE.init);
 
     const numRounds = parseInt(gameState.rounds);
-    const shuffled = [...gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear)].sort(() => Math.random() - 0.5);
+    const shuffled = [...gameState.collection.songs
+		.filter(song => (gameState.difficulty ? gameState.difficulty[song.difficulty] : true))
+		.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear)
+	].sort(() => Math.random() - 0.5);
+
     gameState.shuffledSongs = shuffled.slice(0, numRounds);
 
 	if (gameState.currentSongIndex >= gameState.shuffledSongs.length) {
@@ -537,13 +541,13 @@ function updateStart() {
 	document.getElementById('collectionTitle').textContent = gameState.collection.title;
 	document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
 
-	document.querySelector('.collection-difficulties').innerHTML = "";
+	document.querySelector('#startScreen .collection-difficulties').innerHTML = "";
 
 	gameState.difficulty && (Object.keys(gameState.difficulty).forEach(d => {
 		const lsDifficulty = localStorage.getItem(`${collectionsUrl}-${collectionId}-${d}-difficulty`);
 		const checked = lsDifficulty !== null ? lsDifficulty == 'true' : gameState.difficulty ? gameState.difficulty[d] : false;
 		dLower = d.toLowerCase();
-		document.querySelector('.collection-difficulties').innerHTML += `
+		document.querySelector('#startScreen .collection-difficulties').innerHTML += `
 			<label for='startPage-difficulty-${dLower}' data-difficulty="${d}">
 				<input type='checkbox' id='startPage-difficulty-${dLower}' name='startPage-difficulty-${dLower}' ${checked ? 'checked' : ''}/>
 				<span>${d}</span>
@@ -551,9 +555,9 @@ function updateStart() {
 	}));
 
 	// Prevent 0 Difficulty Buttons
-	document.querySelectorAll('.collection-difficulties input').forEach(input => {
+	document.querySelectorAll('#startScreen .collection-difficulties input').forEach(input => {
 		input.addEventListener('click', (e) => {
-			const checkedCount = [...document.querySelectorAll('.collection-difficulties input[type="checkbox"]')].filter(cb => cb.checked).length;
+			const checkedCount = [...document.querySelectorAll('#startScreen .collection-difficulties input[type="checkbox"]')].filter(cb => cb.checked).length;
 			console.log(checkedCount)
 			if (checkedCount == 0) {
 				e.preventDefault();
@@ -590,6 +594,7 @@ function updateStart() {
 
 	document.body.dataset.guess = gameState.collection.guess.join(",");
 
+	updateDifficulty();
 	updateYearSlider();
 	updateRoundSlider();
 }
@@ -649,7 +654,9 @@ function updateRoundSlider() {
 	const slider = document.getElementById("roundSlider");
 	if (slider.noUiSlider) slider.noUiSlider.destroy();
 
-	const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
+	const maxRound = gameState.collection.songs
+		.filter(song => (gameState.difficulty ? gameState.difficulty[song.difficulty] : true))
+		.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
 	const minRound = !maxRound ? maxRound : 1;
 
 	const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
@@ -710,7 +717,9 @@ function updateYearSlider() {
 	const slider = document.getElementById("yearSlider");
 	if (slider.noUiSlider) slider.noUiSlider.destroy();
 
-	const years = gameState.collection.songs.map(item => (item.year || 0))
+	const years = gameState.collection.songs
+		.filter(song => (gameState.difficulty ? gameState.difficulty[song.difficulty] : true))
+		.map(item => (item.year || 0));
 	const minYear = Math.min(...years);
 	const maxYear = Math.max(...years);
 
@@ -777,14 +786,16 @@ function setYearValue() {
 
 function updateDifficulty() {
 
-	const labels = document.querySelectorAll(".collection-difficulties label");
+	const labels = document.querySelectorAll("#startScreen .collection-difficulties label");
 	labels.forEach(label => {
 		if (label.dataset.difficulty) {
 			localStorage.setItem(`${collectionsUrl}-${collectionId}-${label.dataset.difficulty}-difficulty`, label.querySelector(":scope input").checked);
 			gameState.difficulty[label.dataset.difficulty] = label.querySelector(":scope input").checked;
 		}
 	});
-	
+
+	updateYearSlider();
+	updateRoundSlider();
 }
 
 function updateHearts() {
@@ -823,8 +834,13 @@ function updateResult() {
     // Update collection info
     document.getElementById('resultCollection').textContent = gameState.collection.title;
     document.getElementById('resultDescription').textContent = gameState.collection.description || '';
-    document.querySelector('#resultScreen .difficulty > *:last-child').textContent = gameState.collection.difficulty;
-    document.querySelector('#resultScreen .difficulty > *:last-child').dataset.difficulty = gameState.collection.difficulty;
+
+	// Update Difficulty
+	document.querySelector('#resultScreen .collection-difficulties').innerHTML = "";
+	gameState.difficulty && (Object.keys(gameState.difficulty).forEach(d => {
+		document.querySelector('#resultScreen .collection-difficulties').innerHTML += `
+			<span data-difficulty="${d}" class="${gameState.difficulty && gameState.difficulty[d] ? 'active' : ''}">${d}</span>`
+	}));
 
 	// Update Mode Label
     document.querySelector('#resultScreen .mode > span').textContent = MODES[currentMode].title;
