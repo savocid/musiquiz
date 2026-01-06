@@ -210,6 +210,7 @@ async function loadGameData() {
         }
         const songsData = await songsResponse.json();
 
+		gameState.difficulty = Object.fromEntries(Object.keys(collectionData.songs).map(k => [k, true]));
         gameState.collection = collectionData;
 		gameState.collection.songs = Object.entries(collectionData.songs).flatMap(([difficulty, songs]) => 
 			Object.keys(songs).map(key => ({ 
@@ -219,8 +220,6 @@ async function loadGameData() {
 				audioFile: `https://${collectionsUrl}/audio/${songsData[key].audioFile}` 
 			}))
 		);
-
-		gameState.difficulty = Object.entries(collectionData.songs);
 
 		updateStart();
 
@@ -541,8 +540,29 @@ function updateStart() {
 	document.querySelector('.collection-difficulties').innerHTML = "";
 
 	gameState.difficulty && (Object.keys(gameState.difficulty).forEach(d => {
-		document.querySelector('.collection-difficulties').innerHTML += `<label for='startPage-difficulty-${d}'><input type='checkbox' id='startPage-difficulty-${d}' name='startPage-difficulty-${d}' oninput='handleDifficultyInput()' /></label>`
+		const lsDifficulty = localStorage.getItem(`${collectionsUrl}-${collectionId}-${d}-difficulty`);
+		const checked = lsDifficulty !== null ? lsDifficulty == 'true' : gameState.difficulty ? gameState.difficulty[d] : false;
+		dLower = d.toLowerCase();
+		document.querySelector('.collection-difficulties').innerHTML += `
+			<label for='startPage-difficulty-${dLower}' data-difficulty="${d}">
+				<input type='checkbox' id='startPage-difficulty-${dLower}' name='startPage-difficulty-${dLower}' ${checked ? 'checked' : ''}/>
+				<span>${d}</span>
+			</label>`
 	}));
+
+	// Prevent 0 Difficulty Buttons
+	document.querySelectorAll('.collection-difficulties input').forEach(input => {
+		input.addEventListener('click', (e) => {
+			const checkedCount = [...document.querySelectorAll('.collection-difficulties input[type="checkbox"]')].filter(cb => cb.checked).length;
+			console.log(checkedCount)
+			if (checkedCount == 0) {
+				e.preventDefault();
+			}
+			else {
+				updateDifficulty();
+			}
+		});
+	});
 	
 
 	// Update Collection Image
@@ -753,6 +773,18 @@ function setYearValue() {
 
 	gameState.minYear = minYear;
 	gameState.maxYear = maxYear;
+}
+
+function updateDifficulty() {
+
+	const labels = document.querySelectorAll(".collection-difficulties label");
+	labels.forEach(label => {
+		if (label.dataset.difficulty) {
+			localStorage.setItem(`${collectionsUrl}-${collectionId}-${label.dataset.difficulty}-difficulty`, label.querySelector(":scope input").checked);
+			gameState.difficulty[label.dataset.difficulty] = label.querySelector(":scope input").checked;
+		}
+	});
+	
 }
 
 function updateHearts() {

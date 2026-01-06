@@ -1176,6 +1176,7 @@ body.loading {
 
 /* Difficulty colors */
 
+.collection-difficulties,
 #collectionsList,
 #startScreen,
 #resultScreen {
@@ -1215,6 +1216,21 @@ body.loading {
 #resultScreen .songs[hidden] {
 	display: none;
 }
+.collection-difficulties input {
+	display: none;
+}
+.collection-difficulties label:not(:has(input:checked)) {
+	opacity: 0.5;
+}
+
+.collection-difficulties label {
+	user-select: none;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	font-weight:bold;
+	cursor:pointer;
+}
+
 
 /* Song List */
 .song-list {
