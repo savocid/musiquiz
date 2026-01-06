@@ -211,11 +211,16 @@ async function loadGameData() {
         const songsData = await songsResponse.json();
 
         gameState.collection = collectionData;
-		gameState.collection.songs = Object.keys(collectionData.songs).map(key => ({ 
-			...songsData[key],
-			...collectionData.songs[key],
-			audioFile: `https://${collectionsUrl}/audio/${songsData[key].audioFile}` 
-		}));
+		gameState.collection.songs = Object.entries(collectionData.songs).flatMap(([difficulty, songs]) => 
+			Object.keys(songs).map(key => ({ 
+				...songsData[key], 
+				...songs[key], 
+				difficulty, 
+				audioFile: `https://${collectionsUrl}/audio/${songsData[key].audioFile}` 
+			}))
+		);
+
+		gameState.difficulty = Object.entries(collectionData.songs);
 
 		updateStart();
 
@@ -532,8 +537,13 @@ function updateStart() {
 	// Populate start screen
 	document.getElementById('collectionTitle').textContent = gameState.collection.title;
 	document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
-	document.getElementById('collectionDifficulty').textContent = gameState.collection.difficulty;
-	document.getElementById('collectionDifficulty').dataset.difficulty = gameState.collection.difficulty;
+
+	document.querySelector('.collection-difficulties').innerHTML = "";
+
+	gameState.difficulty && (Object.keys(gameState.difficulty).forEach(d => {
+		document.querySelector('.collection-difficulties').innerHTML += `<label for='startPage-difficulty-${d}'><input type='checkbox' id='startPage-difficulty-${d}' name='startPage-difficulty-${d}' oninput='handleDifficultyInput()' /></label>`
+	}));
+	
 
 	// Update Collection Image
 	const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
@@ -1333,7 +1343,6 @@ function startTimeout(timeOut = gameState.settings.timeout) {
 
     const timerElement = document.getElementById('timer');
     timerElement.textContent = timeLeft;
-
 
     updateTimeoutColor(timeLeft, timeOut);
 

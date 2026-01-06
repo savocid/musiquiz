@@ -405,7 +405,7 @@ header h5 {
 }
 
 /* Footer */
-.site-footer {
+footer {
   position: relative;
   margin: 1rem auto;
   width: fit-content;
@@ -417,7 +417,7 @@ header h5 {
   z-index: 10;
 }
 
-.site-footer a {
+footer a {
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 600;
@@ -425,12 +425,12 @@ header h5 {
     text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
 }
 
-.site-footer a:hover {
+footer a:hover {
     color: var(--primary-dark);
     text-decoration: underline;
 }
 
-.site-footer span {
+footer span {
     color: #999;
     margin: 0 0.5rem;
 }
@@ -689,7 +689,7 @@ body.loading {
 }
 
 #resultScreen *:has(> * > #resultDifficulty),
-#startScreen *:has(> * > #collectionDifficulty),
+#startScreen *:has(> * > .collection-difficulties),
 #resultScreen *:has(> #resultScreenCover):has(img:not([src=''])),
 #startScreen *:has(> #startScreenCover):has(img:not([src=''])) {
 	width: 50%;
@@ -1715,4 +1715,7 @@ body:not([data-state="1"]):not([data-state="2"]) {
 		display: none !important;
 	}
 }
+
+
+
 
