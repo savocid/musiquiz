@@ -60,7 +60,8 @@ const params = new URLSearchParams(window.location.search);
 let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || null; 
 let collectionId = localStorage.getItem('collection') || params.get('collection') || null;
 let lsMode = localStorage.getItem('selectedMode');
-let currentMode = lsMode && MODES[lsMode] ? lsMode : params.get('mode') ? params.get('mode') : 'basic'; 
+let pMode = params.get('mode');
+let currentMode = lsMode && MODES[lsMode] ? lsMode : pMode && MODES[pMode] ? pMode : 'basic'; 
 collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
 
 
