@@ -37,7 +37,7 @@
                 <div  style="flex: 1; text-align: left;">
 				
 					<div class="difficulty-wrapper">
-						<strong>Difficulty:</strong><div class="collection-difficulties"></div>
+						<div class="collection-difficulties"></div>
 					</div>
 					<div class="year-wrapper">
 						<strong>Year:</strong><span id="yearValue"></span>
@@ -154,15 +154,15 @@
             <p id="resultDescription" style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; text-align: center;">Example description.</p>
 
             <!-- Image and Difficulty/Rounds Layout -->
-            <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px;">
+            <div style="display: flex; gap: 2rem; align-items: center; justify-content: flex-start; margin: 1rem auto; max-width: 800px; flex-wrap: nowrap;">
                 <!-- Collection Image -->
-                <div style="flex-shrink: 0;">
+                <div style="width: 100%;">
                     <img class="collection-img" src="" alt="" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(0,0,0,0.2);">
                 </div>
 
                 <!-- Game Info / Result Details Grid -->
-                <div style="display: inline-block; width: 100%;">
-					<span class="difficulty"><strong>Difficulty:</strong><div class="collection-difficulties"></div></span>
+                <div style="width: 100%;">
+					<span class="difficulty"><strong style="margin: auto 0;">Difficulty:</strong><div class="collection-difficulties"></div></span>
 					<span class="mode"><strong>Mode:</strong><span style="color: var(--primary-color); font-weight: bold;"></span></span>
 					<span class="rounds"><strong>Rounds:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>
 					<span class="sources"><strong>Sources:</strong><span style="color: var(--primary-color); font-weight: bold;"><span></span>/<span></span></span></span>

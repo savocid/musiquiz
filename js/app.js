@@ -68,7 +68,9 @@ async function loadCollections(url) {
         });
 
 		allCollections.sort((a, b) => {
-			return Object.keys(b.songs).length - Object.keys(a.songs).length;
+			const aLength = Object.values(a.songs || {}).reduce((sum, bucket) => sum + Object.keys(bucket || {}).length, 0);
+			const bLength = Object.values(b.songs || {}).reduce((sum, bucket) => sum + Object.keys(bucket || {}).length, 0);
+			return bLength - aLength;
 		});
 
 

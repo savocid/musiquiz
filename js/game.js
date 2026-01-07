@@ -435,6 +435,7 @@ async function initAudio() {
 
 		removeLoad();
 		startRound();
+		document.querySelector("#gameContent").scrollIntoView({ behavior: "smooth", });
 	});
 
 	audio.on('play', () => {
@@ -541,34 +542,6 @@ function updateStart() {
 	document.getElementById('collectionTitle').textContent = gameState.collection.title;
 	document.getElementById('collectionDescription').textContent = gameState.collection.description || '';
 
-	document.querySelector('#startScreen .collection-difficulties').innerHTML = "";
-
-	gameState.difficulty && (Object.keys(gameState.difficulty).forEach(d => {
-		const lsDifficulty = localStorage.getItem(`${collectionsUrl}-${collectionId}-${d}-difficulty`);
-		const checked = lsDifficulty !== null ? lsDifficulty == 'true' : gameState.difficulty ? gameState.difficulty[d] : false;
-		dLower = d.toLowerCase();
-		document.querySelector('#startScreen .collection-difficulties').innerHTML += `
-			<label for='startPage-difficulty-${dLower}' data-difficulty="${d}">
-				<input type='checkbox' id='startPage-difficulty-${dLower}' name='startPage-difficulty-${dLower}' ${checked ? 'checked' : ''}/>
-				<span>${d}</span>
-			</label>`
-	}));
-
-	// Prevent 0 Difficulty Buttons
-	document.querySelectorAll('#startScreen .collection-difficulties input').forEach(input => {
-		input.addEventListener('click', (e) => {
-			const checkedCount = [...document.querySelectorAll('#startScreen .collection-difficulties input[type="checkbox"]')].filter(cb => cb.checked).length;
-			console.log(checkedCount)
-			if (checkedCount == 0) {
-				e.preventDefault();
-			}
-			else {
-				updateDifficulty();
-			}
-		});
-	});
-	
-
 	// Update Collection Image
 	const randomCover = gameState.collection.covers[Math.floor(Math.random() * gameState.collection.covers.length)];
 	const collectionImgs = document.querySelectorAll(".collection-img");
@@ -594,9 +567,9 @@ function updateStart() {
 
 	document.body.dataset.guess = gameState.collection.guess.join(",");
 
-	updateDifficulty();
-	updateYearSlider();
-	updateRoundSlider();
+	initDifficulty();
+	initYearSlider();
+	initRoundSlider();
 }
 
 
@@ -649,7 +622,7 @@ function updateGame() {
 	document.getElementById("answerDisplay").dataset.lifelineReveal = false;
 }
 
-function updateRoundSlider() {
+function initRoundSlider() {
 
 	const slider = document.getElementById("roundSlider");
 	if (slider.noUiSlider) slider.noUiSlider.destroy();
@@ -659,7 +632,7 @@ function updateRoundSlider() {
 		.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
 	const minRound = !maxRound ? maxRound : 1;
 
-	const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
+	const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-round`)
 	const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
 
 	noUiSlider.create(slider, {
@@ -677,29 +650,40 @@ function updateRoundSlider() {
     });
 
 	slider.noUiSlider.on('slide', () => {
+		setDifficultyValue();
 		setRoundValue();
 
-		const roundSlider = document.getElementById("roundSlider");
-		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
-		const minRound = !maxRound ? maxRound : 1;
-
-		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
-		const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
-
-		roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
-		roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
+		updateRoundSlider();
 	});
 
 	slider.noUiSlider.on('update', () => {
+		setDifficultyValue();
 		setRoundValue();
 	});
 
+	setDifficultyValue();
 	setRoundValue();
+}
+
+function updateRoundSlider() {
+	const roundSlider = document.getElementById("roundSlider");
+	const maxRound = gameState.collection.songs
+		.filter(song => (gameState.difficulty ? gameState.difficulty[song.difficulty] : true))
+		.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
+	const minRound = !maxRound ? maxRound : 1;
+
+	const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-round`)
+	const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
+
+	roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
+	roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
 }
 
 function setRoundValue() {
 	const roundSlider = document.getElementById("roundSlider");
 	const value = roundSlider && roundSlider.noUiSlider ? roundSlider.noUiSlider.get() : null;
+
+	document.getElementById("startGameBtn").className = value && value > 0 ? "btn btn-success" : "btn btn-fail";
 
 	if (!value || value == null) return;
 
@@ -708,17 +692,16 @@ function setRoundValue() {
 
 	document.getElementById("roundValue").textContent = `${valRound}/${maxRound}`;
 
-	localStorage.setItem(`${collectionsUrl}-${collectionId}-rounds`, valRound);
+	localStorage.setItem(`${collectionsUrl}-${collectionId}-round`, valRound);
 	gameState.rounds = valRound;
 }
 
-function updateYearSlider() {
+function initYearSlider() {
 
 	const slider = document.getElementById("yearSlider");
 	if (slider.noUiSlider) slider.noUiSlider.destroy();
 
 	const years = gameState.collection.songs
-		.filter(song => (gameState.difficulty ? gameState.difficulty[song.difficulty] : true))
 		.map(item => (item.year || 0));
 	const minYear = Math.min(...years);
 	const maxYear = Math.max(...years);
@@ -744,27 +727,26 @@ function updateYearSlider() {
     });
 
 	slider.noUiSlider.on('slide', () => {
+		setDifficultyValue();
 		setYearValue();
 		setRoundValue();
 	
-		const roundSlider = document.getElementById("roundSlider");
-		const maxRound = gameState.collection.songs.filter(song => song.year >= gameState.minYear && song.year <= gameState.maxYear).length;
-		const minRound = !maxRound ? maxRound : 1;
-
-		const storedVal = localStorage.getItem(`${collectionsUrl}-${collectionId}-rounds`)
-		const valRound = storedVal && storedVal <= maxRound ? storedVal : maxRound >= 10 ? 10 : Math.ceil(maxRound * 0.5)
-
-		roundSlider.noUiSlider.updateOptions({ range: { min: minRound, max: maxRound } });
-		roundSlider.noUiSlider.updateOptions({ value: valRound >= minRound && valRound <= maxRound ? valRound : minRound });
+		updateRoundSlider();
 	});
 
 	slider.noUiSlider.on('update', () => {
+		setDifficultyValue();
 		setYearValue();
 		setRoundValue();
 	});
 
+	setDifficultyValue();
 	setYearValue();
 	setRoundValue();
+}
+
+function updateYearSlider() {
+	
 }
 
 function setYearValue() {
@@ -784,8 +766,35 @@ function setYearValue() {
 	gameState.maxYear = maxYear;
 }
 
-function updateDifficulty() {
+function initDifficulty() {
 
+	document.querySelector('#startScreen .collection-difficulties').innerHTML = "";
+
+	gameState.difficulty && (Object.keys(gameState.difficulty).forEach(d => {
+		const lsDifficulty = localStorage.getItem(`${collectionsUrl}-${collectionId}-${d}-difficulty`);
+		const checked = lsDifficulty !== null ? lsDifficulty == 'true' : gameState.difficulty ? gameState.difficulty[d] : false;
+		dLower = d.toLowerCase();
+		document.querySelector('#startScreen .collection-difficulties').innerHTML += `
+			<label for='startPage-difficulty-${dLower}' data-difficulty="${d}">
+				<input type='checkbox' id='startPage-difficulty-${dLower}' name='startPage-difficulty-${dLower}' ${checked ? 'checked' : ''}/>
+				<span>${d}</span>
+			</label>`
+	}));
+
+	const inputs = document.querySelectorAll('#startScreen .collection-difficulties input');
+	inputs.forEach(input => input.addEventListener('change', (e) => {
+		const checkedCount = [...inputs].filter(cb => cb.checked).length;
+		if (checkedCount === 0) { e.target.checked = true; return; }
+		setDifficultyValue();
+		updateRoundSlider();
+	}));
+
+	setDifficultyValue();
+	setYearValue();
+	setRoundValue();
+}
+
+function setDifficultyValue(e) {
 	const labels = document.querySelectorAll("#startScreen .collection-difficulties label");
 	labels.forEach(label => {
 		if (label.dataset.difficulty) {
@@ -793,9 +802,6 @@ function updateDifficulty() {
 			gameState.difficulty[label.dataset.difficulty] = label.querySelector(":scope input").checked;
 		}
 	});
-
-	updateYearSlider();
-	updateRoundSlider();
 }
 
 function updateHearts() {
@@ -1027,7 +1033,7 @@ function checkGuess() {
 
 		for (let s = 1; s < sources[i].length; s++) {
 
-			if (compareGuess(sources[i][s], inputValue)) {
+			if (compareGuess(sources[i][s], inputValue, el)) {
 				correct = true;
 				revealSource(true,i);
 			}
@@ -1041,7 +1047,7 @@ function checkGuess() {
 
 		for (let s = 1; s < artists[i].length; s++) {
 
-			if (compareGuess(artists[i][s], inputValue)) {
+			if (compareGuess(artists[i][s], inputValue, el)) {
 				correct = true;
 				revealArtist(true,i);
 			}
@@ -1053,7 +1059,7 @@ function checkGuess() {
 		const el = document.querySelector(`#answerDisplay .song`)
 		if (!el || el.dataset.reveal == "true") continue;
 
-		if (compareGuess(song[s], inputValue) ) {
+		if (compareGuess(song[s], inputValue, el) ) {
 			correct = true;
 			revealSong(true);
 		}
@@ -1160,31 +1166,37 @@ function checkGuess() {
 	}
 }
 
-function compareGuess(val1,val2) {
+function compareGuess(correct,guess,el) {
 
-	val1 = val1.toLowerCase();
-	val2 = val2.toLowerCase();
+	correct = correct.toLowerCase();
+	guess = guess.toLowerCase();
 
-	const normalizedVal1 = normalize_str(val1);
-	const normalizedVal2 = normalize_str(val2);
+	const revealLifeline = document.querySelector(".answer-wrapper").dataset.lifelineReveal && document.querySelector(".answer-wrapper").dataset.lifelineReveal == "true";
 
-	const stringSimilarityPlain = calcStringSimilarity(val1, val2);
-	const stringSimilarityNormalized = calcStringSimilarity(normalizedVal1, normalizedVal2);
+	const normalizedCorrect = normalize_str(correct);
+	const normalizedGuess = normalize_str(guess);
 
-	const wordSimilarityPlain = calcWordSimilarity(val1, val2);
-	const wordSimilarityNormalized = calcWordSimilarity(normalizedVal1, normalizedVal2);
+	const stringSimilarityPlain = calcStringSimilarity(correct, guess, el);
+	const stringSimilarityNormalized = calcStringSimilarity(normalizedCorrect, normalizedGuess, el);
+
+	const wordSimilarityPlain = calcWordSimilarity(correct, guess, el);
+	const wordSimilarityNormalized = calcWordSimilarity(normalizedCorrect, normalizedGuess, el);
 
 	const stringSimilarity = Math.max(stringSimilarityPlain, stringSimilarityNormalized);
 	const wordSimilarity = Math.max(wordSimilarityPlain, wordSimilarityNormalized);
+	
+	const stringSimilartyVal1 = revealLifeline ? 0.9 : 0.75;
+	const stringSimilartyVal2 = revealLifeline ? 0.75 : 0.5;
+
+	const wordSimilarityVal1 = revealLifeline ? 0.8 : 0.8;
+	const wordSimilarityVal2 = revealLifeline ? 0.5 : 0.5;
 
 	if (
-		val1.includes(val2) ||
-		val2.includes(val1) || 
-		normalizedVal1.includes(normalizedVal2) || 
-		normalizedVal2.includes(normalizedVal1) ||
-		stringSimilarity >= 0.75 || 
-		wordSimilarity >= 0.8 ||
-		(stringSimilarity >= 0.5 && wordSimilarity >= 0.5) 
+		guess.includes(correct) ||
+		normalizedGuess.includes(normalizedCorrect) ||
+		stringSimilarity >= stringSimilartyVal1 ||
+		wordSimilarity >= wordSimilarityVal1 ||
+		(stringSimilarity >= stringSimilartyVal2 && wordSimilarity >= wordSimilarityVal2) 
 	) {
 		return true;	
 	}
@@ -1269,15 +1281,15 @@ function revealSong(bool) {
 	}
 }
 
-function calcStringSimilarity(str1, str2) {
+function calcStringSimilarity(correct, guess, el) {
 
-	if (str1 == null || str2 == null) return 0;
-    if (str1.length === 0 && str2.length === 0) return 1;
-    if (str1.length === 0 || str2.length === 0) return 0;
+	if (correct == null || guess == null) return 0;
+    if (correct.length === 0 && guess.length === 0) return 1;
+    if (correct.length === 0 || guess.length === 0) return 0;
     
     // Convert to lowercase for case-insensitive comparison
-    const s1 = str1.toLowerCase();
-    const s2 = str2.toLowerCase();
+    const s1 = correct.toLowerCase();
+    const s2 = guess.toLowerCase();
     
     // Calculate Levenshtein distance (edit distance)
     const track = Array(s2.length + 1).fill(null).map(() =>
@@ -1311,13 +1323,25 @@ function calcStringSimilarity(str1, str2) {
     return similarity;
 }
 
-function calcWordSimilarity(str1, str2) {
-  	if (str1 == null || str2 == null) return 0;
-  	if (str1.length === 0 && str2.length === 0) return 1;
-	if (str1.length === 0 || str2.length === 0) return 0;
+function calcWordSimilarity(correct, guess, el) {
 
-	const w1 = str1.split(/\s+/).filter(Boolean).map(w => w.toLowerCase());
-	const w2 = str2.split(/\s+/).filter(Boolean).map(w => w.toLowerCase());
+  	if (correct == null || guess == null) return 0;
+  	if (correct.length === 0 && guess.length === 0) return 1;
+	if (correct.length === 0 || guess.length === 0) return 0;
+
+	const revealed = Array.from(el.querySelectorAll('.true > span'))
+		.reduce((s, node) => {
+		if (node.classList.contains('space')) { if (s.buf.length) s.groups.push(s.buf); s.buf = []; }
+		else s.buf = s.buf.concat(node);
+		return s;
+	}, { groups: [], buf: [] });
+	revealed.buf.length && (revealed.groups.push(revealed.buf));
+	const revealed_words = revealed.groups
+		.filter(w => w.every(sp => !/^[A-Za-z0-9]+$/.test(sp.textContent) || sp.classList.contains('hint')))
+		.map(w => w.map(sp => sp.textContent).join(''));
+
+	const w1 = correct.split(/\s+/).filter(Boolean).map(w => w.toLowerCase()).filter(w => !revealed_words.includes(w));
+	const w2 = guess.split(/\s+/).filter(Boolean).map(w => w.toLowerCase()).filter(w => !revealed_words.includes(w));
 
 	if (w1.length === 0 || w2.length === 0) return 0;
 

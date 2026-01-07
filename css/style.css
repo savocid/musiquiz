@@ -596,6 +596,11 @@ footer span {
     background: #28a745;
     color: white;
 }
+.btn-fail {
+    background: hsl(0,0%,40%);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+}
 
 .btn-success:hover {
     background: #41ca61;
@@ -1179,9 +1184,7 @@ body.loading {
 
 /* Difficulty colors */
 
-.collection-difficulties,
 #collectionsList,
-#startScreen,
 #resultScreen {
 	[data-difficulty='Easy'] {
 		color: #28a745;
@@ -1227,22 +1230,68 @@ body.loading {
 	display: flex;
     flex-direction: column;
     align-items: flex-end;
-	user-select: none;
 	font-size: 0.8rem;
 	text-transform: uppercase;
 	font-weight:bold;
+	gap: .2rem;
 }
+#startScreen .collection-difficulties { 
+	flex-direction: row;
+}
+
 .collection-difficulties input {
 	display: none;
 }
-#resultScreen .collection-difficulties span:not(.active),
-.collection-difficulties label:not(:has(input:checked)) {
-	opacity: 0.25;
-    color: initial !important;
+
+
+.collection-difficulties label::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    display: inline-block;
+    background: linear-gradient(45deg, lightgray, lightslategrey);
+    border: 1px solid rgba(0, 0, 0, 0.5);
+	margin-left: .2rem
+}
+
+.collection-difficulties label:has(input:checked)::after {
+ 	background: linear-gradient(45deg, limegreen, lawngreen);
+}
+
+.collection-difficulties label:not(:has(input:checked)) span,
+.collection-difficulties label:not(:has(input:checked))::after {
+	opacity: 0.5;
+}
+
+#resultScreen .collection-difficulties span:not(.active) {
+	display:none;
 }
 
 .collection-difficulties label {
+	padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
 	cursor:pointer;
+	user-select: none;
+}
+#startScreen .collection-difficulties {
+	[data-difficulty='Easy'] {
+		background: #28a745;
+	}
+
+	[data-difficulty='Medium'] {
+		background: #667eea;
+	}
+
+	[data-difficulty='Hard'] {
+		background: #ff9800;
+	}
+
+	[data-difficulty='Extreme'] {
+		background: #dc3545;
+	}
 }
 
 
