@@ -266,7 +266,7 @@ async function initRound() {
         const duration = await extractAudioDuration(gameState.currentSong.audioFile);
         gameState.currentSong.duration = duration;
 
-		const clipDuration = gameState.settings.clipDuration == Infinity ? (Math.random() * duration) : gameState.settings.clipDuration;
+		const clipDuration = gameState.settings.clipDuration == Infinity ? duration / 4 : gameState.settings.clipDuration;
 
         const endPadding = 5;
         // Use original start/end if present, else default to 0/duration
@@ -298,6 +298,8 @@ async function initRound() {
             clipDuration: clipDuration,
             duration
         });
+
+		console.log(clipDuration)
 
         // Sanitize chosen values
         const startTime = Math.max(0, Math.min(typeof chosen.startTime === 'number' ? chosen.startTime : 0, Math.max(0, duration - 1)));

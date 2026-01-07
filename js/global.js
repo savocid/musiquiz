@@ -64,7 +64,7 @@ const MODES = {
     intense: {
 		title: "Intense",
         lives: 3,
-        clipDuration: 10,
+        clipDuration: 20,
         timeout: 30,
         lifelines: {
             reveal:	{ total: 1, },
@@ -78,15 +78,15 @@ const MODES = {
     suddendeath: {
 		title: "Sudden Death",
         lives: 1,
-        clipDuration: 10,
-        timeout: 0,
+        clipDuration: 20,
+        timeout: 60,
         lifelines: {
             reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand:	{ total: 1, },
             year:	{ total: 1, },
             skip:	{ total: 1, },
-			time:	{ total: 0, },
+			time:	{ total: 1, },
         }
     }
 };
