@@ -827,6 +827,9 @@ body.loading {
     pointer-events: none;
     filter: drop-shadow(2px 0px 0px black);
     letter-spacing: 1.5px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.1rem 0.5rem;
+    border-radius: 5px;
 }
 
 /* cover Image */
