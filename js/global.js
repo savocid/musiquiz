@@ -121,7 +121,7 @@ function cleanUrl(url) {
 	document.body.dataset.collection = collectionId ? collectionId : "";
 
 	const currentMode = localStorage.getItem('selectedMode');
-	document.body.dataset.mode = currentMode ? currentMode : "basic";
+	document.body.dataset.mode = currentMode && MODES[currentMode] ? currentMode : 'basic';
 
 	updateUrl();
 

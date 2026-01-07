@@ -121,7 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Apply current mode styling (without animation)
-    const savedMode = localStorage.getItem('selectedMode') || params.get('mode') || 'basic';
+	const lsMode = localStorage.getItem('selectedMode');
+	const savedMode = lsMode && MODES[lsMode] ? lsMode : params.get('mode') ? params.get('mode') : 'basic';
 
     updateCSSVariables(savedMode)
     

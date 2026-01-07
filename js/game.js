@@ -58,8 +58,9 @@ let audio = WaveSurfer.create({
 const params = new URLSearchParams(window.location.search);
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || null; 
-let collectionId = localStorage.getItem('collection') || params.get('collection') || null; 
-let currentMode = localStorage.getItem('selectedMode') || params.get('mode') || 'basic'; 
+let collectionId = localStorage.getItem('collection') || params.get('collection') || null;
+let lsMode = localStorage.getItem('selectedMode');
+let currentMode = lsMode && MODES[lsMode] ? lsMode : params.get('mode') ? params.get('mode') : 'basic'; 
 collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
 
 
