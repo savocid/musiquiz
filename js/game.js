@@ -299,8 +299,6 @@ async function initRound() {
             duration
         });
 
-		console.log(clipDuration)
-
         // Sanitize chosen values
         const startTime = Math.max(0, Math.min(typeof chosen.startTime === 'number' ? chosen.startTime : 0, Math.max(0, duration - 1)));
         const endTime = Math.max(startTime + 1, Math.min(typeof chosen.endTime === 'number' ? chosen.endTime : startTime + clipDuration, duration));
