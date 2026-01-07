@@ -135,8 +135,8 @@ function displayCollections() {
 
 	const languages = Array.isArray(collection.language) ? collection.language.join('/') : (collection.language || '');
 
-	const difficulties = Object.keys(collection.songs)
-	const totalSongs = Object.values(collection.songs || {}).reduce((sum, bucket) => sum + Object.keys(bucket || {}).length, 0);
+	const difficulties = [...new Set(Object.values(collection.songs).map(s => s.difficulty))];
+	const totalSongs = Object.keys(collection.songs).length;
 
 	parts.push(`
 		<div class="collection-item" data-songs="${totalSongs}">

@@ -212,16 +212,13 @@ async function loadGameData() {
         }
         const songsData = await songsResponse.json();
 
-		gameState.difficulty = Object.fromEntries(Object.keys(collectionData.songs).map(k => [k, true]));
-        gameState.collection = collectionData;
-		gameState.collection.songs = Object.entries(collectionData.songs).flatMap(([difficulty, songs]) => 
-			Object.keys(songs).map(key => ({ 
-				...songsData[key], 
-				...songs[key], 
-				difficulty, 
-				audioFile: `https://${collectionsUrl}/audio/${songsData[key].audioFile}` 
-			}))
-		);
+		gameState.collection = collectionData;
+		gameState.collection.songs = Object.entries(collectionData.songs).map(([songKey, songInfo]) => ({ 
+			...songsData[songKey], 
+			...songInfo, 
+			audioFile: `https://${collectionsUrl}/audio/${songsData[songKey].audioFile}` 
+		}));
+		gameState.difficulty = Object.fromEntries([...new Set(Object.values(collectionData.songs).map(s => s.difficulty))].map(d => [d, true]));
 
 		updateStart();
 
