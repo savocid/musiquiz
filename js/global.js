@@ -143,7 +143,7 @@ function updateUrl() {
 
 	const params = new URLSearchParams(window.location.search);
 	currentMode && (params.set('mode', currentMode));
-	collectionId && (params.set('collection', collectionId));
+	collectionId && document.body.dataset.page == "game" && (params.set('collection', collectionId));
 	collectionsUrl && (params.set('data', collectionsUrl));
 
 	const newUrl = params.toString() ? `${window.location.origin}${window.location.pathname.replace(/\/$/,"")}?${params.toString()}` : `${window.location.origin}${window.location.pathname}`;
