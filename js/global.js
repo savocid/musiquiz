@@ -35,56 +35,56 @@ const lifeLines = {
 const MODES = {
     trivial: {
 		title: "Trivial",
-        lives: Infinity, 
-        clipDuration: 20, 
+        lives: Infinity,
+        clipDuration: Infinity,
         timeout: 0,
         lifelines: {
             reveal:	{ total: Infinity, },
 			cover:	{ total: Infinity, },
-            expand: { total: Infinity, },
+            expand: { total: 0, },
             year:	{ total: Infinity, },
             skip:	{ total: 0, },
 			time:	{ total: 0, },
         }
     },
-    default: { 
-		title: "Default",
-        lives: 3, 
-        clipDuration: 20, 
+    basic: {
+		title: "Basic",
+        lives: Infinity,
+        clipDuration: 20,
         timeout: 0,
         lifelines: {
             reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand: { total: 1, },
-            year:	{ total: 1, }, 
-            skip:	{ total: 1, },
+            year:	{ total: 1, },
+            skip:	{ total: 0, },
 			time:	{ total: 0, },
         }
     },
-    intense: { 
+    intense: {
 		title: "Intense",
-        lives: 3, 
-        clipDuration: 10, 
+        lives: 3,
+        clipDuration: 10,
         timeout: 30,
         lifelines: {
             reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand:	{ total: 1, },
-            year:	{ total: 1, }, 
+            year:	{ total: 1, },
             skip:	{ total: 1, },
 			time:	{ total: 1, },
         }
     },
-    suddendeath: { 
+    suddendeath: {
 		title: "Sudden Death",
-        lives: 1, 
-        clipDuration: 10, 
+        lives: 1,
+        clipDuration: 10,
         timeout: 0,
         lifelines: {
             reveal:	{ total: 1, },
 			cover:	{ total: 1, },
             expand:	{ total: 1, },
-            year:	{ total: 1, }, 
+            year:	{ total: 1, },
             skip:	{ total: 1, },
 			time:	{ total: 0, },
         }
@@ -121,7 +121,7 @@ function cleanUrl(url) {
 	document.body.dataset.collection = collectionId ? collectionId : "";
 
 	const currentMode = localStorage.getItem('selectedMode');
-	document.body.dataset.mode = currentMode ? currentMode : "default";
+	document.body.dataset.mode = currentMode ? currentMode : "basic";
 
 	updateUrl();
 

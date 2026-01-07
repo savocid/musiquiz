@@ -62,7 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		
 		// Listen time and timeout
 		const listenSpan = document.createElement('span');
-		listenSpan.textContent = `${modeData.clipDuration}s Listen • ${modeData.timeout > 0 ? modeData.timeout + 's Timeout' : 'No Timeout'}`;
+
+		const timeOutText = modeData.timeout > 0 ? modeData.timeout + 's Timeout' : 'No Timeout';
+		const listenText = modeData.clipDuration == Infinity ? `Full Listen` : `${modeData.clipDuration}s Listen`;
+		listenSpan.textContent = `${listenText} • ${timeOutText}`;
 		button.appendChild(listenSpan);
 
 		// Lifelines
@@ -118,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Apply current mode styling (without animation)
-    const savedMode = localStorage.getItem('selectedMode') || params.get('mode') || 'default';
+    const savedMode = localStorage.getItem('selectedMode') || params.get('mode') || 'basic';
 
     updateCSSVariables(savedMode)
     
@@ -183,7 +186,7 @@ function updateCSSVariables(mode) {
         root.style.setProperty('--primary-dark', '#d94a4a');
         root.style.setProperty('--text-light', '#fff5f5');
         root.style.setProperty('--shadow-color', 'rgba(255, 107, 107, 0.4)');
-    } else { // default
+    } else { // basic
         root.style.setProperty('--primary-color', '#667eea');
         root.style.setProperty('--primary-dark', '#764ba2');
         root.style.setProperty('--text-light', 'white');

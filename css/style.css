@@ -56,7 +56,7 @@ body[data-mode="trivial"] {
     background: linear-gradient(90deg, #48bb78 0%, #2f855a 100%);
 }
 
-body[data-mode="default"] {
+body[data-mode="basic"] {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -102,7 +102,7 @@ body.mode-animating[data-new-mode="trivial"]::before {
     background: linear-gradient(90deg, #48bb78 0%, #2f855a 100%);
 }
 
-body.mode-animating[data-new-mode="default"]::before {
+body.mode-animating[data-new-mode="basic"]::before {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -301,16 +301,16 @@ body.mode-animating[data-new-mode="suddendeath"]::before {
     box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
 }
 
-.mode-btn-compact[data-mode="default"] {
+.mode-btn-compact[data-mode="basic"] {
     border-color: #667eea;
     color: #667eea;
 }
 
-.mode-btn-compact[data-mode="default"]:hover {
+.mode-btn-compact[data-mode="basic"]:hover {
     background: #f0f0ff;
 }
 
-.mode-btn-compact[data-mode="default"].active {
+.mode-btn-compact[data-mode="basic"].active {
     background: #667eea;
     border-color: #667eea;
     color: white;
@@ -790,9 +790,9 @@ body.loading {
 	content: "";
     display: block;
     position: absolute;
-    --color1: tomato;
+	--color1: rgba(255, 99, 71, 0.5);
     --color2: rgba(0, 0, 0, 0);
-    --border: var(--color1);
+    --border: rgba(255, 99, 71, 1);
     --val1: 2;
     --val2: 0;
     --val3: 10;

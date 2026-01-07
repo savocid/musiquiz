@@ -1,4 +1,4 @@
-let selectedMode = localStorage.getItem('selectedMode') || 'default'; // Restore saved mode or default
+let selectedMode = localStorage.getItem('selectedMode') || 'basic'; // Restore saved mode or basic
 let selectedCollection = null;
 
 let allCollections = []; // Store all collections

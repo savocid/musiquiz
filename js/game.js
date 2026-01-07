@@ -59,7 +59,7 @@ const params = new URLSearchParams(window.location.search);
 
 let collectionsUrl = localStorage.getItem('collectionsUrl') || params.get('data') || null; 
 let collectionId = localStorage.getItem('collection') || params.get('collection') || null; 
-let currentMode = localStorage.getItem('selectedMode') || params.get('mode') || 'default'; 
+let currentMode = localStorage.getItem('selectedMode') || params.get('mode') || 'basic'; 
 collectionsUrl = collectionsUrl ? cleanUrl(collectionsUrl) : collectionsUrl;
 
 
@@ -266,6 +266,8 @@ async function initRound() {
         const duration = await extractAudioDuration(gameState.currentSong.audioFile);
         gameState.currentSong.duration = duration;
 
+		const clipDuration = gameState.settings.clipDuration == Infinity ? (Math.random() * duration) : gameState.settings.clipDuration;
+
         const endPadding = 5;
         // Use original start/end if present, else default to 0/duration
         let origStart = extractTime(gameState.currentSong.startTime);
@@ -278,7 +280,7 @@ async function initRound() {
         maxEnd = Math.max(Math.min(maxEnd, duration - endPadding), minStart + 1);
 
         // Calculate the latest possible start time for the clip
-        let maxClipStart = Math.max(maxEnd - gameState.settings.clipDuration, minStart);
+        let maxClipStart = Math.max(maxEnd - clipDuration, minStart);
 
         // Analyse quiet parts for this audio file (if available)
         let quietParts = [];
@@ -293,27 +295,27 @@ async function initRound() {
         const chosen = selectAudioClipWindow(quietParts, {
             minStart,
             maxClipStart,
-            clipDuration: gameState.settings.clipDuration,
+            clipDuration: clipDuration,
             duration
         });
 
         // Sanitize chosen values
         const startTime = Math.max(0, Math.min(typeof chosen.startTime === 'number' ? chosen.startTime : 0, Math.max(0, duration - 1)));
-        const endTime = Math.max(startTime + 1, Math.min(typeof chosen.endTime === 'number' ? chosen.endTime : startTime + gameState.settings.clipDuration, duration));
+        const endTime = Math.max(startTime + 1, Math.min(typeof chosen.endTime === 'number' ? chosen.endTime : startTime + clipDuration, duration));
 
         // Commit to state
-        gameState.currentSong.startTime = startTime;
-        gameState.currentSong.endTime = endTime;
+        gameState.currentSong.startTime = gameState.settings.clipDuration == Infinity ? 0 : startTime;
+        gameState.currentSong.endTime = gameState.settings.clipDuration == Infinity ? duration : endTime;
 
         // Keep "original" values for UI display
         gameState.currentSong.originalStartTime = startTime;
-        gameState.currentSong.originalEndTime = endTime;
+        gameState.currentSong.originalEndTime = gameState.settings.clipDuration == Infinity ? duration : endTime;
 
         await initAudio();
     } catch (error) {
         console.error('Failed to get audio duration, using 0:', error);
         gameState.currentSong.startTime = 0;
-        gameState.currentSong.endTime = Math.min(gameState.settings.clipDuration || 5, gameState.currentSong.duration || 1);
+        gameState.currentSong.endTime = Math.min((gameState.settings.clipDuration == Infinity ? gameState.currentSong.duration : gameState.settings.clipDuration) || 5, gameState.currentSong.duration || 1);
         gameState.currentSong.originalStartTime = gameState.currentSong.startTime;
         gameState.currentSong.originalEndTime = gameState.currentSong.endTime;
         await initAudio();
@@ -429,7 +431,7 @@ async function initAudio() {
 		audio.options.autoplay = true;
 
 		audio.seekTo(0)
-		audio.play()
+		audio.play(gameState.settings.clipDuration == Infinity ? gameState.currentSong.originalStartTime : 0)
 
 		audio.getRenderer().reRender();
 
