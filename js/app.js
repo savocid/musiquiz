@@ -145,8 +145,8 @@ function displayCollections() {
 			<h3>${collection.title}</h3>
 			<p>${collection.description || 'No description'}</p>
 			<p>
-				<strong>Difficulty:</strong>
-				${difficulties.map(d => `<span data-difficulty="${d}">${d}</span>`).join('/')} |
+				${difficulties.length > 0 ? `<strong>Difficulty:</strong>
+                ${difficulties.map(d => `<span data-difficulty="${d}">${d}</span>`).join('/')} |` : ''}
 				<strong>Songs:</strong> ${totalSongs} | 
 				<strong>Language:</strong> ${languages}
 			</p>
